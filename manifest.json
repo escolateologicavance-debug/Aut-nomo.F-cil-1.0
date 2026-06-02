@@ -1,26 +1,32 @@
 {
 "name": "AutônomoFácil",
 "short_name": "AutônomoFácil",
-"description": "App para Assessorar Autônomos através de comandos de voz.",
+"description": "App para assessorar autônomos através de comandos de voz.",
+
 "start_url": "./index.html",
+"scope": "./",
+
 "display": "standalone",
-"background_color": "#f4f6f9",
-"theme-color": "#1565c0",
 "orientation": "portrait",
+
+"background_color": "#f4f6f9",
+"theme_color": "#1565c0",
+
 "icons": [
 {
-"src": "https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-192b.png",
+"src": "./icon-192.png",
 "sizes": "192x192",
 "type": "image/png",
-"purpose": "any"
+"purpose": "any maskable"
 },
 {
-"src": "https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-512b.png",
+"src": "./icon-512.png",
 "sizes": "512x512",
 "type": "image/png",
-"purpose": "any"
+"purpose": "any maskable"
 }
  ],
+
 "shortcuts": [
 {
 "name": "Clientes",
@@ -67,5 +73,5 @@
 "short_name": "Arquivos",
 "url": "./arquivos.html"
 }
-]
+ ]
 }
