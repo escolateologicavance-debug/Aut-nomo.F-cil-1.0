@@ -12,7 +12,6 @@
 <meta name="theme-color" content="#1565c0">
 
 <style>
-
 :root{
 --primary:#1565c0;
 --primary-dark:#0d47a1;
@@ -103,6 +102,7 @@ min-height:70px;
 box-shadow:0 2px 8px rgba(0,0,0,.08);
 font-size:14px;
 color:#555;
+text-align:center;
 }
 
 .section-title{
@@ -230,14 +230,12 @@ font-size:22px;
 margin-bottom:4px;
 color:var(--primary);
 }
-
 </style>
 </head>
 
 <body>
 
 <header>
-
 <div class="top-row">
 <div>
 <div class="logo">AutônomoFácil</div>
@@ -257,15 +255,10 @@ color:var(--primary);
 <p class="subtitle">
 Fale. O sistema organiza.
 </p>
-
 </header>
 
 <div class="voice-container">
-
-<button class="voice-btn" id="btnVoice">
-🎤
-</button>
-
+<button class="voice-btn" id="btnVoice">🎤</button>
 </div>
 
 <div class="voice-text">
@@ -283,7 +276,6 @@ Resumo Financeiro
 </div>
 
 <section class="stats">
-
 <div class="card">
 <h3>💰 Faturado</h3>
 <p id="txtFaturado">R$` 0,00</p>
@@ -303,7 +295,6 @@ Resumo Financeiro
 <h3>🔴 A Receber</h3>
 <p class="red" id="txtReceber">R$` 0,00</p>
 </div>
-
 </section>
 
 <div class="section-title">
@@ -311,7 +302,6 @@ Ações Rápidas
 </div>
 
 <section class="shortcuts">
-
 <a class="shortcut" href="clientes.html">
 <i class="fa-solid fa-users"></i>
 <span>Clientes</span>
@@ -356,7 +346,6 @@ Ações Rápidas
 <i class="fa-solid fa-folder"></i>
 <span>Arquivos</span>
 </a>
-
 </section>
 
 <div class="section-title">
@@ -364,14 +353,11 @@ Ações Rápidas
 </div>
 
 <section class="activities">
-
 <div class="activity-box" id="activityBox">
 </div>
-
 </section>
 
 <nav class="bottom-nav">
-
 <a href="index.html">
 <i class="fa-solid fa-house"></i>
 Início
@@ -396,31 +382,24 @@ Financeiro
 <i class="fa-solid fa-users"></i>
 Clientes
 </a>
-
 </nav>
 
 <script>
-
 const btnVoice = document.getElementById("btnVoice");
 const voiceResult = document.getElementById("voiceResult");
 const activityBox = document.getElementById("activityBox");
 
-// Elementos do resumo financeiro
 const txtFaturado = document.getElementById("txtFaturado");
 const txtClientes = document.getElementById("txtClientes");
 const txtRecebido = document.getElementById("txtRecebido");
 const txtReceber = document.getElementById("txtReceber");
 
-const SpeechRecognition =
-window.SpeechRecognition ||
-window.webkitSpeechRecognition;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-// Função auxiliar para formatar em Moeda Real
 function formatarMoeda(valor) {
 return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-// Inicializa a interface com os dados salvos
 function atualizarInterface() {
 let lancamentos = JSON.parse(localStorage.getItem("lancamentosFinanceiros")) || [];
 
@@ -437,44 +416,35 @@ totalReceber += item.valor;
 
 let totalFaturado = totalRecebido + totalReceber;
 
-// Atualiza os cards na tela
 txtRecebido.innerHTML = formatarMoeda(totalRecebido);
 txtReceber.innerHTML = formatarMoeda(totalReceber);
 txtFaturado.innerHTML = formatarMoeda(totalFaturado);
 
-// Atualiza o contador de lançamentos/atividades como exemplo simples
 txtClientes.innerHTML = lancamentos.length;
 
-// Renderiza a lista de Últimas Atividades
 if (lancamentos.length === 0) {
-activityBox.innerHTML = &lt;div class="activity"&gt;📌 Nenhuma atividade registrada.&lt;/div&gt; &lt;div class="activity"&gt;🎤 Aguardando comandos de voz.&lt;/div&gt; &lt;div class="activity"&gt;🚀 Sistema iniciado com sucesso.&lt;/div&gt;;
+activityBox.innerHTML = &lt;div class="activity"&gt;📌 Nenhuma atividade registrada.&lt;/div&gt; &lt;div class="activity"&gt;🎤 Aguardando comandos de voz.&lt;/div&gt; &lt;div class="activity"&gt;🚀 Sistema iniciado com sucesso.&lt;/div>;
 } else {
 activityBox.innerHTML = "";
-// Mostra os últimos 5 lançamentos
 lancamentos.slice(0, 5).forEach(item => {
 let badge = item.tipo === "recebido" ? "🟢 [Recebido]" : "🔴 [A Receber]";
 activityBox.innerHTML += &lt;div class="activity"&gt; &lt;strong&gt;${badge}</strong> 
 
 {item.textoOriginal}" <br>
-<small style="color:#888; font-size:11px;">${item.data}&lt;/small&gt; &lt;/div&gt;;
+<small style="color:#888; font-size:11px;">${item.data}&lt;/small&gt; &lt;/div>;
 });
 }
 }
 
-// Processa o comando de voz capturado
 function processarComandoVoz(texto) {
 const textoMinusculo = texto.toLowerCase();
-
-// Expressão regular para capturar números (ex: 450, 1.200, 50,50)
 const regexPreco = /([\d.,]+)/g;
 const matches = textoMinusculo.match(regexPreco);
 
 let valorDetectado = 0;
 
 if (matches) {
-// Pega o primeiro número longo ou grupo numérico que faça sentido como preço
 for (let match of matches) {
-// Limpa pontos de milhar e substitui vírgula por ponto decimal
 let valorLimpo = match.replace(/./g, "").replace(",", ".");
 let numero = parseFloat(valorLimpo);
 if (!isNaN(numero) && numero > 0) {
@@ -489,23 +459,19 @@ voiceResult.innerHTML = ⚠️ Identificado: "${texto}", mas não encontrei um v
 return;
 }
 
-// Identifica o tipo com base em palavras-chave comuns do dia a dia
-let tipo = "receber"; // Padrão caso não identifique à vista
-
+let tipo = "receber";
 const palavrasRecebido = ["recebi", "pago", "à vista", "no pix", "dinheiro", "recebido", "entrou"];
 const palavrasReceber = ["prazo", "à prazo", "vou receber", "cobrar", "cobrei", "receber", "deve"];
 
-// Verifica se possui alguma palavra que determine o estado "Recebido"
 let temRecebido = palavrasRecebido.some(palavra => textoMinusculo.includes(palavra));
 let temReceber = palavrasReceber.some(palavra => textoMinusculo.includes(palavra));
 
 if (temRecebido && !temReceber) {
 tipo = "recebido";
 } else {
-tipo = "receber"; // Se disser "cobrei", "à prazo", ou for ambíguo, vai para "A Receber"
+tipo = "receber";
 }
 
-// Grava no banco de dados local (localStorage)
 let lancamentos = JSON.parse(localStorage.getItem("lancamentosFinanceiros")) || [];
 
 lancamentos.unshift({
@@ -516,16 +482,12 @@ data: new Date().toLocaleString("pt-BR")
 });
 
 localStorage.setItem("lancamentosFinanceiros", JSON.stringify(lancamentos));
-
-// Atualiza a interface em tempo real
 atualizarInterface();
 
-// Dá o feedback visual de sucesso do arquivamento
 let destino = tipo === "recebido" ? "🟢 Recebido" : "🔴 A Receber";
 voiceResult.innerHTML = ✅ Gravado com sucesso! &lt;br&gt; &lt;strong&gt;Valor:&lt;/strong&gt; ${formatarMoeda(valorDetectado)} arquivado em <strong>${destino}&lt;/strong&gt;.;
 }
 
-// Carrega la foto de perfil na barra superior se existir
 function carregarFotoPerfilTopo() {
 const fotoSalva = localStorage.getItem("fotoPerfilAutonomo");
 const iconePadrao = document.getElementById("iconePadrao");
@@ -538,24 +500,21 @@ iconePadrao.style.display = "none";
 }
 }
 
-// Inicializa a escuta do Microfone
 if (SpeechRecognition) {
-
 const recognition = new SpeechRecognition();
 recognition.lang = "pt-BR";
 recognition.continuous = false;
 recognition.interimResults = false;
 
 btnVoice.addEventListener("click", () => {
-    voiceResult.innerHTML = "🎙️ Ouvindo...";
-
-    try {
-        recognition.abort(); // limpa estado travado
-        recognition.start();
-    } catch (e) {
-        console.log(e);
-        voiceResult.innerHTML = "❌ Microfone bloqueado ou ocupado.";
-    }
+voiceResult.innerHTML = "🎙️ Ouvindo...";
+try {
+recognition.abort();
+recognition.start();
+} catch(e){
+voiceResult.innerHTML = "❌ Erro ao iniciar microfone.";
+console.log(e);
+}
 });
 
 recognition.onresult = (event) => {
@@ -577,26 +536,16 @@ voiceResult.innerHTML = "Aguardando comando de voz...";
 voiceResult.innerHTML = "⚠️ Reconhecimento de voz não suportado neste navegador.";
 }
 
-// Carrega os dados salvos assim que a página abre
 window.addEventListener("DOMContentLoaded", () => {
 atualizarInterface();
 carregarFotoPerfilTopo();
 });
 
-// Configuração do Service Worker
 if("serviceWorker" in navigator){
 window.addEventListener("load",()=>{
-navigator.serviceWorker
-.register("sw.js")
-.then(()=>{
-console.log("SW ativo");
-})
-.catch(err=>{
-console.log(err);
-});
+navigator.serviceWorker.register("sw.js").then(()=>{console.log("SW ativo");}).catch(err=>{console.log(err);});
 });
 }
-
 </script>
 </body>
 </html>
