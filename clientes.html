@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AutônomoFácil 1.0 - Clientes</title>
+
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<meta name="theme-color" content="#1565c0">
+
+<style>
+:root{
+--primary:#1565c0;
+--primary-dark:#0d47a1;
+--bg:#f4f6f9;
+--white:#ffffff;
+--green:#2e7d32;
+--red:#c62828;
+--text:#222;
+}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+}
+
+body{
+background:var(--bg);
+color:var(--text);
+padding-bottom:90px;
+}
+
+header{
+background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+color:white;
+padding:25px;
+border-radius:0 0 30px 30px;
+box-shadow:0 4px 15px rgba(0,0,0,.15);
+}
+
+.top-row{
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.logo{
+font-size:24px;
+font-weight:bold;
+}
+
+.back-btn {
+color: white;
+text-decoration: none;
+font-size: 16px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.section-title{
+padding:20px 20px 10px;
+font-size:18px;
+font-weight:700;
+display: flex;
+justify-content: Brass;
+align-items: center;
+justify-content: space-between;
+}
+
+.search-box {
+padding: 0 20px 15px;
+}
+
+.search-input {
+width: 100%;
+padding: 12px 15px;
+border-radius: 12px;
+border: 1px solid #ddd;
+font-size: 14px;
+outline: none;
+box-shadow: 0 2px 5px rgba(0,0,0,.03);
+}
+
+.client-list {
+padding: 0 20px;
+}
+
+.client-card {
+background: white;
+border-radius: 18px;
+padding: 15px;
+margin-bottom: 12px;
+box-shadow: 0 2px 10px rgba(0,0,0,.06);
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.client-info h3 {
+font-size: 16px;
+color: var(--text);
+margin-bottom: 4px;
+text-transform: capitalize;
+}
+
+.client-info p {
+font-size: 12px;
+color: #777;
+}
+
+.client-actions {
+display: flex;
+gap: 10px;
+}
+
+.action-btn {
+width: 40px;
+height: 40px;
+border-radius: 50%;
+border: none;
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+text-decoration: none;
+font-size: 16px;
+}
+
+.btn-whatsapp {
+background: #e8f5e9;
+color: #2e7d32;
+}
+
+.btn-delete {
+background: #ffebee;
+color: #c62828;
+}
+
+.empty-state {
+text-align: center;
+padding: 40px 20px;
+color: #777;
+font-size: 14px;
+}
+
+.bottom-nav{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+height:70px;
+background:white;
+display:flex;
+justify-content:space-around;
+align-items:center;
+box-shadow:0 -2px 15px rgba(0,0,0,.12);
+z-index:999;
+}
+
+.bottom-nav a{
+text-decoration:none;
+color:#444;
+font-size:11px;
+text-align:center;
+}
+
+.bottom-nav i{
+display:block;
+font-size:22px;
+margin-bottom:4px;
+color:#444;
+}
+
+.bottom-nav .active-nav {
+color: var(--primary);
+}
+
+.bottom-nav .active-nav i {
+color: var(--primary);
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="top-row">
+<a href="index.html" class="back-btn">
+<i class="fa-solid fa-arrow-left"></i> Voltar
+</a>
+<div class="logo">Clientes</div>
+</div>
+</header>
+
+<div class="section-title">
+<span>Gerenciar Clientes</span>
+</div>
+
+<div class="search-box">
+<input type="text" id="inputBusca" class="search-input" placeholder="Buscar cliente pelo nome...">
+</div>
+
+<section class="client-list" id="listaClientes">
+<!-- Injetado dinamicamente via JavaScript -->
+</section>
+
+<nav class="bottom-nav">
+<a href="index.html">
+<i class="fa-solid fa-house"></i>
+Início
+</a>
+
+<a href="index.html">
+<i class="fa-solid fa-microphone"></i>
+Voz
+</a>
+
+<a href="servicos.html">
+<i class="fa-solid fa-clipboard-list"></i>
+Serviços
+</a>
+
+<a href="financeiro.html">
+<i class="fa-solid fa-wallet"></i>
+Financeiro
+</a>
+
+<a href="clientes.html" class="active-nav">
+<i class="fa-solid fa-users"></i>
+Clientes
+</a>
+</nav>
+
+<script>
+const listaClientes = document.getElementById("listaClientes");
+const inputBusca = document.getElementById("inputBusca");
+
+// Função para tentar extrair o nome do cliente a partir do comando falado
+function extrairNomeCliente(texto) {
+const textoMinusculo = texto.toLowerCase();
+
+// Padrões comuns: "de fulano", "da fulana", "do fulano"
+const gatilhos = [" de ", " da ", " do ", " para o ", " para a "];
+
+for (let gatilho of gatilhos) {
+if (textoMinusculo.includes(gatilho)) {
+let partes = textoMinusculo.split(gatilho);
+if (partes.length > 1) {
+// Pega o restante do texto após o gatilho
+let resto = partes[1].trim();
+
+// Remove termos de data comuns para isolar o nome se houver data depois
+resto = resto.split(" dia ")[0].split(" data ")[0].split(" em ")[0];
+
+// Limpa espaços extras e remove pontos finais
+let nomeFinal = resto.replace(/[.,/#!$%\^&\*;:{}=\-_~()]/g,"").trim();
+
+// Valida tamanho mínimo para evitar pegar fragmentos errados
+if (nomeFinal.length > 2 && nomeFinal.length < 40) {
+return nomeFinal;
+}
+}
+}
+}
+return null;
+}
+
+function carregarClientes() {
+let historico = JSON.parse(localStorage.getItem("historicoVoz")) || [];
+let clientesSet = new Set();
+
+// Varre o histórico de voz para colher os nomes falados
+historico.forEach(item => {
+let nomeExtraido = extrairNomeCliente(item.texto);
+if (nomeExtraido) {
+// Salva com a primeira letra maiúscula para ficar bonito
+clientesSet.add(nomeExtraido);
+}
+});
+
+// Converte o Set para Array para podermos listar e filtrar
+let clientes = Array.from(clientesSet);
+let termoBusca = inputBusca.value.toLowerCase();
+
+if (clientes.length === 0) {
+listaClientes.innerHTML = &lt;div class="empty-state"&gt; 👤 Nenhum cliente identificado nos comandos de voz ainda.&lt;br&gt; &lt;small style="color:#999;"&gt;Ex: Fale "Recebi 100 reais do João" na página inicial.&lt;/small&gt; &lt;/div&gt;;
+return;
+}
+
+listaClientes.innerHTML = "";
+
+clientes.forEach(nome => {
+if (nome.toLowerCase().includes(termoBusca)) {
+listaClientes.innerHTML += &lt;div class="client-card"&gt; &lt;div class="client-info"&gt; &lt;h3&gt;${nome}</h3>
+<p>Cliente detectado via Voz</p>
+</div>
+<div class="client-actions">
+<a href="https://wa.me/?text=Olá ${nome}," target="_blank" class="action-btn btn-whatsapp" title="Enviar Mensagem">
+<i class="fa-brands fa-whatsapp"></i>
+</a>
+</div>
+</div>
+`;
+}
+});
+}
+
+// Escuta a barra de pesquisa em tempo real
+inputBusca.addEventListener("input", carregarClientes);
+
+// Executa ao abrir a página
+window.addEventListener("DOMContentLoaded", carregarClientes);
+</script>
+</body>
+</html>
