@@ -360,10 +360,25 @@ voiceResult.innerHTML="❌ Erro no reconhecimento: "+e.error;
 voiceResult.innerHTML="❌ Seu navegador não suporta comandos de voz.";
 }
 
+// 📸 Função precisa para carregar a foto do perfil
+function carregarFotoPerfil(){
+    const fotoSalva = localStorage.getItem("fotoPerfilAutonomo");
+    const iconePadrao = document.getElementById("iconePadrao");
+    const imgPerfilMinha = document.getElementById("imgPerfilMinha");
+    
+    if(fotoSalva && imgPerfilMinha && iconePadrao){
+        imgPerfilMinha.src = fotoSalva;
+        imgPerfilMinha.style.display = "block";
+        iconePadrao.style.display = "none";
+    }
+}
+
+// Executa as duas funções ao mesmo tempo quando a página abre
 window.onload = () => {
-atualizarInterface();
-carregarFotoPerfil();
+    atualizarInterface();
+    carregarFotoPerfil();
 };
+
 </script>
 
 </body>
