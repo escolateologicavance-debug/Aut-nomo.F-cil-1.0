@@ -9,13 +9,13 @@
 "orientation": "portrait",
 "icons": [
 {
-"src": "./icon-192.png",
+"src": "https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-192b.png",
 "sizes": "192x192",
 "type": "image/png",
 "purpose": "any"
 },
 {
-"src": "./icon-512.png",
+"src": "https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-512b.png",
 "sizes": "512x512",
 "type": "image/png",
 "purpose": "any"
@@ -25,56 +25,47 @@
 {
 "name": "Clientes",
 "short_name": "Clientes",
-"url": "./clientes.html",
-"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/users.svg", "sizes": "192x192" }]
+"url": "./clientes.html"
 },
 {
 "name": "Serviços",
 "short_name": "Serviços",
-"url": "./servicos.html",
-"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/clipboard-list.svg", "sizes": "192x192" }]
+"url": "./servicos.html"
 },
 {
 "name": "Agenda",
 "short_name": "Agenda",
-"url": "./agenda.html",
-"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/calendar.svg", "sizes": "192x192" }]
+"url": "./agenda.html"
 },
 {
 "name": "Financeiro",
 "short_name": "Finanças",
-"url": "./financeiro.html",
-"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/wallet.svg", "sizes": "192x192" }]
+"url": "./financeiro.html"
 },
 {
 "name": "Contratos",
 "short_name": "Contratos",
-"url": "./contratos.html",
-"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/file-contract.svg", "sizes": "192x192" }]
+"url": "./contratos.html"
 },
 {
 "name": "Feedbacks",
 "short_name": "Feedbacks",
-"url": "./feedbacks.html",
-"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/star.svg", "sizes": "192x192" }]
+"url": "./feedbacks.html"
 },
 {
 "name": "Conversas",
 "short_name": "Conversas",
-"url": "./conversas.html",
-"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/comments.svg", "sizes": "192x192" }]
+"url": "./conversas.html"
 },
 {
 "name": "Veículos",
 "short_name": "Veículos",
-"url": "./veiculos.html",
-"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/car.svg", "sizes": "192x192" }]
+"url": "./veiculos.html"
 },
 {
 "name": "Arquivos",
 "short_name": "Arquivos",
-"url": "./arquivos.html",
-"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/folder.svg", "sizes": "192x192" }]
+"url": "./arquivos.html"
 }
 ]
 }
