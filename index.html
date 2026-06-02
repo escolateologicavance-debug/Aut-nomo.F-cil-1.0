@@ -250,94 +250,6 @@ const txtClientes = document.getElementById("txtClientes");
 const txtRecebido = document.getElementById("txtRecebido");
 const txtReceber = document.getElementById("txtReceber");
 
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-function formatarMoeda(v){
-return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-}
-
-function atualizarInterface(){
-let lancamentos = JSON.parse(localStorage.getItem("lancamentosFinanceiros")) || [];
-
-let recebido = 0, receber = 0;
-
-lancamentos.forEach(i=>{
-if(i.tipo==="recebido") recebido += i.valor;
-else receber += i.valor;
-});
-
-txtRecebido.innerHTML = formatarMoeda(recebido);
-txtReceber.innerHTML = formatarMoeda(receber);
-txtFaturado.innerHTML = formatarMoeda(recebido+receber);
-txtClientes.innerHTML = lancamentos.length;
-
-if(lancamentos.length===0){
-activityBox.innerHTML = `
-    <div class="activity">📌 Nenhuma atividade registrada.</div>
-    <div class="activity">🎤 Aguardando comandos de voz.</div>
-    <div class="activity">🚀 Sistema iniciado com sucesso.</div>
-`;
-}else{
-activityBox.innerHTML = "";
-lancamentos.slice(0,5).forEach(i=>{
-activityBox.innerHTML += `
-    <div class="activity">
-        <strong>${i.tipo==="recebido"?"🟢 Rec":"🔴 Dev"}:</strong> ${i.textoOriginal}<br>
-        <small style="color:#888;">${i.data}</small>
-    </div>
-`;
-});
-}
-}
-
-function processarComandoVoz(texto){
-// Regex ajustado para capturar números com pontos e vírgulas corretamente
-const match = texto.match(/([\d.,]+)/);
-if(!match){
-voiceResult.innerHTML = `⚠️ Não encontrei valor em: "${texto}"`;
-return;
-}
-
-// Tratamento correto de pontuação da moeda em PT-BR
-let valorTexto = match[0];
-if (valorTexto.includes(",") && valorTexto.includes(".")) {
-    valorTexto = valorTexto.replace(/\./g, "").replace(",", ".");
-} else if (valorTexto.includes(",")) {
-    valorTexto = valorTexto.replace(",", ".");
-}
-let valor = parseFloat(valorTexto);
-
-if(isNaN(valor)){
-voiceResult.innerHTML = `⚠️ Erro ao processar o valor numérico.`;
-return;
-}
-
-let tipo = texto.toLowerCase().includes("recebi") ? "recebido" : "receber";
-let lista = JSON.parse(localStorage.getItem("lancamentosFinanceiros")) || [];
-
-lista.unshift({
-valor,
-tipo,
-textoOriginal:texto,
-data:new Date().toLocaleString("pt-BR")
-});
-
-localStorage.setItem("lancamentosFinanceiros",JSON.stringify(lista));
-
-voiceResult.innerHTML = `✅ Salvo: ${formatarMoeda(valor)}`;
-atualizarInterface();
-}
-
-<script>
-const btnVoice = document.getElementById("btnVoice");
-const voiceResult = document.getElementById("voiceResult");
-const activityBox = document.getElementById("activityBox");
-
-const txtFaturado = document.getElementById("txtFaturado");
-const txtClientes = document.getElementById("txtClientes");
-const txtRecebido = document.getElementById("txtRecebido");
-const txtReceber = document.getElementById("txtReceber");
-
 // Elementos da foto de perfil no cabeçalho
 const iconePadrao = document.getElementById("iconePadrao");
 const imgPerfilMinha = document.getElementById("imgPerfilMinha");
@@ -348,9 +260,9 @@ function formatarMoeda(v){
 return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 }
 
-// 📸 Nova função para carregar a foto salva no perfil
+// 📸 Carrega a foto guardada no armazenamento do navegador
 function carregarFotoPerfil(){
-    const fotoSalva = localStorage.getItem("fotoPerfil"); // Chave onde a imagem em Base64 deve estar salva
+    const fotoSalva = localStorage.getItem("fotoPerfil");
     
     if(fotoSalva && imgPerfilMinha && iconePadrao){
         imgPerfilMinha.src = fotoSalva;
@@ -452,13 +364,12 @@ voiceResult.innerHTML="❌ Erro no reconhecimento: "+e.error;
 voiceResult.innerHTML="❌ Seu navegador não suporta comandos de voz.";
 }
 
-// Executa as atualizações ao carregar a página inicial
-window.onload= () => {
+// Inicializa tudo ordenadamente assim que a página abre
+window.onload = () => {
     atualizarInterface();
-    carregarFotoPerfil(); 
+    carregarFotoPerfil();
 };
 </script>
-
 
 </body>
 </html>
