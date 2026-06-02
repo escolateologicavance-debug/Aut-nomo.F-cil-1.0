@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AutônomoFácil 1.0</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+}
+
+body{
+background:#f4f6f9;
+padding-bottom:90px;
+}
+
+header{
+background:linear-gradient(135deg,#1565c0,#0d47a1);
+color:white;
+padding:25px;
+border-radius:0 0 30px 30px;
+box-shadow:0 4px 12px rgba(0,0,0,.2);
+}
+
+header h1{
+font-size:26px;
+}
+
+header p{
+margin-top:5px;
+opacity:.9;
+}
+
+.voice-area{
+display:flex;
+justify-content:center;
+margin-top:-40px;
+}
+
+.voice-btn{
+width:130px;
+height:130px;
+border:none;
+border-radius:50%;
+background:white;
+box-shadow:0 10px 25px rgba(0,0,0,.15);
+font-size:50px;
+color:#1565c0;
+cursor:pointer;
+}
+
+.voice-text{
+padding:15px;
+text-align:center;
+font-weight:600;
+color:#555;
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
+padding:20px;
+}
+
+.card{
+background:white;
+border-radius:20px;
+padding:18px;
+box-shadow:0 3px 10px rgba(0,0,0,.08);
+}
+
+.card h3{
+font-size:14px;
+color:#777;
+margin-bottom:8px;
+}
+
+.card p{
+font-size:22px;
+font-weight:bold;
+}
+
+.green{
+color:#2e7d32;
+}
+
+.red{
+color:#c62828;
+}
+
+.blue{
+color:#1565c0;
+}
+
+.section-title{
+padding:0 20px;
+margin-top:10px;
+margin-bottom:10px;
+font-weight:bold;
+font-size:18px;
+}
+
+.shortcuts{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px;
+padding:0 20px;
+}
+
+.shortcut{
+background:white;
+border-radius:18px;
+padding:18px 10px;
+text-align:center;
+box-shadow:0 3px 10px rgba(0,0,0,.08);
+}
+
+.shortcut i{
+font-size:26px;
+color:#1565c0;
+margin-bottom:8px;
+}
+
+.shortcut span{
+display:block;
+font-size:12px;
+font-weight:600;
+}
+
+.activities{
+padding:20px;
+}
+
+.activity-box{
+background:white;
+border-radius:20px;
+padding:15px;
+box-shadow:0 3px 10px rgba(0,0,0,.08);
+}
+
+.activity{
+padding:10px 0;
+border-bottom:1px solid #eee;
+}
+
+.activity:last-child{
+border:none;
+}
+
+.bottom-nav{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+background:white;
+display:flex;
+justify-content:space-around;
+padding:12px;
+box-shadow:0 -3px 10px rgba(0,0,0,.1);
+}
+
+.bottom-nav i{
+font-size:22px;
+color:#1565c0;
+}
+
+.bottom-nav div{
+text-align:center;
+font-size:11px;
+font-weight:600;
+}
+
+</style>
+</head>
+<body>
+
+<header>
+
+<h1>AutônomoFácil 1.0</h1>
+
+<p>Fale. O sistema organiza.</p>
+
+</header>
+
+<div class="voice-area">
+
+<button class="voice-btn">
+🎤
+</button>
+
+</div>
+
+<div class="voice-text">
+
+Toque e diga:
+
+"Cobrei 450 reais do João..."
+
+</div>
+
+<section class="stats">
+
+<div class="card">
+<h3>💰 Faturado</h3>
+<p>R$` 0,00</p>
+</div>
+
+<div class="card">
+<h3>👥 Clientes</h3>
+<p class="blue">0</p>
+</div>
+
+<div class="card">
+<h3>🟢 Recebido</h3>
+<p class="green">R`$ 0,00</p>
+</div>
+
+<div class="card">
+<h3>🔴 A Receber</h3>
+<p class="red">R$ 0,00</p>
+</div>
+
+</section>
+
+<div class="section-title">
+
+Ações Rápidas
+
+</div>
+
+<section class="shortcuts">
+
+<div class="shortcut">
+<i class="fa-solid fa-users"></i>
+<span>Clientes</span>
+</div>
+
+<div class="shortcut">
+<i class="fa-solid fa-clipboard-list"></i>
+<span>Serviços</span>
+</div>
+
+<div class="shortcut">
+<i class="fa-solid fa-calendar"></i>
+<span>Agenda</span>
+</div>
+
+<div class="shortcut">
+<i class="fa-solid fa-file-contract"></i>
+<span>Contratos</span>
+</div>
+
+<div class="shortcut">
+<i class="fa-solid fa-comments"></i>
+<span>Conversas</span>
+</div>
+
+<div class="shortcut">
+<i class="fa-solid fa-star"></i>
+<span>Feedbacks</span>
+</div>
+
+<div class="shortcut">
+<i class="fa-solid fa-car"></i>
+<span>Veículos</span>
+</div>
+
+<div class="shortcut">
+<i class="fa-solid fa-folder"></i>
+<span>Arquivos</span>
+</div>
+
+</section>
+
+<div class="section-title">
+
+Últimas Atividades
+
+</div>
+
+<section class="activities">
+
+<div class="activity-box">
+
+<div class="activity">
+Nenhuma atividade registrada.
+</div>
+
+<div class="activity">
+Aguardando comandos de voz.
+</div>
+
+</div>
+
+</section>
+
+<nav class="bottom-nav">
+
+<div>
+<i class="fa-solid fa-house"></i>
+<br>Início
+</div>
+
+<div>
+<i class="fa-solid fa-microphone"></i>
+<br>Voz
+</div>
+
+<div>
+<i class="fa-solid fa-clipboard-list"></i>
+<br>Serviços
+</div>
+
+<div>
+<i class="fa-solid fa-wallet"></i>
+<br>Financeiro
+</div>
+
+<div>
+<i class="fa-solid fa-gear"></i>
+<br>Mais
+</div>
+
+</nav>
+
+</body>
+</html>
