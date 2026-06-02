@@ -404,42 +404,51 @@ return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 function atualizarInterface() {
-let lancamentos = JSON.parse(localStorage.getItem("lancamentosFinanceiros")) || [];
+let lancamentos = [];
+try {
+lancamentos = JSON.parse(localStorage.getItem("lancamentosFinanceiros")) || [];
+} catch(e) {
+lancamentos = [];
+}
 
 let totalRecebido = 0;
 let totalReceber = 0;
 
 lancamentos.forEach(item => {
-if (item.tipo === "recebido") {
-totalRecebido += item.valor;
-} else if (item.tipo === "receber") {
-totalReceber += item.valor;
+if (item && item.tipo === "recebido") {
+totalRecebido += item.valor || 0;
+} else if (item && item.tipo === "receber") {
+totalReceber += item.valor || 0;
 }
 });
 
 let totalFaturado = totalRecebido + totalReceber;
 
-txtRecebido.innerHTML = formatarMoeda(totalRecebido);
-txtReceber.innerHTML = formatarMoeda(totalReceber);
-txtFaturado.innerHTML = formatarMoeda(totalFaturado);
+if(txtRecebido) txtRecebido.innerHTML = formatarMoeda(totalRecebido);
+if(txtReceber) txtReceber.innerHTML = formatarMoeda(totalReceber);
+if(txtFaturado) txtFaturado.innerHTML = formatarMoeda(totalFaturado);
+if(txtClientes) txtClientes.innerHTML = lancamentos.length;
 
-txtClientes.innerHTML = lancamentos.length;
+if (!activityBox) return;
 
 if (lancamentos.length === 0) {
 activityBox.innerHTML = &lt;div class="activity"&gt;📌 Nenhuma atividade registrada.&lt;/div&gt; &lt;div class="activity"&gt;🎤 Aguardando comandos de voz.&lt;/div&gt; &lt;div class="activity"&gt;🚀 Sistema iniciado com sucesso.&lt;/div>;
 } else {
 activityBox.innerHTML = "";
 lancamentos.slice(0, 5).forEach(item => {
+if(item) {
 let badge = item.tipo === "recebido" ? "🟢 [Recebido]" : "🔴 [A Receber]";
 activityBox.innerHTML += &lt;div class="activity"&gt; &lt;strong&gt;${badge}</strong> 
 
-{item.textoOriginal}" <br>
-<small style="color:#888; font-size:11px;">${item.data}&lt;/small&gt; &lt;/div>;
+{item.textoOriginal || ''}" <br>
+<small style="color:#888; font-size:11px;">${item.data || ''}&lt;/small&gt; &lt;/div>;
+}
 });
 }
 }
 
 function processarComandoVoz(texto) {
+if (!texto) return;
 const textoMinusculo = texto.toLowerCase();
 const regexPreco = /([\d.,]+)/g;
 const matches = textoMinusculo.match(regexPreco);
@@ -448,7 +457,12 @@ let valorDetectado = 0;
 
 if (matches) {
 for (let match of matches) {
-let valorLimpo = match.replace(/./g, "").replace(",", ".");
+let valorLimpo = match;
+if (valorLimpo.includes(",") && valorLimpo.includes(".")) {
+valorLimpo = valorLimpo.replace(/./g, "").replace(",", ".");
+} else if (valorLimpo.includes(",")) {
+valorLimpo = valorLimpo.replace(",", ".");
+}
 let numero = parseFloat(valorLimpo);
 if (!isNaN(numero) && numero > 0) {
 valorDetectado = numero;
@@ -458,7 +472,7 @@ break;
 }
 
 if (valorDetectado === 0) {
-voiceResult.innerHTML = ⚠️ Identificado: "${texto}", mas não encontrei um valor em reais.`;
+if(voiceResult) voiceResult.innerHTML = ⚠️ Identificado: "${texto}", mas não encontrei um valor em reais.`;
 return;
 }
 
@@ -488,7 +502,7 @@ localStorage.setItem("lancamentosFinanceiros", JSON.stringify(lancamentos));
 atualizarInterface();
 
 let destino = tipo === "recebido" ? "🟢 Recebido" : "🔴 A Receber";
-voiceResult.innerHTML = ✅ Gravado com sucesso! &lt;br&gt; &lt;strong&gt;Valor:&lt;/strong&gt; ${formatarMoeda(valorDetectado)} arquivado em <strong>${destino}&lt;/strong&gt;.;
+if(voiceResult) voiceResult.innerHTML = ✅ Gravado com sucesso! &lt;br&gt; &lt;strong&gt;Valor:&lt;/strong&gt; ${formatarMoeda(valorDetectado)} arquivado em <strong>${destino}&lt;/strong&gt;.;
 }
 
 function carregarFotoPerfilTopo() {
@@ -497,7 +511,7 @@ const iconePadrao = document.getElementById("iconePadrao");
 const imgPerfilMinha = document.getElementById("imgPerfilMinha");
 
 if (fotoSalva && iconePadrao && imgPerfilMinha) {
-imgPerfilMinha.src = fotoSalva;
+imgPerfilMinha.setAttribute("src", fotoSalva);
 imgPerfilMinha.style.display = "block";
 iconePadrao.style.display = "none";
 }
@@ -509,16 +523,18 @@ recognition.lang = "pt-BR";
 recognition.continuous = false;
 recognition.interimResults = false;
 
+if(btnVoice) {
 btnVoice.addEventListener("click", () => {
-voiceResult.innerHTML = "🎙️ Ouvindo...";
+if(voiceResult) voiceResult.innerHTML = "🎙️ Ouvindo...";
 try {
 recognition.abort();
 recognition.start();
 } catch(e){
-voiceResult.innerHTML = "❌ Erro ao iniciar microfone.";
+if(voiceResult) voiceResult.innerHTML = "❌ Erro ao iniciar microfone.";
 console.log(e);
 }
 });
+}
 
 recognition.onresult = (event) => {
 const texto = event.results[0][0].transcript;
@@ -526,17 +542,17 @@ processarComandoVoz(texto);
 };
 
 recognition.onerror = (event) => {
-voiceResult.innerHTML = "❌ Erro: " + event.error;
+if(voiceResult) voiceResult.innerHTML = "❌ Erro: " + event.error;
 };
 
 recognition.onend = () => {
-if(voiceResult.innerHTML === "🎙️ Ouvindo..."){
+if(voiceResult && voiceResult.innerHTML === "🎙️ Ouvindo..."){
 voiceResult.innerHTML = "Aguardando comando de voz...";
 }
 };
 
 } else {
-voiceResult.innerHTML = "⚠️ Reconhecimento de voz não suportado neste navegador.";
+if(voiceResult) voiceResult.innerHTML = "⚠️ Reconhecimento de voz não suportado neste navegador.";
 }
 
 window.addEventListener("DOMContentLoaded", () => {
