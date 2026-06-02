@@ -409,31 +409,32 @@ Clientes
 
 <script>
 
-const btnVoice =
-document.getElementById("btnVoice");
+const btnVoice = document.getElementById("btnVoice");
+const voiceResult = document.getElementById("voiceResult");
 
-const voiceResult =
-document.getElementById("voiceResult");
+const SpeechRecognition =
+window.SpeechRecognition ||
+window.webkitSpeechRecognition;
 
-if('webkitSpeechRecognition' in window){
+if (SpeechRecognition) {
 
-const recognition =
-new webkitSpeechRecognition();
+const recognition = new SpeechRecognition();
 
-recognition.lang='pt-BR';
-recognition.continuous=false;
-recognition.interimResults=false;
+recognition.lang = "pt-BR";
+recognition.continuous = false;
+recognition.interimResults = false;
 
-btnVoice.addEventListener('click',()=>{
+btnVoice.addEventListener("click", () => {
 
-voiceResult.innerHTML =
-"🎙️ Ouvindo...";
+voiceResult.innerHTML = "🎙️ Ouvindo...";
 
+try {
 recognition.start();
+} catch(e){}
 
 });
 
-recognition.onresult=(event)=>{
+recognition.onresult = (event) => {
 
 const texto =
 event.results[0][0].transcript;
@@ -446,7 +447,7 @@ localStorage.getItem("historicoVoz")
 ) || [];
 
 historico.unshift({
-texto:texto,
+texto,
 data:new Date().toLocaleString()
 });
 
@@ -457,21 +458,48 @@ JSON.stringify(historico)
 
 };
 
-recognition.onerror=()=>{
+recognition.onerror = (event) => {
 
 voiceResult.innerHTML =
-"❌ Não foi possível acessar o microfone.";
+"❌ Erro: " + event.error;
+
+};
+
+recognition.onend = () => {
+
+if(
+voiceResult.innerHTML === "🎙️ Ouvindo..."
+){
+voiceResult.innerHTML =
+"⚠️ Nenhuma fala detectada.";
+}
 
 };
 
 }else{
 
 voiceResult.innerHTML =
-"⚠️ Seu navegador não suporta reconhecimento de voz.";
+"⚠️ Reconhecimento de voz não suportado neste navegador.";
+
+}
+
+if("serviceWorker" in navigator){
+
+window.addEventListener("load",()=>{
+
+navigator.serviceWorker
+.register("sw.js")
+.then(()=>{
+console.log("SW ativo");
+})
+.catch(err=>{
+console.log(err);
+});
+
+});
 
 }
 
 </script>
-
 </body>
 </html>
