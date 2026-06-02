@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfil - AutônomoFácil</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+:root{
+--primary:#1565c0;
+--primary-dark:#0d47a1;
+--bg:#f4f6f9;
+--text:#222;
+--white:#ffffff;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+
+body{
+background:var(--bg);
+color:var(--text);
+padding-bottom:30px;
+}
+
+header{
+background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+color:white;
+padding:20px;
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+header a{
+color:white;
+text-decoration:none;
+font-size:20px;
+}
+
+.avatar-container{
+display:flex;
+flex-direction:column;
+align-items:center;
+margin:30px 0;
+}
+
+.avatar-wrapper{
+position:relative;
+width:120px;
+height:120px;
+border-radius:50%;
+background:var(--white);
+box-shadow:0 4px 12px rgba(0,0,0,0.15);
+overflow:hidden;
+border:3px solid var(--white);
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.avatar-wrapper img{
+width:100%;
+height:100%;
+object-fit:cover;
+display:none;
+}
+
+.avatar-wrapper i{
+color:#aaa;
+}
+
+.upload-btn{
+margin-top:12px;
+background:var(--primary);
+color:white;
+padding:8px 16px;
+border-radius:20px;
+font-size:13px;
+font-weight:600;
+cursor:pointer;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:15px;
+margin:15px;
+box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+
+.form-group{
+margin-bottom:15px;
+}
+
+.form-group label{
+display:block;
+font-size:13px;
+font-weight:600;
+margin-bottom:5px;
+color:#666;
+}
+
+.form-group input{
+width:100%;
+padding:12px;
+border:1px solid #ddd;
+border-radius:8px;
+font-size:15px;
+outline:none;
+}
+
+.form-group input:focus{
+border-color:var(--primary);
+}
+
+.btn-salvar{
+width:100%;
+background:var(--primary);
+color:white;
+border:none;
+padding:14px;
+border-radius:8px;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+margin-top:10px;
+box-shadow:0 4px 10px rgba(21,101,192,0.3);
+}
+
+.btn-salvar:active{
+background:var(--primary-dark);
+}
+
+#msgSucesso{
+text-align:center;
+color:#2e7d32;
+font-weight:600;
+margin-top:10px;
+display:none;
+}
+</style>
+</head>
+<body>
+
+<header>
+<a href="index.html"><i class="fa-solid fa-arrow-left"></i></a>
+<h2>Meu Perfil</h2>
+</header>
+
+<div class="avatar-container">
+<div class="avatar-wrapper">
+<i class="fa-solid fa-user fa-4x" id="avatarIcone"></i>
+<img id="avatarImg" src="">
+</div>
+<label for="fileFoto" class="upload-btn">
+<i class="fa-solid fa-camera"></i> Alterar Foto
+</label>
+<input type="file" id="fileFoto" accept="image/*" style="display:none;">
+</div>
+
+<div class="card">
+<div class="form-group">
+<label>Nome do Profissional</label>
+<input type="text" id="txtNomePerfil" placeholder="Ex: João Silva">
+</div>
+
+<div class="form-group">
+<label>Ocupação / Especialidade</label>
+<input type="text" id="txtOcupacaoPerfil" placeholder="Ex: Eletricista, Pintor, Terapeuta">
+</div>
+
+<button class="btn-salvar" id="btnSalvarPerfil">Salvar Alterações</button>
+<div id="msgSucesso">✅ Dados salvos com sucesso!</div>
+</div>
+
+<script>
+const fileFoto = document.getElementById("fileFoto");
+const avatarImg = document.getElementById("avatarImg");
+const avatarIcone = document.getElementById("avatarIcone");
+
+const txtNome = document.getElementById("txtNomePerfil");
+const txtOcupacao = document.getElementById("txtOcupacaoPerfil");
+const btnSalvar = document.getElementById("btnSalvarPerfil");
+const msgSucesso = document.getElementById("msgSucesso");
+
+// Carrega os dados salvos ao abrir a página
+function carregarDados() {
+const nomeSalvo = localStorage.getItem("nomeUsuarioAutonomo");
+const ocupacaoSalva = localStorage.getItem("ocupacaoUsuarioAutonomo");
+const fotoSalva = localStorage.getItem("fotoPerfilAutonomo");
+
+if(nomeSalvo) txtNome.value = nomeSalvo;
+if(ocupacaoSalva) txtOcupacao.value = ocupacaoSalva;
+
+if(fotoSalva) {
+avatarImg.src = fotoSalva;
+avatarImg.style.display = "block";
+avatarIcone.style.display = "none";
+}
+}
+
+// Processa a imagem escolhida e transforma em texto (Base64)
+fileFoto.addEventListener("change", function() {
+const arquivo = this.files[0];
+if (arquivo) {
+const reader = new FileReader();
+reader.onload = function(e) {
+const base64Image = e.target.result;
+// Atualiza a prévia na tela
+avatarImg.src = base64Image;
+avatarImg.style.display = "block";
+avatarIcone.style.display = "none";
+
+// Salva a foto direto no localStorage
+localStorage.setItem("fotoPerfilAutonomo", base64Image);
+}
+reader.readAsDataURL(arquivo);
+}
+});
+
+// Salva os campos de texto
+btnSalvar.addEventListener("click", () => {
+localStorage.setItem("nomeUsuarioAutonomo", txtNome.value.trim());
+localStorage.setItem("ocupacaoUsuarioAutonomo", txtOcupacao.value.trim());
+
+// Feedback visual de sucesso
+msgSucesso.style.display = "block";
+setTimeout(() => {
+msgSucesso.style.display = "none";
+}, 3000);
+});
+
+window.onload = carregarDados;
+</script>
+
+</body>
+</html>
