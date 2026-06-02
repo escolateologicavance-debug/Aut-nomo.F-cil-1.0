@@ -547,13 +547,15 @@ recognition.continuous = false;
 recognition.interimResults = false;
 
 btnVoice.addEventListener("click", () => {
-voiceResult.innerHTML = "🎙️ Ouvindo...";
-try {
-recognition.start();
-} catch(e){
-voiceResult.innerHTML = "❌ Erro ao iniciar microfone.";
-console.log(e);
-}
+    voiceResult.innerHTML = "🎙️ Ouvindo...";
+
+    try {
+        recognition.abort(); // limpa estado travado
+        recognition.start();
+    } catch (e) {
+        console.log(e);
+        voiceResult.innerHTML = "❌ Microfone bloqueado ou ocupado.";
+    }
 });
 
 recognition.onresult = (event) => {
