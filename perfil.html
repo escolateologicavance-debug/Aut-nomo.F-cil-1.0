@@ -186,7 +186,9 @@ const txtOcupacao = document.getElementById("txtOcupacaoPerfil");
 const btnSalvar = document.getElementById("btnSalvarPerfil");
 const msgSucesso = document.getElementById("msgSucesso");
 
-// Carrega os dados salvos ao abrir a página
+// Variável temporária para segurar a imagem em base64 antes de clicar em salvar
+let imagemBase64Temporaria = "";
+
 function carregarDados() {
 const nomeSalvo = localStorage.getItem("nomeUsuarioAutonomo");
 const ocupacaoSalva = localStorage.getItem("ocupacaoUsuarioAutonomo");
@@ -199,34 +201,36 @@ if(fotoSalva) {
 avatarImg.src = fotoSalva;
 avatarImg.style.display = "block";
 avatarIcone.style.display = "none";
+imagemBase64Temporaria = fotoSalva; // Mantém a foto atual ativa
 }
 }
 
-// Processa a imagem escolhida e transforma em texto (Base64)
+// Processa a imagem quando escolhida pelo usuário
 fileFoto.addEventListener("change", function() {
 const arquivo = this.files[0];
 if (arquivo) {
 const reader = new FileReader();
 reader.onload = function(e) {
-const base64Image = e.target.result;
-// Atualiza a prévia na tela
-avatarImg.src = base64Image;
+imagemBase64Temporaria = e.target.result;
+
+// Atualiza imediatamente o círculo de visualização do perfil
+avatarImg.src = imagemBase64Temporaria;
 avatarImg.style.display = "block";
 avatarIcone.style.display = "none";
-
-// Salva a foto direto no localStorage
-localStorage.setItem("fotoPerfilAutonomo", base64Image);
 }
 reader.readAsDataURL(arquivo);
 }
 });
 
-// Salva os campos de texto
+// Botão Salvar consolida todos os dados de uma vez só
 btnSalvar.addEventListener("click", () => {
 localStorage.setItem("nomeUsuarioAutonomo", txtNome.value.trim());
 localStorage.setItem("ocupacaoUsuarioAutonomo", txtOcupacao.value.trim());
 
-// Feedback visual de sucesso
+if(imagemBase64Temporaria) {
+localStorage.setItem("fotoPerfilAutonomo", imagemBase64Temporaria);
+}
+
 msgSucesso.style.display = "block";
 setTimeout(() => {
 msgSucesso.style.display = "none";

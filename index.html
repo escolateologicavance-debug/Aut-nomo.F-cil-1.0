@@ -193,7 +193,7 @@ Aguardando comando de voz...
 <section class="stats">
 <div class="card">
 <h3>💰 Faturado</h3>
-<p id="txtFaturado">R$ 0,00</p>
+<p id="txtFaturado">R$` 0,00</p>
 </div>
 
 <div class="card">
@@ -203,12 +203,12 @@ Aguardando comando de voz...
 
 <div class="card">
 <h3>🟢 Recebido</h3>
-<p class="green" id="txtRecebido">R$ 0,00</p>
+<p class="green" id="txtRecebido">R`$ 0,00</p>
 </div>
 
 <div class="card">
 <h3>🔴 A Receber</h3>
-<p class="red" id="txtReceber">R$ 0,00</p>
+<p class="red" id="txtReceber">R$` 0,00</p>
 </div>
 </section>
 
@@ -260,15 +260,15 @@ function formatarMoeda(v){
 return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 }
 
-// 📸 Carrega a foto guardada no armazenamento do navegador
+// 📸 Carrega a foto sincronizada com a chave correta do Perfil
 function carregarFotoPerfil(){
-    const fotoSalva = localStorage.getItem("fotoPerfil");
-    
-    if(fotoSalva && imgPerfilMinha && iconePadrao){
-        imgPerfilMinha.src = fotoSalva;
-        imgPerfilMinha.style.display = "block";
-        iconePadrao.style.display = "none";
-    }
+const fotoSalva = localStorage.getItem("fotoPerfilAutonomo");
+
+if(fotoSalva && imgPerfilMinha && iconePadrao){
+imgPerfilMinha.src = fotoSalva;
+imgPerfilMinha.style.display = "block";
+iconePadrao.style.display = "none";
+}
 }
 
 function atualizarInterface(){
@@ -287,19 +287,15 @@ txtFaturado.innerHTML = formatarMoeda(recebido+receber);
 txtClientes.innerHTML = lancamentos.length;
 
 if(lancamentos.length===0){
-activityBox.innerHTML = `
-    <div class="activity">📌 Nenhuma atividade registrada.</div>
-    <div class="activity">🎤 Aguardando comandos de voz.</div>
-    <div class="activity">🚀 Sistema iniciado com sucesso.</div>
-`;
+activityBox.innerHTML = &lt;div class="activity"&gt;📌 Nenhuma atividade registrada.&lt;/div&gt; &lt;div class="activity"&gt;🎤 Aguardando comandos de voz.&lt;/div&gt; &lt;div class="activity"&gt;🚀 Sistema iniciado com sucesso.&lt;/div&gt;;
 }else{
 activityBox.innerHTML = "";
 lancamentos.slice(0,5).forEach(i=>{
-activityBox.innerHTML += `
-    <div class="activity">
-        <strong>${i.tipo==="recebido"?"🟢 Rec":"🔴 Dev"}:</strong> ${i.textoOriginal}<br>
-        <small style="color:#888;">${i.data}</small>
-    </div>
+activityBox.innerHTML += &lt;div class="activity"&gt; &lt;strong&gt;${i.tipo==="recebido"?"🟢 Rec":"🔴 Dev"}:</strong> latex
+{i.textoOriginal}&lt;br&gt; &lt;small style="color:#888;"&gt;
+
+{i.data}</small>
+</div>
 `;
 });
 }
@@ -308,20 +304,20 @@ activityBox.innerHTML += `
 function processarComandoVoz(texto){
 const match = texto.match(/([\d.,]+)/);
 if(!match){
-voiceResult.innerHTML = `⚠️ Não encontrei valor em: "${texto}"`;
+voiceResult.innerHTML = ⚠️ Não encontrei valor em: "${texto}"`;
 return;
 }
 
 let valorTexto = match[0];
 if (valorTexto.includes(",") && valorTexto.includes(".")) {
-    valorTexto = valorTexto.replace(/\./g, "").replace(",", ".");
+valorTexto = valorTexto.replace(/./g, "").replace(",", ".");
 } else if (valorTexto.includes(",")) {
-    valorTexto = valorTexto.replace(",", ".");
+valorTexto = valorTexto.replace(",", ".");
 }
 let valor = parseFloat(valorTexto);
 
 if(isNaN(valor)){
-voiceResult.innerHTML = `⚠️ Erro ao processar o valor numérico.`;
+voiceResult.innerHTML = ⚠️ Erro ao processar o valor numérico.;
 return;
 }
 
@@ -337,7 +333,7 @@ data:new Date().toLocaleString("pt-BR")
 
 localStorage.setItem("lancamentosFinanceiros",JSON.stringify(lista));
 
-voiceResult.innerHTML = `✅ Salvo: ${formatarMoeda(valor)}`;
+voiceResult.innerHTML = ✅ Salvo:${formatarMoeda(valor)}`;
 atualizarInterface();
 }
 
@@ -364,10 +360,9 @@ voiceResult.innerHTML="❌ Erro no reconhecimento: "+e.error;
 voiceResult.innerHTML="❌ Seu navegador não suporta comandos de voz.";
 }
 
-// Inicializa tudo ordenadamente assim que a página abre
 window.onload = () => {
-    atualizarInterface();
-    carregarFotoPerfil();
+atualizarInterface();
+carregarFotoPerfil();
 };
 </script>
 
