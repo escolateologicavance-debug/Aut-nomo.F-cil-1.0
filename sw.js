@@ -1,47 +1,66 @@
-const CACHE_NAME = "autonomofacil-v2";
+const CACHE_NAME = "autonomofacil-v1";
 
-// Lista contendo apenas os arquivos reais do repositório
 const urlsToCache = [
-  "./",
-  "./index.html",
-  "./manifest.json"
+"/",
+"/index.html",
+"/index3.html",
+"/perfil.html",
+
+// módulos
+"/clientes.html",
+"/servicos.html",
+"/agenda.html",
+"/financeiro.html",
+"/contratos.html",
+"/feedbacks.html",
+"/conversas.html",
+"/veiculos.html",
+"/arquivos.html",
+
+// base
+"/manifest.json",
+"/style.css",
+"/app.js",
+
+// imagens (IMPORTANTE)
+"/icon-192.png",
+"/icon-512.png",
+
+// fallback offline (opcional)
+"/offline.html"
 ];
 
-// Instalação do Service Worker e criação do Cache
+// INSTALL
 self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log("Cache aberto com sucesso.");
-        return cache.addAll(urlsToCache);
-      })
-      .then(() => self.skipWaiting()) // Força o SW novo a virar ativo imediatamente
-  );
+event.waitUntil(
+caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+);
+self.skipWaiting();
 });
 
-// Ativação e limpeza de caches antigos
+// ACTIVATE (limpa cache antigo)
 self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cache => {
-          if (cache !== CACHE_NAME) {
-            console.log("Removendo cache antigo:", cache);
-            return caches.delete(cache);
-          }
-        })
-      );
-    }).then(() => self.clients.claim()) // Assume o controle da página na hora
-  );
+event.waitUntil(
+caches.keys().then(keys =>
+Promise.all(
+keys.map(key => {
+if (key !== CACHE_NAME) {
+return caches.delete(key);
+}
+})
+)
+)
+);
+self.clients.claim();
 });
 
-// Intercepta as requisições para funcionar Offline
+// FETCH (offline first)
 self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Retorna o arquivo do cache se encontrar, senão busca na rede
-        return response || fetch(event.request);
-      })
-  );
+event.respondWith(
+caches.match(event.request).then(response => {
+return response || fetch(event.request).catch(() => {
+return caches.match("/offline.html");
+});
+})
+);
 });
