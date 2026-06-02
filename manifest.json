@@ -1,21 +1,80 @@
 {
-"name":"AutônomoFácil",
-"short_name":"AutônomoFácil",
-"start_url":"./",
-"display":"standalone",
-"background_color":"#ffffff",
-"theme_color":"#1565c0",
-"orientation":"portrait",
-"icons":[
+"name": "AutônomoFácil",
+"short_name": "AutônomoFácil",
+"description": "App para Assessorar Autônomos através de comandos de voz.",
+"start_url": "./index.html",
+"display": "standalone",
+"background_color": "#f4f6f9",
+"theme-color": "#1565c0",
+"orientation": "portrait",
+"icons": [
 {
-"src":"icon-192.png",
-"type":"image/png",
-"sizes":"192x192"
+"src": "./icon-192.png",
+"sizes": "192x192",
+"type": "image/png",
+"purpose": "any"
 },
 {
-"src":"icon-512.png",
-"type":"image/png",
-"sizes":"512x512"
+"src": "./icon-512.png",
+"sizes": "512x512",
+"type": "image/png",
+"purpose": "any"
+}
+ ],
+"shortcuts": [
+{
+"name": "Clientes",
+"short_name": "Clientes",
+"url": "./clientes.html",
+"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/users.svg", "sizes": "192x192" }]
+},
+{
+"name": "Serviços",
+"short_name": "Serviços",
+"url": "./servicos.html",
+"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/clipboard-list.svg", "sizes": "192x192" }]
+},
+{
+"name": "Agenda",
+"short_name": "Agenda",
+"url": "./agenda.html",
+"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/calendar.svg", "sizes": "192x192" }]
+},
+{
+"name": "Financeiro",
+"short_name": "Finanças",
+"url": "./financeiro.html",
+"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/wallet.svg", "sizes": "192x192" }]
+},
+{
+"name": "Contratos",
+"short_name": "Contratos",
+"url": "./contratos.html",
+"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/file-contract.svg", "sizes": "192x192" }]
+},
+{
+"name": "Feedbacks",
+"short_name": "Feedbacks",
+"url": "./feedbacks.html",
+"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/star.svg", "sizes": "192x192" }]
+},
+{
+"name": "Conversas",
+"short_name": "Conversas",
+"url": "./conversas.html",
+"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/comments.svg", "sizes": "192x192" }]
+},
+{
+"name": "Veículos",
+"short_name": "Veículos",
+"url": "./veiculos.html",
+"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/car.svg", "sizes": "192x192" }]
+},
+{
+"name": "Arquivos",
+"short_name": "Arquivos",
+"url": "./arquivos.html",
+"icons": [{ "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/svgs/solid/folder.svg", "sizes": "192x192" }]
 }
 ]
 }
