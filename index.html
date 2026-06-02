@@ -6,9 +6,22 @@
 
 <title>AutônomoFácil 1.0</title>
 
+<link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
+<meta name="theme-color" content="#1565c0">
+
 <style>
+
+:root{
+--primary:#1565c0;
+--primary-dark:#0d47a1;
+--bg:#f4f6f9;
+--white:#ffffff;
+--green:#2e7d32;
+--red:#c62828;
+--text:#222;
+}
 
 *{
 margin:0;
@@ -18,31 +31,44 @@ font-family:'Segoe UI',sans-serif;
 }
 
 body{
-background:#f4f6f9;
+background:var(--bg);
+color:var(--text);
 padding-bottom:90px;
 }
 
 header{
-background:linear-gradient(135deg,#1565c0,#0d47a1);
+background:linear-gradient(135deg,var(--primary),var(--primary-dark));
 color:white;
 padding:25px;
 border-radius:0 0 30px 30px;
-box-shadow:0 4px 12px rgba(0,0,0,.2);
+box-shadow:0 4px 15px rgba(0,0,0,.15);
 }
 
-header h1{
-font-size:26px;
+.top-row{
+display:flex;
+justify-content:space-between;
+align-items:center;
 }
 
-header p{
-margin-top:5px;
+.logo{
+font-size:24px;
+font-weight:bold;
+}
+
+.version{
+font-size:13px;
+opacity:.8;
+}
+
+.subtitle{
+margin-top:8px;
 opacity:.9;
 }
 
-.voice-area{
+.voice-container{
 display:flex;
 justify-content:center;
-margin-top:-40px;
+margin-top:-45px;
 }
 
 .voice-btn{
@@ -52,36 +78,57 @@ border:none;
 border-radius:50%;
 background:white;
 box-shadow:0 10px 25px rgba(0,0,0,.15);
-font-size:50px;
-color:#1565c0;
+font-size:55px;
 cursor:pointer;
+transition:.3s;
+}
+
+.voice-btn:hover{
+transform:scale(1.05);
 }
 
 .voice-text{
-padding:15px;
 text-align:center;
+padding:15px;
 font-weight:600;
+color:#666;
+}
+
+.voice-result{
+margin:0 20px;
+background:white;
+border-radius:15px;
+padding:15px;
+min-height:70px;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
+font-size:14px;
 color:#555;
+}
+
+.section-title{
+padding:20px 20px 10px;
+font-size:18px;
+font-weight:700;
 }
 
 .stats{
 display:grid;
 grid-template-columns:repeat(2,1fr);
 gap:15px;
-padding:20px;
+padding:0 20px 20px;
 }
 
 .card{
 background:white;
-border-radius:20px;
 padding:18px;
-box-shadow:0 3px 10px rgba(0,0,0,.08);
+border-radius:18px;
+box-shadow:0 2px 10px rgba(0,0,0,.08);
 }
 
 .card h3{
-font-size:14px;
-color:#777;
+font-size:13px;
 margin-bottom:8px;
+color:#777;
 }
 
 .card p{
@@ -90,30 +137,22 @@ font-weight:bold;
 }
 
 .green{
-color:#2e7d32;
+color:var(--green);
 }
 
 .red{
-color:#c62828;
+color:var(--red);
 }
 
 .blue{
-color:#1565c0;
-}
-
-.section-title{
-padding:0 20px;
-margin-top:10px;
-margin-bottom:10px;
-font-weight:bold;
-font-size:18px;
+color:var(--primary);
 }
 
 .shortcuts{
 display:grid;
-grid-template-columns:repeat(4,1fr);
+grid-template-columns:repeat(3,1fr);
 gap:12px;
-padding:0 20px;
+padding:0 20px 20px;
 }
 
 .shortcut{
@@ -121,35 +160,43 @@ background:white;
 border-radius:18px;
 padding:18px 10px;
 text-align:center;
-box-shadow:0 3px 10px rgba(0,0,0,.08);
+box-shadow:0 2px 10px rgba(0,0,0,.08);
+text-decoration:none;
+color:#222;
+transition:.2s;
+}
+
+.shortcut:hover{
+transform:translateY(-3px);
 }
 
 .shortcut i{
-font-size:26px;
-color:#1565c0;
-margin-bottom:8px;
+font-size:28px;
+color:var(--primary);
+margin-bottom:10px;
 }
 
 .shortcut span{
 display:block;
-font-size:12px;
+font-size:13px;
 font-weight:600;
 }
 
 .activities{
-padding:20px;
+padding:0 20px;
 }
 
 .activity-box{
 background:white;
-border-radius:20px;
+border-radius:18px;
 padding:15px;
-box-shadow:0 3px 10px rgba(0,0,0,.08);
+box-shadow:0 2px 10px rgba(0,0,0,.08);
 }
 
 .activity{
-padding:10px 0;
+padding:12px 0;
 border-bottom:1px solid #eee;
+font-size:14px;
 }
 
 .activity:last-child{
@@ -161,50 +208,73 @@ position:fixed;
 bottom:0;
 left:0;
 right:0;
+height:70px;
 background:white;
 display:flex;
 justify-content:space-around;
-padding:12px;
-box-shadow:0 -3px 10px rgba(0,0,0,.1);
+align-items:center;
+box-shadow:0 -2px 15px rgba(0,0,0,.12);
+z-index:999;
+}
+
+.bottom-nav a{
+text-decoration:none;
+color:#444;
+font-size:11px;
+text-align:center;
 }
 
 .bottom-nav i{
+display:block;
 font-size:22px;
-color:#1565c0;
-}
-
-.bottom-nav div{
-text-align:center;
-font-size:11px;
-font-weight:600;
+margin-bottom:4px;
+color:var(--primary);
 }
 
 </style>
 </head>
+
 <body>
 
 <header>
 
-<h1>AutônomoFácil 1.0</h1>
+<div class="top-row">
+<div>
+<div class="logo">AutônomoFácil</div>
+<div class="version">Versão 1.0</div>
+</div>
 
-<p>Fale. O sistema organiza.</p>
+<div>
+<i class="fa-solid fa-user-circle fa-2x"></i>
+</div>
+</div>
+
+<p class="subtitle">
+Fale. O sistema organiza.
+</p>
 
 </header>
 
-<div class="voice-area">
+<div class="voice-container">
 
-<button class="voice-btn">
+<button class="voice-btn" id="btnVoice">
 🎤
 </button>
 
 </div>
 
 <div class="voice-text">
-
 Toque e diga:
-
+<br>
 "Cobrei 450 reais do João..."
+</div>
 
+<div class="voice-result" id="voiceResult">
+Aguardando comando de voz...
+</div>
+
+<div class="section-title">
+Resumo Financeiro
 </div>
 
 <section class="stats">
@@ -232,59 +302,60 @@ Toque e diga:
 </section>
 
 <div class="section-title">
-
 Ações Rápidas
-
 </div>
 
 <section class="shortcuts">
 
-<div class="shortcut">
+<a class="shortcut" href="clientes.html">
 <i class="fa-solid fa-users"></i>
 <span>Clientes</span>
-</div>
+</a>
 
-<div class="shortcut">
+<a class="shortcut" href="servicos.html">
 <i class="fa-solid fa-clipboard-list"></i>
 <span>Serviços</span>
-</div>
+</a>
 
-<div class="shortcut">
+<a class="shortcut" href="agenda.html">
 <i class="fa-solid fa-calendar"></i>
 <span>Agenda</span>
-</div>
+</a>
 
-<div class="shortcut">
+<a class="shortcut" href="financeiro.html">
+<i class="fa-solid fa-wallet"></i>
+<span>Financeiro</span>
+</a>
+
+<a class="shortcut" href="contratos.html">
 <i class="fa-solid fa-file-contract"></i>
 <span>Contratos</span>
-</div>
+</a>
 
-<div class="shortcut">
-<i class="fa-solid fa-comments"></i>
-<span>Conversas</span>
-</div>
-
-<div class="shortcut">
+<a class="shortcut" href="feedbacks.html">
 <i class="fa-solid fa-star"></i>
 <span>Feedbacks</span>
-</div>
+</a>
 
-<div class="shortcut">
+<a class="shortcut" href="conversas.html">
+<i class="fa-solid fa-comments"></i>
+<span>Conversas</span>
+</a>
+
+<a class="shortcut" href="veiculos.html">
 <i class="fa-solid fa-car"></i>
 <span>Veículos</span>
-</div>
+</a>
 
-<div class="shortcut">
+<a class="shortcut" href="arquivos.html">
 <i class="fa-solid fa-folder"></i>
 <span>Arquivos</span>
-</div>
+</a>
 
 </section>
 
 <div class="section-title">
-
 Últimas Atividades
-
 </div>
 
 <section class="activities">
@@ -292,11 +363,15 @@ Ações Rápidas
 <div class="activity-box">
 
 <div class="activity">
-Nenhuma atividade registrada.
+📌 Nenhuma atividade registrada.
 </div>
 
 <div class="activity">
-Aguardando comandos de voz.
+🎤 Aguardando comandos de voz.
+</div>
+
+<div class="activity">
+🚀 Sistema iniciado com sucesso.
 </div>
 
 </div>
@@ -305,32 +380,98 @@ Aguardando comandos de voz.
 
 <nav class="bottom-nav">
 
-<div>
+<a href="index.html">
 <i class="fa-solid fa-house"></i>
-<br>Início
-</div>
+Início
+</a>
 
-<div>
+<a href="#">
 <i class="fa-solid fa-microphone"></i>
-<br>Voz
-</div>
+Voz
+</a>
 
-<div>
+<a href="servicos.html">
 <i class="fa-solid fa-clipboard-list"></i>
-<br>Serviços
-</div>
+Serviços
+</a>
 
-<div>
+<a href="financeiro.html">
 <i class="fa-solid fa-wallet"></i>
-<br>Financeiro
-</div>
+Financeiro
+</a>
 
-<div>
-<i class="fa-solid fa-gear"></i>
-<br>Mais
-</div>
+<a href="clientes.html">
+<i class="fa-solid fa-users"></i>
+Clientes
+</a>
 
 </nav>
+
+<script>
+
+const btnVoice =
+document.getElementById("btnVoice");
+
+const voiceResult =
+document.getElementById("voiceResult");
+
+if('webkitSpeechRecognition' in window){
+
+const recognition =
+new webkitSpeechRecognition();
+
+recognition.lang='pt-BR';
+recognition.continuous=false;
+recognition.interimResults=false;
+
+btnVoice.addEventListener('click',()=>{
+
+voiceResult.innerHTML =
+"🎙️ Ouvindo...";
+
+recognition.start();
+
+});
+
+recognition.onresult=(event)=>{
+
+const texto =
+event.results[0][0].transcript;
+
+voiceResult.innerHTML = texto;
+
+let historico =
+JSON.parse(
+localStorage.getItem("historicoVoz")
+) || [];
+
+historico.unshift({
+texto:texto,
+data:new Date().toLocaleString()
+});
+
+localStorage.setItem(
+"historicoVoz",
+JSON.stringify(historico)
+);
+
+};
+
+recognition.onerror=()=>{
+
+voiceResult.innerHTML =
+"❌ Não foi possível acessar o microfone.";
+
+};
+
+}else{
+
+voiceResult.innerHTML =
+"⚠️ Seu navegador não suporta reconhecimento de voz.";
+
+}
+
+</script>
 
 </body>
 </html>
