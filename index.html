@@ -355,6 +355,7 @@ Ações Rápidas
 
 <section class="activities">
 <div class="activity-box" id="activityBox">
+<!-- Preenchido dinamicamente -->
 </div>
 </section>
 
@@ -523,7 +524,9 @@ btnVoice.addEventListener("click", () => {
 voiceResult.innerHTML = "🎙️ Ouvindo...";
 try {
 recognition.start();
-} catch(e){}
+} catch(e){
+console.log(e);
+}
 });
 
 recognition.onresult = (event) => {
