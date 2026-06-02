@@ -12,7 +12,6 @@
 <meta name="theme-color" content="#1565c0">
 
 <style>
-
 :root{
 --primary:#1565c0;
 --primary-dark:#0d47a1;
@@ -230,26 +229,24 @@ font-size:22px;
 margin-bottom:4px;
 color:var(--primary);
 }
-
 </style>
 </head>
 
 <body>
 
 <header>
-
 <div class="top-row">
 <div>
-<div class="logo">Aut�nomoF�cil</div>
-<div class="version">Vers�o 1.0</div>
+<div class="logo">AutônomoFácil</div>
+<div class="version">Versão 1.0</div>
 </div>
 
 <div>
 <a href="perfil.html" style="color: white; text-decoration: none;">
-    <div id="fotoPerfilContainer" style="width: 45px; height: 45px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid white;">
-        <i class="fa-solid fa-user-circle fa-2x" id="iconePadrao"></i>
-        <img id="imgPerfilMinha" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
-    </div>
+<div id="fotoPerfilContainer" style="width: 45px; height: 45px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid white;">
+<i class="fa-solid fa-user-circle fa-2x" id="iconePadrao"></i>
+<img id="imgPerfilMinha" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+</div>
 </a>
 </div>
 </div>
@@ -257,15 +254,12 @@ color:var(--primary);
 <p class="subtitle">
 Fale. O sistema organiza.
 </p>
-
 </header>
 
 <div class="voice-container">
-
 <button class="voice-btn" id="btnVoice">
 🎤
 </button>
-
 </div>
 
 <div class="voice-text">
@@ -283,7 +277,6 @@ Resumo Financeiro
 </div>
 
 <section class="stats">
-
 <div class="card">
 <h3>💰 Faturado</h3>
 <p id="txtFaturado">R$` 0,00</p>
@@ -303,7 +296,6 @@ Resumo Financeiro
 <h3>🔴 A Receber</h3>
 <p class="red" id="txtReceber">R$` 0,00</p>
 </div>
-
 </section>
 
 <div class="section-title">
@@ -311,7 +303,6 @@ Ações Rápidas
 </div>
 
 <section class="shortcuts">
-
 <a class="shortcut" href="clientes.html">
 <i class="fa-solid fa-users"></i>
 <span>Clientes</span>
@@ -356,7 +347,6 @@ Ações Rápidas
 <i class="fa-solid fa-folder"></i>
 <span>Arquivos</span>
 </a>
-
 </section>
 
 <div class="section-title">
@@ -364,14 +354,11 @@ Ações Rápidas
 </div>
 
 <section class="activities">
-
 <div class="activity-box" id="activityBox">
 </div>
-
 </section>
 
 <nav class="bottom-nav">
-
 <a href="index.html">
 <i class="fa-solid fa-house"></i>
 Início
@@ -396,85 +383,96 @@ Financeiro
 <i class="fa-solid fa-users"></i>
 Clientes
 </a>
-
 </nav>
 
 <script>
-
 const btnVoice = document.getElementById("btnVoice");
 const voiceResult = document.getElementById("voiceResult");
 const activityBox = document.getElementById("activityBox");
 
-// Elementos do resumo financeiro
 const txtFaturado = document.getElementById("txtFaturado");
 const txtClientes = document.getElementById("txtClientes");
 const txtRecebido = document.getElementById("txtRecebido");
 const txtReceber = document.getElementById("txtReceber");
 
-const SpeechRecognition =
-window.SpeechRecognition ||
-window.webkitSpeechRecognition;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-// Função auxiliar para formatar em Moeda Real
 function formatarMoeda(valor) {
 return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-// Inicializa a interface com os dados salvos
+function extrairNomeCliente(texto) {
+const textoMinusculo = texto.toLowerCase();
+const gatilhos = [" de ", " da ", " do ", " para o ", " para a "];
+for (let gatilho of gatilhos) {
+if (textoMinusculo.includes(gatilho)) {
+let partes = textoMinusculo.split(gatilho);
+if (partes.length > 1) {
+let resto = partes[1].trim();
+resto = resto.split(" dia ")[0].split(" data ")[0].split(" em ")[0];
+let nomeFinal = resto.replace(/[.,/#!$%\^&\*;:{}=\-_~()]/g,"").trim();
+if (nomeFinal.length > 2 && nomeFinal.length < 40) {
+return nomeFinal;
+}
+}
+}
+}
+return null;
+}
+
 function atualizarInterface() {
-let lancamentos = JSON.parse(localStorage.getItem("lancamentosFinanceiros")) || [];
+let historico = JSON.parse(localStorage.getItem("historicoVoz")) || [];
 
 let totalRecebido = 0;
 let totalReceber = 0;
+let clientesSet = new Set();
 
-lancamentos.forEach(item => {
-if (item.tipo === "recebido") {
+historico.forEach(item => {
+if (item.valor && item.tipo === "recebido") {
 totalRecebido += item.valor;
-} else if (item.tipo === "receber") {
+} else if (item.valor && item.tipo === "receber") {
 totalReceber += item.valor;
+}
+
+let nomeCliente = extrairNomeCliente(item.texto);
+if (nomeCliente) {
+clientesSet.add(nomeCliente);
 }
 });
 
 let totalFaturado = totalRecebido + totalReceber;
 
-// Atualiza os cards na tela
 txtRecebido.innerHTML = formatarMoeda(totalRecebido);
 txtReceber.innerHTML = formatarMoeda(totalReceber);
 txtFaturado.innerHTML = formatarMoeda(totalFaturado);
+txtClientes.innerHTML = clientesSet.size;
 
-// Atualiza o contador de lançamentos/atividades como exemplo simples
-txtClientes.innerHTML = lancamentos.length;
-
-// Renderiza a lista de Últimas Atividades
-if (lancamentos.length === 0) {
+if (historico.length === 0) {
 activityBox.innerHTML = &lt;div class="activity"&gt;📌 Nenhuma atividade registrada.&lt;/div&gt; &lt;div class="activity"&gt;🎤 Aguardando comandos de voz.&lt;/div&gt; &lt;div class="activity"&gt;🚀 Sistema iniciado com sucesso.&lt;/div&gt;;
 } else {
 activityBox.innerHTML = "";
-// Mostra os últimos 5 lançamentos
-lancamentos.slice(0, 5).forEach(item => {
-let badge = item.tipo === "recebido" ? "🟢 [Recebido]" : "🔴 [A Receber]";
-activityBox.innerHTML += &lt;div class="activity"&gt; &lt;strong&gt;${badge}</strong> 
-
-{item.textoOriginal}" <br>
-<small style="color:#888; font-size:11px;">${item.data}&lt;/small&gt; &lt;/div&gt;;
+historico.slice(0, 5).forEach(item => {
+let badge = "";
+if (item.valor) {
+badge = item.tipo === "recebido" ? "<strong>🟢 [Recebido]</strong> " : "<strong>🔴 [A Receber]</strong> ";
+} else {
+badge = "<strong>📝 [Texto]</strong> ";
+}
+activityBox.innerHTML += &lt;div class="activity"&gt; ${badge} ${item.texto} &lt;br&gt; &lt;small style="color:#888; font-size:11px;"&gt;${item.data}&lt;/small&gt; &lt;/div&gt;;
 });
 }
 }
 
-// Processa o comando de voz capturado
 function processarComandoVoz(texto) {
 const textoMinusculo = texto.toLowerCase();
-
-// Expressão regular para capturar números (ex: 450, 1.200, 50,50)
 const regexPreco = /([\d.,]+)/g;
 const matches = textoMinusculo.match(regexPreco);
 
-let valorDetectado = 0;
+let valorDetectado = null;
+let tipoDetectado = null;
 
 if (matches) {
-// Pega o primeiro número longo ou grupo numérico que faça sentido como preço
 for (let match of matches) {
-// Limpa pontos de milhar e substitui vírgula por ponto decimal
 let valorLimpo = match.replace(/./g, "").replace(",", ".");
 let numero = parseFloat(valorLimpo);
 if (!isNaN(numero) && numero > 0) {
@@ -484,50 +482,38 @@ break;
 }
 }
 
-if (valorDetectado === 0) {
-voiceResult.innerHTML = ⚠️ Identificado: "${texto}", mas não encontrei um valor em reais.`;
-return;
-}
-
-// Identifica o tipo com base em palavras-chave comuns do dia a dia
-let tipo = "receber"; // Padrão caso não identifique à vista
-
+if (valorDetectado !== null) {
 const palavrasRecebido = ["recebi", "pago", "à vista", "no pix", "dinheiro", "recebido", "entrou"];
-const palavrasReceber = ["prazo", "à prazo", "vou receber", "cobrar", "cobrei", "receber", "deve"];
-
-// Verifica se possui alguma palavra que determine o estado "Recebido"
 let temRecebido = palavrasRecebido.some(palavra => textoMinusculo.includes(palavra));
-let temReceber = palavrasReceber.some(palavra => textoMinusculo.includes(palavra));
-
-if (temRecebido && !temReceber) {
-tipo = "recebido";
-} else {
-tipo = "receber"; // Se disser "cobrei", "à prazo", ou for ambíguo, vai para "A Receber"
+tipoDetectado = temRecebido ? "recebido" : "receber";
 }
 
-// Grava no banco de dados local (localStorage)
-let lancamentos = JSON.parse(localStorage.getItem("lancamentosFinanceiros")) || [];
+let historico = JSON.parse(localStorage.getItem("historicoVoz")) || [];
 
-lancamentos.unshift({
+historico.unshift({
+texto: texto,
 valor: valorDetectado,
-tipo: tipo,
-textoOriginal: texto,
+tipo: tipoDetectado,
 data: new Date().toLocaleString("pt-BR")
 });
 
-localStorage.setItem("lancamentosFinanceiros", JSON.stringify(lancamentos));
-
-// Atualiza a interface em tempo real
+localStorage.setItem("historicoVoz", JSON.stringify(historico));
 atualizarInterface();
-
-// Dá o feedback visual de sucesso do arquivamento
-let destino = tipo === "recebido" ? "🟢 Recebido" : "🔴 A Receber";
-voiceResult.innerHTML = ✅ Gravado com sucesso! &lt;br&gt; &lt;strong&gt;Valor:&lt;/strong&gt; ${formatarMoeda(valorDetectado)} arquivado em <strong>${destino}&lt;/strong&gt;.;
 }
 
-// Inicializa a escuta do Microfone
-if (SpeechRecognition) {
+function carregarFotoPerfilTopo() {
+const fotoSalva = localStorage.getItem("fotoPerfilAutonomo");
+const iconePadrao = document.getElementById("iconePadrao");
+const imgPerfilMinha = document.getElementById("imgPerfilMinha");
 
+if (fotoSalva && iconePadrao && imgPerfilMinha) {
+imgPerfilMinha.src = fotoSalva;
+imgPerfilMinha.style.display = "block";
+iconePadrao.style.display = "none";
+}
+}
+
+if (SpeechRecognition) {
 const recognition = new SpeechRecognition();
 recognition.lang = "pt-BR";
 recognition.continuous = false;
@@ -542,7 +528,7 @@ recognition.start();
 
 recognition.onresult = (event) => {
 const texto = event.results[0][0].transcript;
-// Processa as regras de negócio de preço e tipo de arquivamento
+voiceResult.innerHTML = texto;
 processarComandoVoz(texto);
 };
 
@@ -555,42 +541,23 @@ if(voiceResult.innerHTML === "🎙️ Ouvindo..."){
 voiceResult.innerHTML = "⚠️ Nenhuma fala detectada.";
 }
 };
-
 } else {
 voiceResult.innerHTML = "⚠️ Reconhecimento de voz não suportado neste navegador.";
 }
 
-// Carrega os dados salvos assim que a página abre
-window.addEventListener("DOMContentLoaded", atualizarInterface);
+window.addEventListener("DOMContentLoaded", () => {
+atualizarInterface();
+carregarFotoPerfilTopo();
+});
 
-// Configuração do Service Worker
 if("serviceWorker" in navigator){
 window.addEventListener("load",()=>{
 navigator.serviceWorker
 .register("sw.js")
-.then(()=>{
-console.log("SW ativo");
-})
-.catch(err=>{
-console.log(err);
-});
+.then(()=>{ console.log("SW ativo"); })
+.catch(err=>{ console.log(err); });
 });
 }
-// Carrega a foto de perfil na barra superior se existir
-function carregarFotoPerfilTopo() {
-    const fotoSalva = localStorage.getItem("fotoPerfilAutonomo");
-    const iconePadrao = document.getElementById("iconePadrao");
-    const imgPerfilMinha = document.getElementById("imgPerfilMinha");
-    
-    if (fotoSalva && iconePadrao && imgPerfilMinha) {
-        imgPerfilMinha.src = fotoSalva;
-        imgPerfilMinha.style.display = "block";
-        iconePadrao.style.display = "none";
-    }
-}
-// Executa a leitura da foto ao carregar a tela
-window.addEventListener("DOMContentLoaded", carregarFotoPerfilTopo);
-
 </script>
 </body>
 </html>
