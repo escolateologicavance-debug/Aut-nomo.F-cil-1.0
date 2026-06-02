@@ -1,71 +1,71 @@
 {
-"name": "AutônomoFácil",
-"short_name": "AutônomoFácil",
-"description": "App para Assessorar Autônomos através de comandos de voz.",
-"start_url": "./index.html",
-"display": "standalone",
-"background_color": "#f4f6f9",
-"theme-color": "#1565c0",
-"orientation": "portrait",
-"icons": [
-{
-"src": "https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-192b.png",
-"sizes": "192x192",
-"type": "image/png",
-"purpose": "any"
-},
-{
-"src": "https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-512b.png",
-"sizes": "512x512",
-"type": "image/png",
-"purpose": "any"
-}
- ],
-"shortcuts": [
-{
-"name": "Clientes",
-"short_name": "Clientes",
-"url": "./clientes.html"
-},
-{
-"name": "Serviços",
-"short_name": "Serviços",
-"url": "./servicos.html"
-},
-{
-"name": "Agenda",
-"short_name": "Agenda",
-"url": "./agenda.html"
-},
-{
-"name": "Financeiro",
-"short_name": "Finanças",
-"url": "./financeiro.html"
-},
-{
-"name": "Contratos",
-"short_name": "Contratos",
-"url": "./contratos.html"
-},
-{
-"name": "Feedbacks",
-"short_name": "Feedbacks",
-"url": "./feedbacks.html"
-},
-{
-"name": "Conversas",
-"short_name": "Conversas",
-"url": "./conversas.html"
-},
-{
-"name": "Veículos",
-"short_name": "Veículos",
-"url": "./veiculos.html"
-},
-{
-"name": "Arquivos",
-"short_name": "Arquivos",
-"url": "./arquivos.html"
-}
-]
+  "name": "AutônomoFácil",
+  "short_name": "AutônomoFácil",
+  "description": "App para Assessorar Autônomos através de comandos de voz.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f6f9",
+  "theme-color": "#1565c0",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-192b.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-512b.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Clientes",
+      "short_name": "Clientes",
+      "url": "./clientes.html"
+    },
+    {
+      "name": "Serviços",
+      "short_name": "Serviços",
+      "url": "./servicos.html"
+    },
+    {
+      "name": "Agenda",
+      "short_name": "Agenda",
+      "url": "./agenda.html"
+    },
+    {
+      "name": "Financeiro",
+      "short_name": "Finanças",
+      "url": "./financeiro.html"
+    },
+    {
+      "name": "Contratos",
+      "short_name": "Contratos",
+      "url": "./contratos.html"
+    },
+    {
+      "name": "Feedbacks",
+      "short_name": "Feedbacks",
+      "url": "./feedbacks.html"
+    },
+    {
+      "name": "Conversas",
+      "short_name": "Conversas",
+      "url": "./conversas.html"
+    },
+    {
+      "name": "Veículos",
+      "short_name": "Veículos",
+      "url": "./veiculos.html"
+    },
+    {
+      "name": "Arquivos",
+      "short_name": "Arquivos",
+      "url": "./arquivos.html"
+    }
+  ]
 }
