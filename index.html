@@ -48,7 +48,9 @@ box-shadow:0 4px 15px rgba(0,0,0,.15);
 width:130px;height:130px;border:none;border-radius:50%;
 background:white;box-shadow:0 10px 25px rgba(0,0,0,.15);
 font-size:55px;cursor:pointer;
+transition: transform 0.1s ease;
 }
+.voice-btn:active{transform: scale(0.95);}
 
 .voice-text{text-align:center;padding:15px;font-weight:600;color:#666;}
 
@@ -191,7 +193,7 @@ Aguardando comando de voz...
 <section class="stats">
 <div class="card">
 <h3>💰 Faturado</h3>
-<p id="txtFaturado">R$` 0,00</p>
+<p id="txtFaturado">R$ 0,00</p>
 </div>
 
 <div class="card">
@@ -201,12 +203,12 @@ Aguardando comando de voz...
 
 <div class="card">
 <h3>🟢 Recebido</h3>
-<p class="green" id="txtRecebido">R`$ 0,00</p>
+<p class="green" id="txtRecebido">R$ 0,00</p>
 </div>
 
 <div class="card">
 <h3>🔴 A Receber</h3>
-<p class="red" id="txtReceber">R$` 0,00</p>
+<p class="red" id="txtReceber">R$ 0,00</p>
 </div>
 </section>
 
@@ -230,7 +232,6 @@ Aguardando comando de voz...
 <div class="activity-box" id="activityBox"></div>
 </section>
 
-<!-- 🔥 AQUI VOLTOU TUDO -->
 <nav class="bottom-nav">
 <a href="index.html"><i class="fa-solid fa-house"></i>Início</a>
 <a href="#"><i class="fa-solid fa-microphone"></i>Voz</a>
@@ -271,29 +272,47 @@ txtFaturado.innerHTML = formatarMoeda(recebido+receber);
 txtClientes.innerHTML = lancamentos.length;
 
 if(lancamentos.length===0){
-activityBox.innerHTML = &lt;div class="activity"&gt;📌 Nenhuma atividade registrada.&lt;/div&gt; &lt;div class="activity"&gt;🎤 Aguardando comandos de voz.&lt;/div&gt; &lt;div class="activity"&gt;🚀 Sistema iniciado com sucesso.&lt;/div&gt;;
+activityBox.innerHTML = `
+    <div class="activity">📌 Nenhuma atividade registrada.</div>
+    <div class="activity">🎤 Aguardando comandos de voz.</div>
+    <div class="activity">🚀 Sistema iniciado com sucesso.</div>
+`;
 }else{
 activityBox.innerHTML = "";
 lancamentos.slice(0,5).forEach(i=>{
-activityBox.innerHTML += &lt;div class="activity"&gt; &lt;strong&gt;${i.tipo==="recebido"?"🟢":"🔴"}</strong>
-
-{i.data}</small>
-</div>
+activityBox.innerHTML += `
+    <div class="activity">
+        <strong>${i.tipo==="recebido"?"🟢 Rec":"🔴 Dev"}:</strong> ${i.textoOriginal}<br>
+        <small style="color:#888;">${i.data}</small>
+    </div>
 `;
 });
 }
 }
 
 function processarComandoVoz(texto){
+// Regex ajustado para capturar números com pontos e vírgulas corretamente
 const match = texto.match(/([\d.,]+)/);
 if(!match){
-voiceResult.innerHTML = ⚠️ Não encontrei valor em: "${texto}"`;
+voiceResult.innerHTML = `⚠️ Não encontrei valor em: "${texto}"`;
 return;
 }
 
-let valor = parseFloat(match[0].replace(".","").replace(",","."));
-let tipo = texto.toLowerCase().includes("recebi") ? "recebido" : "receber";
+// Tratamento correto de pontuação da moeda em PT-BR
+let valorTexto = match[0];
+if (valorTexto.includes(",") && valorTexto.includes(".")) {
+    valorTexto = valorTexto.replace(/\./g, "").replace(",", ".");
+} else if (valorTexto.includes(",")) {
+    valorTexto = valorTexto.replace(",", ".");
+}
+let valor = parseFloat(valorTexto);
 
+if(isNaN(valor)){
+voiceResult.innerHTML = `⚠️ Erro ao processar o valor numérico.`;
+return;
+}
+
+let tipo = texto.toLowerCase().includes("recebi") ? "recebido" : "receber";
 let lista = JSON.parse(localStorage.getItem("lancamentosFinanceiros")) || [];
 
 lista.unshift({
@@ -305,26 +324,31 @@ data:new Date().toLocaleString("pt-BR")
 
 localStorage.setItem("lancamentosFinanceiros",JSON.stringify(lista));
 
-voiceResult.innerHTML = ✅ Salvo:${formatarMoeda(valor)}`;
+voiceResult.innerHTML = `✅ Salvo: ${formatarMoeda(valor)}`;
 atualizarInterface();
 }
 
 if(SpeechRecognition){
 const rec = new SpeechRecognition();
 rec.lang="pt-BR";
+rec.continuous = false;
+rec.interimResults = false;
 
 btnVoice.onclick=()=>{
-voiceResult.innerHTML="🎙️ Ouvindo...";
+voiceResult.innerHTML="🎙️ Ouvindo... Fale agora.";
 rec.start();
 };
 
 rec.onresult=e=>{
-processarComandoVoz(e.results[0][0].transcript);
+const resultadoTexto = e.results[0][0].transcript;
+processarComandoVoz(resultadoTexto);
 };
 
 rec.onerror=e=>{
-voiceResult.innerHTML="❌ Erro: "+e.error;
+voiceResult.innerHTML="❌ Erro no reconhecimento: "+e.error;
 };
+} else {
+voiceResult.innerHTML="❌ Seu navegador não suporta comandos de voz.";
 }
 
 window.onload=atualizarInterface;
