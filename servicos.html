@@ -15,67 +15,36 @@ margin:0;
 padding:20px;
 }
 
-h1{
-color:#1565c0;
-margin-bottom:10px;
-}
+h1{color:#1565c0}
 
-.form{
+.form, .card{
 background:#fff;
 padding:15px;
 border-radius:15px;
-box-shadow:0 2px 10px rgba(0,0,0,.08);
-margin-bottom:20px;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
+margin-bottom:15px;
 }
 
-input, textarea, select{
+input, textarea{
 width:100%;
 padding:10px;
-margin:8px 0;
+margin:6px 0;
 border-radius:10px;
 border:1px solid #ddd;
-font-size:14px;
 }
 
 button{
-width:100%;
-padding:12px;
+padding:10px;
 border:none;
 border-radius:10px;
 background:#1565c0;
 color:#fff;
-font-weight:bold;
 cursor:pointer;
-}
-
-button:hover{
-background:#0d47a1;
-}
-
-.card{
-background:#fff;
-padding:15px;
-border-radius:15px;
-margin-bottom:12px;
-box-shadow:0 2px 8px rgba(0,0,0,.08);
-}
-
-.card h3{
-margin:0;
-color:#222;
-}
-
-.price{
 font-weight:bold;
-color:#2e7d32;
 margin-top:5px;
 }
 
-.small{
-font-size:12px;
-color:#666;
-margin-top:5px;
-}
+button:hover{background:#0d47a1}
 
 .actions{
 display:flex;
@@ -88,25 +57,25 @@ flex:1;
 font-size:12px;
 }
 
-.delete{
-background:#c62828;
+.delete{background:#c62828}
+.edit{background:#f9a825}
+.preview{background:#2e7d32}
+
+.topbar{
+display:flex;
+gap:10px;
+margin-bottom:15px;
 }
 
-.edit{
-background:#f9a825;
+.navbtn{
+flex:1;
+background:#444;
 }
 
-.preview{
-background:#2e7d32;
-}
-
-.tag{
-display:inline-block;
-padding:3px 8px;
-font-size:11px;
-border-radius:10px;
-background:#eee;
-margin-top:5px;
+.success{
+color:#2e7d32;
+font-weight:bold;
+margin-top:10px;
 }
 </style>
 </head>
@@ -115,13 +84,20 @@ margin-top:5px;
 
 <h1>🛠️ Meus Serviços</h1>
 
+<div class="topbar">
+<button class="navbtn" onclick="location.href='index.html'">🏠 Início</button>
+<button class="navbtn" onclick="location.href='clientes.html'">👥 Clientes</button>
+</div>
+
 <div class="form">
-<input id="nome" placeholder="Nome do serviço (ex: Corte de grama)">
-<input id="categoria" placeholder="Categoria (ex: Jardineiro, Eletricista)">
-<input id="preco" type="number" placeholder="Preço (R$`)">
-<textarea id="descricao" placeholder="Descrição do serviço"></textarea>
+<input id="nome" placeholder="Nome do serviço">
+<input id="categoria" placeholder="Categoria">
+<input id="preco" placeholder="Preço (ex: 150)">
+<textarea id="descricao" placeholder="Descrição"></textarea>
 
 <button onclick="salvarServico()">Salvar Serviço</button>
+
+<div id="msg"></div>
 </div>
 
 <div id="lista"></div>
@@ -129,37 +105,37 @@ margin-top:5px;
 <script>
 
 let servicos = JSON.parse(localStorage.getItem("servicos")) || [];
-
-let editandoId = null;
+let editando = null;
 
 function salvarServico(){
 
+console.log("clicou salvar"); // debug
+
 const nome = document.getElementById("nome").value.trim();
 const categoria = document.getElementById("categoria").value.trim();
-const preco = document.getElementById("preco").value;
+const preco = document.getElementById("preco").value.trim();
 const descricao = document.getElementById("descricao").value.trim();
 
-if(!nome || !preco){
-alert("Preencha nome e preço");
+if(nome === "" || preco === ""){
+alert("Preencha nome e preço!");
 return;
 }
 
-if(editandoId){
+if(isNaN(preco)){
+alert("Preço precisa ser número!");
+return;
+}
+
+if(editando){
 
 servicos = servicos.map(s=>{
-if(s.id === editandoId){
-return {
-...s,
-nome,
-categoria,
-preco,
-descricao
-};
+if(s.id === editando){
+return {...s,nome,categoria,preco,descricao};
 }
 return s;
 });
 
-editandoId = null;
+editando = null;
 
 }else{
 
@@ -176,6 +152,9 @@ data:new Date().toLocaleString("pt-BR")
 
 localStorage.setItem("servicos", JSON.stringify(servicos));
 
+document.getElementById("msg").innerHTML =
+"<div class='success'>✔ Serviço salvo com sucesso!</div>";
+
 limpar();
 renderizar();
 }
@@ -188,40 +167,27 @@ document.getElementById("descricao").value="";
 }
 
 function deletar(id){
-servicos = servicos.filter(s => s.id !== id);
+servicos = servicos.filter(s=>s.id!==id);
 localStorage.setItem("servicos", JSON.stringify(servicos));
 renderizar();
 }
 
 function editar(id){
-
-const s = servicos.find(x => x.id === id);
-
-document.getElementById("nome").value = s.nome;
-document.getElementById("categoria").value = s.categoria;
-document.getElementById("preco").value = s.preco;
-document.getElementById("descricao").value = s.descricao;
-
-editandoId = id;
-}
-
-function preview(s){
-
-const msg = 🛠️${s.nome}
-📂 {s.descricao || ""}
-`;
-
-alert(msg);
+const s = servicos.find(x=>x.id===id);
+document.getElementById("nome").value=s.nome;
+document.getElementById("categoria").value=s.categoria;
+document.getElementById("preco").value=s.preco;
+document.getElementById("descricao").value=s.descricao;
+editando=id;
 }
 
 function renderizar(){
 
 const lista = document.getElementById("lista");
-
 lista.innerHTML="";
 
-if(servicos.length === 0){
-lista.innerHTML = "<p>Nenhum serviço cadastrado ainda.</p>";
+if(servicos.length===0){
+lista.innerHTML="<p>Nenhum serviço cadastrado.</p>";
 return;
 }
 
@@ -230,33 +196,15 @@ servicos.forEach(s=>{
 lista.innerHTML += `
 <div class="card">
 
-<h3>$`{s.nome}</h3>
-
-<span class="tag">`${s.categoria || "Sem categoria"}</span>
-
-<div class="price">Rlatex
- 
-
-{s.preco}</div>
-
-<div class="small">$`{s.descricao || ""}</div>
-
-<div class="small">📅 `${s.data}</div>
+<h3>${s.nome}</h3>
+<p>📂 ${s.categoria}</p>
+<p>💰 R$ ${s.preco}</p>
+<p>${s.descricao}</p>
 
 <div class="actions">
-
-<button class="preview" onclick='preview($`{JSON.stringify(s)})'>
-<i class="fa fa-eye"></i>
-</button>
-
-<button class="edit" onclick="editar(`${s.id})">
-<i class="fa fa-pen"></i>
-</button>
-
-<button class="delete" onclick="deletar(${s.id})">
-<i class="fa fa-trash"></i>
-</button>
-
+<button class="preview" onclick="alert('Serviço: ${s.nome}\\nPreço: ${s.preco}')">👁</button>
+<button class="edit" onclick="editar(${s.id})">✏️</button>
+<button class="delete" onclick="deletar(${s.id})">🗑</button>
 </div>
 
 </div>
