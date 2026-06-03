@@ -6,32 +6,45 @@
 <title>Financeiro - AutônomoFácil</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 body{
-font-family:Segoe UI;
+font-family:Segoe UI,sans-serif;
 background:#f4f6f9;
 margin:0;
 padding:20px;
 }
 
-h1{color:#1565c0}
+h2, h3{
+margin:0;
+}
 
-.topbar{
+h2{
+color:#1565c0;
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.topo{
 display:flex;
 justify-content:space-between;
 align-items:center;
-margin-bottom:15px;
+margin-bottom:20px;
 }
 
 .home-btn{
 background:#1565c0;
 color:#fff;
 border:none;
-padding:10px 12px;
+padding:10px 15px;
 border-radius:10px;
-cursor:pointer;
 font-weight:bold;
+cursor:pointer;
+display:flex;
+align-items:center;
+gap:8px;
 }
 
 .card{
@@ -42,186 +55,321 @@ box-shadow:0 2px 8px rgba(0,0,0,.08);
 margin-bottom:15px;
 }
 
-.total{
-font-size:20px;
+.resumo-linha {
+font-size: 16px;
+margin: 10px 0;
+font-weight: 500;
+}
+
+.recebido { color: #2e7d32; font-weight: bold; font-size: 18px; }
+.despesa { color: #c62828; font-weight: bold; font-size: 18px; }
+.lucro { color: #1565c0; font-weight: bold; font-size: 18px; }
+
+label{
+display:block;
+margin-top:10px;
 font-weight:bold;
-color:#2e7d32;
+font-size:14px;
 }
 
-.negativo{
-color:#c62828;
-}
-
-.item{
+input, select{
+width:100%;
 padding:10px;
-border-bottom:1px solid #eee;
-}
-
-.tipo{
-font-size:12px;
-padding:3px 8px;
-border-radius:10px;
-color:#fff;
-display:inline-block;
-margin-top:5px;
-}
-
-.recebido{background:#2e7d32}
-.despesa{background:#c62828}
-
-.filters{
-display:flex;
-gap:10px;
-margin-bottom:15px;
-}
-
-select{
-flex:1;
-padding:10px;
-border-radius:10px;
 border:1px solid #ddd;
+border-radius:10px;
+margin-top:5px;
+box-sizing:border-box;
+}
+
+button{
+padding:10px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+margin-top:10px;
+}
+
+.salvar{
+background:#1565c0;
+color:#fff;
+width:100%;
+}
+
+.print{
+background:#f9a825;
+color:white;
+width:100%;
+}
+
+.delete{
+background:#c62828;
+color:white;
+padding:5px 10px;
+border-radius:6px;
+font-size:12px;
+}
+
+.item-lancamento {
+border-bottom: 1px solid #eee;
+padding: 12px 0;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.item-lancamento:last-child {
+border-bottom: none;
+}
+
+.actions{
+display:flex;
+gap:8px;
+margin-top:10px;
+}
+
+.actions button{
+flex:1;
+}
+
+@media print {
+    body { background: white; padding: 0; }
+    .topo, .card:nth-of-type(2), .card:nth-of-type(3), button { display: none !important; }
+    .card { box-shadow: none; padding: 0; margin: 0; }
+    .item-lancamento { border-bottom: 1px solid #000; }
 }
 </style>
 </head>
-
 <body>
 
-<div class="topbar">
-<h1>💰 Financeiro</h1>
-
+<div class="topo">
+<h2>💰 Financeiro</h2>
 <button class="home-btn" onclick="location.href='index.html'">
 <i class="fa fa-home"></i> Início
 </button>
 </div>
 
 <div class="card">
-<div>Total recebido:</div>
-<div class="total" id="totalRecebido">R$ 0,00</div>
-
-<br>
-
-<div>Total despesas:</div>
-<div class="total negativo" id="totalDespesas">R$ 0,00</div>
-
-<br>
-
-<div>💰 Lucro líquido:</div>
-<div class="total" id="lucro">R$ 0,00</div>
+<div class="resumo-linha">Total recebido: <br><span id="totalRecebido" class="recebido">R$ 0,00</span></div>
+<div class="resumo-linha">Total despesas: <br><span id="totalDespesas" class="despesa">R$ 0,00</span></div>
+<div class="resumo-linha">💰 Lucro líquido: <br><span id="lucroLiquido" class="lucro">R$ 0,00</span></div>
 </div>
 
 <div class="card">
-
-<h3>📅 Filtro por mês</h3>
-
-<div class="filters">
-<select id="filtroMes" onchange="renderizar()">
-<option value="">Todos os meses</option>
+<h3>Novo Lançamento</h3>
+<label>Tipo de Fluxo</label>
+<select id="tipo">
+<option value="Receita">🟢 Receita (Ganho / Entrada)</option>
+<option value="Despesa">🔴 Despesa (Gasto / Saída)</option>
 </select>
+
+<label>Descrição / Origem</label>
+<input id="descricao" placeholder="Ex: Pagamento Serviço Seu João, Compra de Material">
+
+<label>Valor (R$)</label>
+<input id="valor" type="number" step="0.01" placeholder="0.00">
+
+<label>Data da Transação</label>
+<input id="data_fin" type="date">
+
+<button class="salvar" onclick="salvarLancamento()">💾 Confirmar Lançamento</button>
 </div>
 
+<div class="card">
+<h3>📅 Filtro por mês</h3>
+<select id="filtroMes" onchange="atualizar()">
+<option value="Todos">Todos os meses</option>
+<option value="01">Janeiro</option>
+<option value="02">Fevereiro</option>
+<option value="03">Março</option>
+<option value="04">Abril</option>
+<option value="05">Maio</option>
+<option value="06">Junho</option>
+<option value="07">Julho</option>
+<option value="08">Agosto</option>
+<option value="09">Setembro</option>
+<option value="10">Outubro</option>
+<option value="11">Novembro</option>
+<option value="12">Dezembro</option>
+</select>
 </div>
 
 <div class="card">
 <h3>📊 Lançamentos</h3>
-<div id="lista"></div>
+<div id="listaLancamentos">Nenhum lançamento.</div>
+<div class="actions" style="margin-top:15px;">
+<button class="print" style="background:#e53935;" onclick="baixarPDF()">📕 Baixar Extrato PDF</button>
+<button class="print" onclick="window.print()">🖨️ Imprimir</button>
+</div>
 </div>
 
 <script>
+let lancamentos = JSON.parse(localStorage.getItem("financas_facil")) || [];
 
-let lancamentos = JSON.parse(localStorage.getItem("lancamentosFinanceiros")) || [];
+window.addEventListener("DOMContentLoaded", () => {
+    // Seta data atual por padrão
+    document.getElementById("data_fin").value = new Date().toISOString().split('T')[0];
 
-// ----------------------
-// GERAR MESES
-// ----------------------
-function gerarMeses(){
-
-let select = document.getElementById("filtroMes");
-let meses = new Set();
-
-lancamentos.forEach(l=>{
-if(l.data){
-let mes = l.data.slice(3,10); // MM/AAAA
-meses.add(mes);
-}
+    const campos = ["tipo", "descricao", "valor", "data_fin", "filtroMes"];
+    campos.forEach(id => {
+        const elemento = document.getElementById(id);
+        const valorSalvo = localStorage.getItem("temp_fin_" + id);
+        if (valorSalvo) elemento.value = valorSalvo;
+        
+        elemento.addEventListener("input", () => {
+            localStorage.setItem("temp_fin_" + id, elemento.value);
+        });
+        if(elemento.tagName === "SELECT") {
+            elemento.addEventListener("change", () => {
+                localStorage.setItem("temp_fin_" + id, elemento.value);
+                if(id === "filtroMes") atualizar();
+            });
+        }
+    });
+    atualizar();
 });
 
-meses.forEach(m=>{
-select.innerHTML += `<option value="${m}">${m}</option>`;
-});
+function limparFormulario() {
+    document.getElementById("descricao").value = "";
+    document.getElementById("valor").value = "";
+    localStorage.removeItem("temp_fin_descricao");
+    localStorage.removeItem("temp_fin_valor");
+    document.getElementById("data_fin").value = new Date().toISOString().split('T')[0];
 }
 
-// ----------------------
-// CALCULAR TOTAIS
-// ----------------------
-function calcularTotais(lista){
+function salvarLancamento(){
+    const tipo = document.getElementById("tipo").value;
+    const descricao = document.getElementById("descricao").value;
+    const valor = document.getElementById("valor").value;
+    const data_fin = document.getElementById("data_fin").value;
 
-let recebido = 0;
-let despesa = 0;
+    if(!descricao || !valor || !data_fin){
+        alert("Preencha todos os campos do lançamento.");
+        return;
+    }
 
-lista.forEach(l=>{
-if(l.tipo === "recebido") recebido += Number(l.valor || 0);
-if(l.tipo === "despesa") despesa += Number(l.valor || 0);
-});
+    lancamentos.unshift({
+        id: Date.now(),
+        tipo,
+        descricao,
+        valor: parseFloat(valor),
+        data: data_fin
+    });
 
-document.getElementById("totalRecebido").innerText =
-"R$ " + recebido.toFixed(2).replace(".", ",");
-
-document.getElementById("totalDespesas").innerText =
-"R$ " + despesa.toFixed(2).replace(".", ",");
-
-document.getElementById("lucro").innerText =
-"R$ " + (recebido - despesa).toFixed(2).replace(".", ",");
+    localStorage.setItem("financas_facil", JSON.stringify(lancamentos));
+    limparFormulario();
+    atualizar();
 }
 
-// ----------------------
-// RENDERIZAR
-// ----------------------
-function renderizar(){
-
-const lista = document.getElementById("lista");
-lista.innerHTML = "";
-
-let filtro = document.getElementById("filtroMes").value;
-
-let filtrados = lancamentos.filter(l=>{
-if(!filtro) return true;
-return l.data && l.data.includes(filtro);
-});
-
-if(filtrados.length === 0){
-lista.innerHTML = "<p>Nenhum lançamento.</p>";
-calcularTotais([]);
-return;
+function excluir(id){
+    if(!confirm("Remover este lançamento do histórico?")) return;
+    lancamentos = lancamentos.filter(l => l.id !== id);
+    localStorage.setItem("financas_facil", JSON.stringify(lancamentos));
+    atualizar();
 }
 
-filtrados.forEach(l=>{
-lista.innerHTML += `
-<div class="item">
+function atualizar(){
+    const filtro = document.getElementById("filtroMes").value;
+    const lista = document.getElementById("listaLancamentos");
+    
+    let totalRec = 0;
+    let totalDes = 0;
+    
+    lista.innerHTML = "";
 
-<b>${l.textoOriginal || "Lançamento"}</b><br>
+    // Filtra e calcula com base no mês selecionado
+    const lancamentosFiltrados = lancamentos.filter(l => {
+        if (filtro === "Todos") return true;
+        const mesLancamento = l.data.split("-")[1]; // Pega o MM de YYYY-MM-DD
+        return mesLancamento === filtro;
+    });
 
-💰 R$ ${Number(l.valor || 0).toFixed(2).replace(".", ",")}
+    // Calcula os totais do histórico completo para o topo do painel
+    lancamentos.forEach(l => {
+        if(l.tipo === "Receita") totalRec += l.valor;
+        if(l.tipo === "Despesa") totalDes += l.valor;
+    });
 
-<br>
+    // Atualiza os cards do topo de forma global
+    document.getElementById("totalRecebido").innerText = `R$ ${totalRec.toFixed(2).replace('.', ',')}`;
+    document.getElementById("totalDespesas").innerText = `R$ ${totalDes.toFixed(2).replace('.', ',')}`;
+    const lucro = totalRec - totalDes;
+    const elLucro = document.getElementById("lucroLiquido");
+    elLucro.innerText = `R$ ${lucro.toFixed(2).replace('.', ',')}`;
+    if(lucro < 0) { elLucro.style.color = "#c62828"; } else { elLucro.style.color = "#1565c0"; }
 
-<span class="tipo ${l.tipo}">
-${l.tipo.toUpperCase()}
-</span>
+    if(lancamentosFiltrados.length === 0){
+        lista.innerHTML = "<p>Nenhum lançamento encontrado para este período.</p>";
+        return;
+    }
 
-<br>
-<small>${l.data || ""}</small>
+    lancamentosFiltrados.forEach(l => {
+        const dataFormatada = l.data.split('-').reverse().join('/');
+        const sinal = l.tipo === "Receita" ? "+" : "-";
+        const corValor = l.tipo === "Receita" ? "#2e7d32" : "#c62828";
 
-</div>
-`;
-});
-
-calcularTotais(filtrados);
+        lista.innerHTML += `
+            <div class="item-lancamento">
+                <div>
+                    <b style="font-size:15px; color:#333;">${l.descricao}</b>
+                    <br>
+                    <small>📅 ${dataFormatada} | Tipo: ${l.tipo}</small>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-weight:bold; color:${corValor}; font-size:16px;">${sinal} R$ ${l.valor.toFixed(2).replace('.', ',')}</span>
+                    <br>
+                    <button class="delete" style="margin-top:4px; padding:2px 6px; font-size:11px;" onclick="excluir(${l.id})">🗑</button>
+                </div>
+            </div>
+        `;
+    });
 }
 
-// INIT
-gerarMeses();
-renderizar();
+function obterTextoExtrato(){
+    if(lancamentos.length === 0) return "Nenhum movimento financeiro cadastrado.";
+    
+    let texto = `AUTÔNOMOFÁCIL - EXTRATO DE MOVIMENTAÇÃO\n`;
+    texto += `Gerado em: ${new Date().toLocaleDateString("pt-BR")}\n`;
+    texto += `========================================\n\n`;
+    
+    let totalRec = 0;
+    let totalDes = 0;
 
+    lancamentos.forEach(l => {
+        const dt = l.data.split('-').reverse().join('/');
+        const sinal = l.tipo === "Receita" ? "(+)" : "(-)";
+        texto += `${dt} - ${l.descricao}\n`;
+        texto += `Tipo: ${l.tipo} | Valor: ${sinal} R$ ${l.valor.toFixed(2)}\n`;
+        texto += `----------------------------------------\n`;
+        
+        if(l.tipo === "Receita") totalRec += l.valor;
+        if(l.tipo === "Despesa") totalDes += l.valor;
+    });
+
+    texto += `\n========================================\n`;
+    texto += `RESUMO CONSOLIDADO:\n`;
+    texto += `Total Recebido: R$ ${totalRec.toFixed(2)}\n`;
+    texto += `Total Despesas: R$ ${totalDes.toFixed(2)}\n`;
+    texto += `Lucro Líquido:  R$ ${(totalRec - totalDes).toFixed(2)}\n`;
+    texto += `========================================\n`;
+    
+    return texto;
+}
+
+function baixarPDF(){
+    const texto = obterTextoExtrato();
+    if(texto.startsWith("Nenhum movimento")){
+        alert(texto);
+        return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(11);
+    const splitTexto = doc.splitTextToSize(texto, 170);
+    doc.text(splitTexto, 20, 20);
+    doc.save(`Extrato_Financeiro.pdf`);
+}
 </script>
 
 </body>
