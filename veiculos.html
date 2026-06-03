@@ -4,21 +4,141 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AutônomoFácil - Veículos</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
-body{font-family:Arial,sans-serif;background:#f4f6f9;margin:0;padding:15px}
-.topo{display:flex;justify-content:space-between;align-items:center}
-.home{background:#1565c0;color:#fff;border:none;border-radius:50%;width:50px;height:50px;font-size:22px}
-.card{background:#fff;padding:15px;margin-top:15px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
-input,select{width:100%;padding:10px;margin:5px 0}
-button{padding:10px;border:none;border-radius:8px;cursor:pointer}
-.salvar{background:#1565c0;color:#fff;width:100%}
-.item{border-bottom:1px solid #ddd;padding:8px 0}
+body{
+font-family:Segoe UI,sans-serif;
+background:#f4f6f9;
+margin:0;
+padding:20px;
+}
+
+h2, h3{
+margin:0;
+}
+
+h2{
+color:#1565c0;
+}
+
+.topo{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.home-btn{
+background:#1565c0;
+color:#fff;
+border:none;
+padding:10px 15px;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+.card{
+background:#fff;
+padding:15px;
+border-radius:15px;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
+margin-bottom:15px;
+}
+
+label{
+display:block;
+margin-top:10px;
+font-weight:bold;
+font-size:14px;
+}
+
+input, select{
+width:100%;
+padding:10px;
+border:1px solid #ddd;
+border-radius:10px;
+margin-top:5px;
+box-sizing:border-box;
+}
+
+button{
+padding:10px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+margin-top:10px;
+}
+
+.salvar{
+background:#1565c0;
+color:#fff;
+width:100%;
+}
+
+.print{
+background:#f9a825;
+color:white;
+width:100%;
+}
+
+.delete{
+background:#c62828;
+color:white;
+padding:5px 10px;
+border-radius:6px;
+font-size:12px;
+margin-top:5px;
+}
+
+.item{
+border-bottom:1px solid #eee;
+padding:12px 0;
+}
+
+.item:last-child{
+border-bottom:none;
+}
+
+.sub-item{
+font-size:13px;
+color:#555;
+margin-left:15px;
+margin-top:4px;
+}
+
+.actions{
+display:flex;
+gap:8px;
+margin-top:10px;
+}
+
+.actions button{
+flex:1;
+}
+
+@media print {
+    body { background: white; padding: 0; }
+    .topo, .card:nth-of-type(1), .card:nth-of-type(2), .card:nth-of-type(3), button { display: none !important; }
+    .card { box-shadow: none; padding: 0; margin: 0; }
+    .item { border-bottom: 1px solid #000; }
+}
 </style>
 </head>
 <body>
+
 <div class="topo">
 <h2>🚗 Veículos</h2>
-<button class="home" onclick="location.href='index.html'">🏠</button>
+<button class="home-btn" onclick="location.href='index.html'">
+<i class="fa fa-home"></i> Início
+</button>
 </div>
 
 <div class="card">
@@ -32,64 +152,228 @@ button{padding:10px;border:none;border-radius:8px;cursor:pointer}
 
 <div class="card">
 <h3>Abastecimento</h3>
+<label>Selecione o Veículo</label>
 <select id="veiculoAb"></select>
-<input id="valorComb" type="number" placeholder="Valor">
+<input id="valorComb" type="number" placeholder="Valor (R$)">
 <button class="salvar" onclick="salvarAbastecimento()">Salvar Abastecimento</button>
 </div>
 
 <div class="card">
 <h3>Manutenção</h3>
+<label>Selecione o Veículo</label>
 <select id="veiculoMan"></select>
-<input id="servico" placeholder="Serviço">
-<input id="valorMan" type="number" placeholder="Valor">
+<input id="servico" placeholder="Serviço (Ex: Troca de óleo)">
+<input id="valorMan" type="number" placeholder="Valor (R$)">
 <button class="salvar" onclick="salvarManutencao()">Salvar Manutenção</button>
 </div>
 
 <div class="card">
-<h3>Veículos</h3>
+<h3>Relatório Geral da Frota</h3>
 <div id="listaVeiculos"></div>
+<div class="actions">
+<button class="print" style="background:#e53935;" onclick="baixarPDF()">📕 Baixar Relatório PDF</button>
+<button class="print" onclick="window.print()">🖨️ Imprimir</button>
+</div>
 </div>
 
 <script>
 function obter(k){return JSON.parse(localStorage.getItem(k)||"[]")}
 function gravar(k,v){localStorage.setItem(k,JSON.stringify(v))}
 
+// Persistência em tempo real para os campos de digitação dos formulários
+window.addEventListener("DOMContentLoaded", () => {
+    const campos = ["marca", "modelo", "placa", "ano", "valorComb", "servico", "valorMan", "veiculoAb", "veiculoMan"];
+    campos.forEach(id => {
+        const elemento = document.getElementById(id);
+        const valorSalvo = localStorage.getItem("temp_veic_" + id);
+        if (valorSalvo) elemento.value = valorSalvo;
+        
+        elemento.addEventListener("input", () => {
+            localStorage.setItem("temp_veic_" + id, elemento.value);
+        });
+        if(elemento.tagName === "SELECT") {
+            elemento.addEventListener("change", () => {
+                localStorage.setItem("temp_veic_" + id, elemento.value);
+            });
+        }
+    });
+    atualizar();
+});
+
+function limparCampos(listaIds) {
+    listaIds.forEach(id => {
+        document.getElementById(id).value = "";
+        localStorage.removeItem("temp_veic_" + id);
+    });
+}
+
 function salvarVeiculo(){
+ if(!marca.value || !modelo.value || !placa.value){
+  alert("Preencha Marca, Modelo e Placa.");
+  return;
+ }
  let v=obter('veiculos');
  v.push({
   id:Date.now(),
   marca:marca.value,modelo:modelo.value,placa:placa.value,ano:ano.value
  });
  gravar('veiculos',v);
+ limparCampos(["marca", "modelo", "placa", "ano"]);
  atualizar();
 }
 
 function salvarAbastecimento(){
+ if(!veiculoAb.value || !valorComb.value){
+  alert("Selecione um veículo e digite o valor.");
+  return;
+ }
  let a=obter('abastecimentos');
- a.push({veiculo:veiculoAb.value,valor:valorComb.value,data:new Date().toLocaleDateString()});
+ a.push({
+  veiculo:veiculoAb.value,
+  valor:valorComb.value,
+  data:new Date().toLocaleDateString('pt-BR')
+ });
  gravar('abastecimentos',a);
- alert('Abastecimento salvo');
+ limparCampos(["valorComb"]);
+ alert('Abastecimento salvo com sucesso!');
+ atualizar();
 }
 
 function salvarManutencao(){
+ if(!veiculoMan.value || !servico.value || !valorMan.value){
+  alert("Preencha todos os dados da manutenção.");
+  return;
+ }
  let m=obter('manutencoes');
- m.push({veiculo:veiculoMan.value,servico:servico.value,valor:valorMan.value,data:new Date().toLocaleDateString()});
+ m.push({
+  veiculo:veiculoMan.value,
+  servico:servico.value,
+  valor:valorMan.value,
+  data:new Date().toLocaleDateString('pt-BR')
+ });
  gravar('manutencoes',m);
- alert('Manutenção salva');
+ limparCampos(["servico", "valorMan"]);
+ alert('Manutenção salva com sucesso!');
+ atualizar();
+}
+
+function excluirVeiculo(id, identificadorVeiculo){
+ if(!confirm("Deseja realmente remover este veículo? Historicos vinculados permanecerão salvos.")) return;
+ let v=obter('veiculos');
+ v=v.filter(x=>x.id!==id);
+ gravar('veiculos',v);
+ atualizar();
 }
 
 function atualizar(){
  let v=obter('veiculos');
+ let a=obter('abastecimentos');
+ let m=obter('manutencoes');
+ 
  listaVeiculos.innerHTML='';
- veiculoAb.innerHTML='';
- veiculoMan.innerHTML='';
+ 
+ // Guarda o valor selecionado temporariamente para não perder o foco ao recarregar as opções
+ const selAb = veiculoAb.value;
+ const selMan = veiculoMan.value;
+ 
+ veiculoAb.innerHTML='<option value="">-- Selecione --</option>';
+ veiculoMan.innerHTML='<option value="">-- Selecione --</option>';
+ 
+ if(v.length===0){
+   listaVeiculos.innerHTML = '<p>Nenhum veículo cadastrado.</p>';
+   return;
+ }
+ 
  v.forEach(x=>{
-   listaVeiculos.innerHTML += `<div class="item"><b>${x.marca} ${x.modelo}</b> - ${x.placa}</div>`;
-   veiculoAb.innerHTML += `<option>${x.modelo}</option>`;
-   veiculoMan.innerHTML += `<option>${x.modelo}</option>`;
+   const txtIdentificador = `${x.marca} ${x.modelo} (${x.placa})`;
+   
+   veiculoAb.innerHTML += `<option value="${txtIdentificador}">${txtIdentificador}</option>`;
+   veiculoMan.innerHTML += `<option value="${txtIdentificador}">${txtIdentificador}</option>`;
+   
+   // Filtra histórico de abastecimento e manutenção deste veículo específico
+   let absDoVeiculo = a.filter(item => item.veiculo === txtIdentificador);
+   let manDoVeiculo = m.filter(item => item.veiculo === txtIdentificador);
+   
+   let htmlDetalhes = "";
+   
+   if(absDoVeiculo.length > 0){
+     htmlDetalhes += `<div style="font-weight:600; font-size:13px; margin-top:5px; color:#2e7d32;">⛽ Abastecimentos:</div>`;
+     absDoVeiculo.forEach(ab => {
+       htmlDetalhes += `<div class="sub-item">R$ ${parseFloat(ab.valor).toFixed(2)} em ${ab.data}</div>`;
+     });
+   }
+   
+   if(manDoVeiculo.length > 0){
+     htmlDetalhes += `<div style="font-weight:600; font-size:13px; margin-top:5px; color:#c62828;">🔧 Manutenções:</div>`;
+     manDoVeiculo.forEach(man => {
+       htmlDetalhes += `<div class="sub-item">${man.servico} - R$ ${parseFloat(man.valor).toFixed(2)} em ${man.data}</div>`;
+     });
+   }
+   
+   listaVeiculos.innerHTML += `
+     <div class="item">
+       <b>${x.marca} ${x.modelo}</b> - Placa: ${x.placa} | Ano: ${x.ano || "-"}
+       ${htmlDetalhes}
+       <br>
+       <button class="delete" onclick="excluirVeiculo(${x.id})">🗑 Remover Veículo</button>
+     </div>`;
  });
+ 
+ // Restaura seleção anterior caso ela ainda exista
+ if(selAb) veiculoAb.value = selAb;
+ if(selMan) veiculoMan.value = selMan;
 }
-atualizar();
+
+function obterTextoRelatorio(){
+ let v=obter('veiculos');
+ let a=obter('abastecimentos');
+ let m=obter('manutencoes');
+ 
+ if(v.length === 0) return "Nenhum veículo cadastrado para gerar relatório.";
+ 
+ let texto = `AUTÔNOMOFÁCIL - RELATÓRIO DE FROTA\n`;
+ texto += `Gerado em: ${new Date().toLocaleDateString("pt-BR")}\n`;
+ texto += `========================================\n\n`;
+ 
+ v.forEach(x => {
+   const txtIdentificador = `${x.marca} ${x.modelo} (${x.placa})`;
+   texto += `VEÍCULO: ${x.marca.toUpperCase()} ${x.modelo.toUpperCase()} \n`;
+   texto += `PLACA: ${x.placa} | ANO: ${x.ano || "-"}\n`;
+   
+   let absDoVeiculo = a.filter(item => item.veiculo === txtIdentificador);
+   if(absDoVeiculo.length > 0){
+     texto += `  -> Abastecimentos:\n`;
+     absDoVeiculo.forEach(ab => {
+       texto += `     • R$ ${parseFloat(ab.valor).toFixed(2)} em ${ab.data}\n`;
+     });
+   }
+   
+   let manDoVeiculo = m.filter(item => item.veiculo === txtIdentificador);
+   if(manDoVeiculo.length > 0){
+     texto += `  -> Manutenções:\n`;
+     manDoVeiculo.forEach(man => {
+       texto += `     • ${man.servico} | R$ ${parseFloat(man.valor).toFixed(2)} em ${man.data}\n`;
+     });
+   }
+   texto += `----------------------------------------\n`;
+ });
+ return texto;
+}
+
+function baixarPDF(){
+ const texto = obterTextoRelatorio();
+ if(texto.startsWith("Nenhum veículo")){
+   alert(texto);
+   return;
+ }
+ const { jsPDF } = window.jspdf;
+ const doc = new jsPDF();
+ doc.setFont("Helvetica", "normal");
+ doc.setFontSize(11);
+ const splitTexto = doc.splitTextToSize(texto, 170);
+ doc.text(splitTexto, 20, 20);
+ doc.save(`Relatorio_Frota_Veiculos.pdf`);
+}
 </script>
 </body>
 </html>
