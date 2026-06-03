@@ -3,31 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clientes - AutônomoFácil</title>
 
-<title>AutônomoFácil 1.0 - Clientes</title>
-
-<link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-<meta name="theme-color" content="#1565c0">
 
 <style>
 :root{
 --primary:#1565c0;
 --primary-dark:#0d47a1;
 --bg:#f4f6f9;
+--text:#222;
 --white:#ffffff;
 --green:#2e7d32;
 --red:#c62828;
---text:#222;
 }
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Segoe UI',sans-serif;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
 
 body{
 background:var(--bg);
@@ -38,23 +29,14 @@ padding-bottom:90px;
 header{
 background:linear-gradient(135deg,var(--primary),var(--primary-dark));
 color:white;
-padding:25px;
-border-radius:0 0 30px 30px;
-box-shadow:0 4px 15px rgba(0,0,0,.15);
-}
-
-.top-row{
+padding:20px;
 display:flex;
-justify-content:space-between;
 align-items:center;
+justify-content:between;
+position:relative;
 }
 
-.logo{
-font-size:24px;
-font-weight:bold;
-}
-
-.back-btn{
+header .btn-voltar{
 color:white;
 text-decoration:none;
 font-size:16px;
@@ -63,73 +45,129 @@ align-items:center;
 gap:8px;
 }
 
+header h2{
+position:absolute;
+right:20px;
+font-size:24px;
+font-weight:bold;
+}
+
 .section-title{
-padding:20px 20px 10px;
+padding:20px 15px 5px;
 font-size:18px;
 font-weight:700;
-display:flex;
-justify-content:space-between;
-align-items:center;
+color:#333;
 }
 
-.search-box{
-padding:0 20px 15px;
+.card{
+background:white;
+padding:15px;
+border-radius:15px;
+margin:10px 15px;
+box-shadow:0 2px 8 rgba(0,0,0,0.05);
 }
 
-.search-input{
+.form-group{
+margin-bottom:12px;
+}
+
+.form-group label{
+display:block;
+font-size:12px;
+font-weight:600;
+margin-bottom:4px;
+color:#666;
+}
+
+.form-group input{
 width:100%;
-padding:12px 15px;
-border-radius:12px;
+padding:10px;
 border:1px solid #ddd;
+border-radius:8px;
 font-size:14px;
 outline:none;
 }
 
-.client-list{
-padding:0 20px;
+.form-group input:focus{
+border-color:var(--primary);
 }
 
-.client-card{
+.btn-acao{
+width:100%;
+background:var(--primary);
+color:white;
+border:none;
+padding:12px;
+border-radius:8px;
+font-size:15px;
+font-weight:bold;
+cursor:pointer;
+box-shadow:0 3px 6px rgba(21,101,192,0.2);
+display:flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+}
+
+.btn-acao:active{
+background:var(--primary-dark);
+}
+
+.busca-container {
+margin-bottom:5px;
+}
+
+.busca-container input {
+width:100%;
+padding:12px;
+border:1px solid #ddd;
+border-radius:8px;
+font-size:14px;
+outline:none;
+}
+
+.lista-clientes{
+margin:10px 15px;
+}
+
+.item-cliente{
 background:white;
-border-radius:18px;
 padding:15px;
-margin-bottom:12px;
-box-shadow:0 2px 10px rgba(0,0,0,.06);
+border-radius:12px;
+margin-bottom:10px;
+box-shadow:0 2px 5px rgba(0,0,0,0.03);
 display:flex;
 justify-content:space-between;
 align-items:center;
 }
 
-.client-info h3{
-font-size:16px;
-margin-bottom:4px;
-text-transform:capitalize;
+.info-cliente h4{
+font-size:15px;
+color:#222;
+margin-bottom:2px;
 }
 
-.client-info p{
+.info-cliente p{
 font-size:12px;
-color:#777;
+color:#666;
 }
 
-.action-btn{
-width:40px;
-height:40px;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-text-decoration:none;
+.btn-excluir{
+background:none;
+border:none;
+color:var(--red);
+font-size:16px;
+cursor:pointer;
+padding:5px;
 }
 
-.btn-whatsapp{
-background:#e8f5e9;
-color:#2e7d32;
-}
-
-.empty-state{
+.msg-feedback{
 text-align:center;
-padding:40px 20px;
-color:#777;
+color:#2e7d32;
+font-weight:600;
+font-size:14px;
+margin-top:8px;
+display:none;
 }
 
 .bottom-nav{
@@ -143,6 +181,7 @@ display:flex;
 justify-content:space-around;
 align-items:center;
 box-shadow:0 -2px 15px rgba(0,0,0,.12);
+z-index:999;
 }
 
 .bottom-nav a{
@@ -156,105 +195,153 @@ text-align:center;
 display:block;
 font-size:22px;
 margin-bottom:4px;
+color:var(--primary);
 }
 
-.active-nav{
+.bottom-nav a.active {
 color:var(--primary);
+font-weight:bold;
 }
 </style>
 </head>
-
 <body>
 
 <header>
-<div class="top-row">
-<a href="index.html" class="back-btn">
-<i class="fa-solid fa-arrow-left"></i> Voltar
-</a>
-<div class="logo">Clientes</div>
-</div>
+<a href="index.html" class="btn-voltar"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
+<h2>Clientes</h2>
 </header>
 
-<div class="section-title">
-<span>Gerenciar Clientes</span>
+<!-- BLOCO 1: NOVO CADASTRO -->
+<div class="section-title">Cadastrar Novo Cliente</div>
+<div class="card">
+<div class="form-group">
+<label>Nome Completo</label>
+<input type="text" id="txtNomeCliente" placeholder="Ex: João Lima">
+</div>
+<div class="form-group">
+<label>Telefone / WhatsApp</label>
+<input type="tel" id="txtTelefoneCliente" placeholder="Ex: (65) 99999-9999">
+</div>
+<div class="form-group">
+<label>Cidade / Localidade</label>
+<input type="text" id="txtCidadeCliente" placeholder="Ex: Itanhangá - MT">
+</div>
+<button class="btn-acao" id="btnSalvarCliente"><i class="fa-solid fa-plus"></i> Salvar Cliente</button>
+<div id="msgSucessoCliente" class="msg-feedback">✅ Cliente cadastrado com sucesso!</div>
 </div>
 
-<div class="search-box">
-<input type="text" id="inputBusca" class="search-input" placeholder="Buscar cliente pelo nome...">
+<!-- BLOCO 2: BUSCA E LISTAGEM -->
+<div class="section-title">Gerenciar Clientes</div>
+<div class="card busca-container">
+<input type="text" id="txtBuscaCliente" placeholder="Buscar cliente pelo nome...">
 </div>
 
-<section class="client-list" id="listaClientes"></section>
+<div class="lista-clientes" id="containerListaClientes">
+<!-- Os clientes cadastrados vão aparecer aqui dinamicamente -->
+</div>
 
+<!-- BARRA DE NAVEGAÇÃO PADRÃO -->
 <nav class="bottom-nav">
 <a href="index.html"><i class="fa-solid fa-house"></i>Início</a>
 <a href="index.html"><i class="fa-solid fa-microphone"></i>Voz</a>
 <a href="servicos.html"><i class="fa-solid fa-clipboard-list"></i>Serviços</a>
 <a href="financeiro.html"><i class="fa-solid fa-wallet"></i>Financeiro</a>
-<a href="clientes.html" class="active-nav"><i class="fa-solid fa-users"></i>Clientes</a>
+<a href="clientes.html" class="active"><i class="fa-solid fa-users"></i>Clientes</a>
 </nav>
 
 <script>
-const listaClientes = document.getElementById("listaClientes");
-const inputBusca = document.getElementById("inputBusca");
+const txtNome = document.getElementById("txtNomeCliente");
+const txtTelefone = document.getElementById("txtTelefoneCliente");
+const txtCidade = document.getElementById("txtCidadeCliente");
+const btnSalvar = document.getElementById("btnSalvarCliente");
+const msgSucesso = document.getElementById("msgSucessoCliente");
+const txtBusca = document.getElementById("txtBuscaCliente");
+const containerLista = document.getElementById("containerListaClientes");
 
-function extrairNomeCliente(texto){
-const t = texto.toLowerCase();
-const gatilhos = [" de "," da "," do "," para o "," para a "];
+// Carrega a lista do localStorage ou inicia vazia
+let listaClientes = JSON.parse(localStorage.getItem("bancoClientesAutonomo")) || [];
 
-for (let g of gatilhos){
-if (t.includes(g)){
-let resto = t.split(g)[1];
-if(!resto) continue;
+// Função para exibir os clientes na tela
+function renderizarClientes(filtro = "") {
+containerLista.innerHTML = "";
 
-resto = resto.split(" dia ")[0].split(" em ")[0];
+const clientesFiltrados = listaClientes.filter(c =>
+c.nome.toLowerCase().includes(filtro.toLowerCase())
+);
 
-let nome = resto.replace(/[.,/#!$%^&*;:{}=\-_~()]/g,"").trim();
-
-if(nome.length > 2 && nome.length < 40){
-return nome;
-}
-}
-}
-return null;
-}
-
-function carregarClientes(){
-let historico = JSON.parse(localStorage.getItem("historicoVoz")) || [];
-let set = new Set();
-
-historico.forEach(item=>{
-let nome = extrairNomeCliente(item.texto);
-if(nome) set.add(nome);
-});
-
-let clientes = [...set];
-let busca = inputBusca.value.toLowerCase();
-
-if(clientes.length === 0){
-listaClientes.innerHTML = &lt;div class="empty-state"&gt; 👤 Nenhum cliente identificado ainda.&lt;br&gt; &lt;small&gt;Ex: "Recebi 100 reais do João"&lt;/small&gt; &lt;/div>;
+if(clientesFiltrados.length === 0) {
+containerLista.innerHTML = '<p style="text-align:center; color:#888; font-size:14px; padding:15px;">Nenhum cliente encontrado.</p>';
 return;
 }
 
-listaClientes.innerHTML = "";
+clientesFiltrados.forEach((cliente, idOriginal) => {
+// Encontra o índice real no array principal para exclusão correta
+const indexReal = listaClientes.indexOf(cliente);
 
-clientes.forEach(nome=>{
-if(nome.toLowerCase().includes(busca)){
-listaClientes.innerHTML += &lt;div class="client-card"&gt; &lt;div class="client-info"&gt; &lt;h3&gt;${nome}</h3>
-<p>Cliente detectado via voz</p>
+containerLista.innerHTML += &lt;div class="item-cliente"&gt; &lt;div class="info-cliente"&gt; &lt;h4&gt;${cliente.nome}</h4>
+<p><i class="fa-solid fa-phone" style="font-size:10px;"></i> ${cliente.telefone} | &lt;i class="fa-solid fa-location-dot" style="font-size:10px;"&gt;&lt;/i&gt; ${cliente.cidade}</p>
 </div>
-
-<div class="client-actions">
-<a href="https://wa.me/?text=Olá ${nome}" target="_blank" class="action-btn btn-whatsapp">
-<i class="fa-brands fa-whatsapp"></i>
-</a>
-</div>
-</div>`;
-}
+<button class="btn-excluir" onclick="excluirCliente(${indexReal})"&gt;&lt;i class="fa-solid fa-trash"&gt;&lt;/i&gt;&lt;/button&gt; &lt;/div&gt;;
 });
 }
 
-inputBusca.addEventListener("input", carregarClientes);
-window.addEventListener("DOMContentLoaded", carregarClientes);
+// Evento para salvar o cliente de forma persistente
+btnSalvar.addEventListener("click", () => {
+const nomeVal = txtNome.value.trim();
+const telVal = txtTelefone.value.trim();
+const cidVal = txtCidade.value.trim();
+
+if(!nomeVal) {
+alert("Por favor, digite pelo menos o nome do cliente.");
+return;
+}
+
+// Cria o objeto do novo cliente
+const novoCliente = {
+nome: nomeVal,
+telefone: telVal || "Não informado",
+cidade: cidVal || "Não informada"
+};
+
+// Adiciona no topo da lista
+listaClientes.unshift(novoCliente);
+
+// Grava de forma permanente no localStorage
+localStorage.setItem("bancoClientesAutonomo", JSON.stringify(listaClientes));
+
+// Limpa os campos do formulário
+txtNome.value = "";
+txtTelefone.value = "";
+txtCidade.value = "";
+
+// Mostra mensagem de sucesso
+msgSucesso.style.display = "block";
+setTimeout(() => {
+msgSucesso.style.display = "none";
+}, 3000);
+
+// Atualiza a lista exibida
+renderizarClientes();
+});
+
+// Função para excluir um cliente
+window.excluirCliente = function(index) {
+if(confirm("Deseja realmente remover este cliente?")) {
+listaClientes.splice(index, 1);
+localStorage.setItem("bancoClientesAutonomo", JSON.stringify(listaClientes));
+renderizarClientes(txtBusca.value);
+}
+}
+
+// Evento de busca em tempo real conforme digita
+txtBusca.addEventListener("input", () => {
+renderizarClientes(txtBusca.value);
+});
+
+// Inicializa a tela carregando os dados salvos
+window.onload = () => {
+renderizarClientes();
+};
 </script>
 
 </body>
