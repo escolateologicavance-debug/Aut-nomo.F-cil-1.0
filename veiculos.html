@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutônomoFácil - Veículos</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f9;margin:0;padding:15px}
+.topo{display:flex;justify-content:space-between;align-items:center}
+.home{background:#1565c0;color:#fff;border:none;border-radius:50%;width:50px;height:50px;font-size:22px}
+.card{background:#fff;padding:15px;margin-top:15px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+input,select{width:100%;padding:10px;margin:5px 0}
+button{padding:10px;border:none;border-radius:8px;cursor:pointer}
+.salvar{background:#1565c0;color:#fff;width:100%}
+.item{border-bottom:1px solid #ddd;padding:8px 0}
+</style>
+</head>
+<body>
+<div class="topo">
+<h2>🚗 Veículos</h2>
+<button class="home" onclick="location.href='index.html'">🏠</button>
+</div>
+
+<div class="card">
+<h3>Cadastrar Veículo</h3>
+<input id="marca" placeholder="Marca">
+<input id="modelo" placeholder="Modelo">
+<input id="placa" placeholder="Placa">
+<input id="ano" placeholder="Ano">
+<button class="salvar" onclick="salvarVeiculo()">Salvar Veículo</button>
+</div>
+
+<div class="card">
+<h3>Abastecimento</h3>
+<select id="veiculoAb"></select>
+<input id="valorComb" type="number" placeholder="Valor">
+<button class="salvar" onclick="salvarAbastecimento()">Salvar Abastecimento</button>
+</div>
+
+<div class="card">
+<h3>Manutenção</h3>
+<select id="veiculoMan"></select>
+<input id="servico" placeholder="Serviço">
+<input id="valorMan" type="number" placeholder="Valor">
+<button class="salvar" onclick="salvarManutencao()">Salvar Manutenção</button>
+</div>
+
+<div class="card">
+<h3>Veículos</h3>
+<div id="listaVeiculos"></div>
+</div>
+
+<script>
+function obter(k){return JSON.parse(localStorage.getItem(k)||"[]")}
+function gravar(k,v){localStorage.setItem(k,JSON.stringify(v))}
+
+function salvarVeiculo(){
+ let v=obter('veiculos');
+ v.push({
+  id:Date.now(),
+  marca:marca.value,modelo:modelo.value,placa:placa.value,ano:ano.value
+ });
+ gravar('veiculos',v);
+ atualizar();
+}
+
+function salvarAbastecimento(){
+ let a=obter('abastecimentos');
+ a.push({veiculo:veiculoAb.value,valor:valorComb.value,data:new Date().toLocaleDateString()});
+ gravar('abastecimentos',a);
+ alert('Abastecimento salvo');
+}
+
+function salvarManutencao(){
+ let m=obter('manutencoes');
+ m.push({veiculo:veiculoMan.value,servico:servico.value,valor:valorMan.value,data:new Date().toLocaleDateString()});
+ gravar('manutencoes',m);
+ alert('Manutenção salva');
+}
+
+function atualizar(){
+ let v=obter('veiculos');
+ listaVeiculos.innerHTML='';
+ veiculoAb.innerHTML='';
+ veiculoMan.innerHTML='';
+ v.forEach(x=>{
+   listaVeiculos.innerHTML += `<div class="item"><b>${x.marca} ${x.modelo}</b> - ${x.placa}</div>`;
+   veiculoAb.innerHTML += `<option>${x.modelo}</option>`;
+   veiculoMan.innerHTML += `<option>${x.modelo}</option>`;
+ });
+}
+atualizar();
+</script>
+</body>
+</html>
