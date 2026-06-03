@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contratos - AutônomoFácil</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+
+body{
+font-family:Segoe UI,sans-serif;
+background:#f4f6f9;
+margin:0;
+padding:20px;
+}
+
+h1{
+color:#1565c0;
+margin:0;
+}
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.home-btn{
+background:#1565c0;
+color:#fff;
+border:none;
+padding:10px 15px;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.card{
+background:#fff;
+padding:15px;
+border-radius:15px;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
+margin-bottom:15px;
+}
+
+label{
+display:block;
+margin-top:10px;
+font-weight:bold;
+font-size:14px;
+}
+
+input, textarea, select{
+width:100%;
+padding:10px;
+border:1px solid #ddd;
+border-radius:10px;
+margin-top:5px;
+box-sizing:border-box;
+}
+
+textarea{
+min-height:80px;
+resize:vertical;
+}
+
+button{
+padding:10px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+margin-top:10px;
+}
+
+.primary{
+background:#1565c0;
+color:white;
+width:100%;
+}
+
+.copy{
+background:#2e7d32;
+color:white;
+width:100%;
+}
+
+.print{
+background:#f9a825;
+color:white;
+width:100%;
+}
+
+.delete{
+background:#c62828;
+color:white;
+}
+
+.edit{
+background:#f9a825;
+color:white;
+}
+
+.contract{
+white-space:pre-line;
+background:#fafafa;
+padding:15px;
+border-radius:10px;
+border:1px solid #eee;
+margin-top:15px;
+}
+
+.actions{
+display:flex;
+gap:8px;
+margin-top:10px;
+}
+
+.actions button{
+flex:1;
+}
+
+small{
+color:#666;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+
+<h1>📄 Contratos</h1>
+
+<button class="home-btn" onclick="location.href='index.html'">
+<i class="fa fa-home"></i> Início
+</button>
+
+</div>
+
+<div class="card">
+
+<label>Cliente</label>
+<input type="text" id="cliente" placeholder="Nome do cliente">
+
+<label>Serviço</label>
+<input type="text" id="servico" placeholder="Ex: Instalação elétrica">
+
+<label>Valor (R$`)</label>
+<input type="number" id="valor" placeholder="0.00">
+
+<label>Data de Início</label>
+<input type="date" id="inicio">
+
+<label>Prazo de Entrega</label>
+<input type="date" id="prazo">
+
+<label>Condições de Pagamento</label>
+<input type="text" id="pagamento"
+placeholder="Ex: 50% entrada e 50% entrega">
+
+<label>Observações</label>
+<textarea id="obs"></textarea>
+
+<button class="primary" onclick="gerarContrato()">
+📄 Gerar Contrato
+</button>
+
+</div>
+
+<div class="card">
+
+<h3>Contrato Gerado</h3>
+
+<div id="contrato" class="contract">
+Nenhum contrato gerado.
+</div>
+
+<button class="copy" onclick="copiarContrato()">
+📋 Copiar Contrato
+</button>
+
+<button class="print" onclick="window.print()">
+🖨️ Imprimir
+</button>
+
+</div>
+
+<div class="card">
+
+<h3>📚 Histórico de Contratos</h3>
+
+<div id="lista"></div>
+
+</div>
+
+<script>
+
+let contratos =
+JSON.parse(localStorage.getItem("contratos")) || [];
+
+let editando = null;
+
+function gerarContrato(){
+
+const cliente =
+document.getElementById("cliente").value;
+
+const servico =
+document.getElementById("servico").value;
+
+const valor =
+document.getElementById("valor").value;
+
+const inicio =
+document.getElementById("inicio").value;
+
+const prazo =
+document.getElementById("prazo").value;
+
+const pagamento =
+document.getElementById("pagamento").value;
+
+const obs =
+document.getElementById("obs").value;
+
+if(
+!cliente ||
+!servico ||
+!valor
+){
+alert("Preencha Cliente, Serviço e Valor.");
+return;
+}
+
+const texto =
+
+`CONTRATO DE PRESTAÇÃO DE SERVIÇOS
+
+CONTRATANTE:
+`${cliente}
+
+CONTRATADO:
+AUTÔNOMOFÁCIL
+
+SERVIÇO:
+$`{servico}
+
+VALOR:
+R$ ${valor}
+
+DATA DE INÍCIO:
+`${inicio}
+
+PRAZO DE ENTREGA:
+$`{prazo}
+
+CONDIÇÕES DE PAGAMENTO:
+`${pagamento}
+
+OBSERVAÇÕES:
+$`{obs}
+
+As partes concordam com os termos acima.
+
+───
+
+ASSINATURA DO CLIENTE
+
+───
+
+ASSINATURA DO PRESTADOR
+
+Data de emissão:
+${new Date().toLocaleDateString("pt-BR")};
+
+document.getElementById("contrato").innerText =
+texto;
+
+if(editando){
+
+contratos = contratos.map(c=>{
+
+if(c.id===editando){
+
+return{
+...c,
+cliente,
+servico,
+valor,
+inicio,
+prazo,
+pagamento,
+obs,
+texto
+};
+
+}
+
+return c;
+
+});
+
+editando = null;
+
+}else{
+
+contratos.unshift({
+
+id:Date.now(),
+cliente,
+servico,
+valor,
+inicio,
+prazo,
+pagamento,
+obs,
+texto
+
+});
+
+}
+
+localStorage.setItem(
+"contratos",
+JSON.stringify(contratos)
+);
+
+renderizar();
+
+}
+
+function copiarContrato(){
+
+const texto =
+document.getElementById("contrato").innerText;
+
+navigator.clipboard.writeText(texto);
+
+alert("Contrato copiado.");
+
+}
+
+function excluir(id){
+
+if(!confirm("Excluir contrato?")) return;
+
+contratos =
+contratos.filter(c=>c.id!==id);
+
+localStorage.setItem(
+"contratos",
+JSON.stringify(contratos)
+);
+
+renderizar();
+
+}
+
+function editar(id){
+
+const c =
+contratos.find(x=>x.id===id);
+
+document.getElementById("cliente").value =
+c.cliente;
+
+document.getElementById("servico").value =
+c.servico;
+
+document.getElementById("valor").value =
+c.valor;
+
+document.getElementById("inicio").value =
+c.inicio;
+
+document.getElementById("prazo").value =
+c.prazo;
+
+document.getElementById("pagamento").value =
+c.pagamento;
+
+document.getElementById("obs").value =
+c.obs;
+
+document.getElementById("contrato").innerText =
+c.texto;
+
+editando = id;
+
+window.scrollTo({
+top:0,
+behavior:"smooth"
+});
+
+}
+
+function renderizar(){
+
+const lista =
+document.getElementById("lista");
+
+lista.innerHTML="";
+
+if(contratos.length===0){
+
+lista.innerHTML =
+"<p>Nenhum contrato cadastrado.</p>";
+
+return;
+
+}
+
+contratos.forEach(c=>{
+
+lista.innerHTML += `
+
+<div class="card">
+
+<b>$`{c.cliente}</b>
+
+<br>
+
+<small>`${c.servico}</small>
+
+<br><br>
+
+💰 Rlatex
+ 
+
+{c.valor}
+
+<br>
+
+📅 Prazo:
+$`{c.prazo || "-"}
+
+<div class="actions">
+
+<button
+class="edit"
+onclick="editar(`${c.id})">
+✏ Editar
+</button>
+
+<button
+class="delete"
+onclick="excluir(${c.id})">
+🗑 Excluir
+</button>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+}
+
+renderizar();
+
+</script>
+
+</body>
+</html>
