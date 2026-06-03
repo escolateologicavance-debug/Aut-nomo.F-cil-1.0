@@ -6,6 +6,7 @@
 <title>Contratos - AutônomoFácil</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 
@@ -150,7 +151,7 @@ color:#666;
 <label>Serviço</label>
 <input type="text" id="servico" placeholder="Ex: Instalação elétrica">
 
-<label>Valor (R$`)</label>
+<label>Valor (R$)</label>
 <input type="number" id="valor" placeholder="0.00">
 
 <label>Data de Início</label>
@@ -184,6 +185,10 @@ Nenhum contrato gerado.
 📋 Copiar Contrato
 </button>
 
+<button class="print" style="background:#e53935;" onclick="baixarPDF()">
+📕 Gerar e Baixar PDF
+</button>
+
 <button class="print" onclick="window.print()">
 🖨️ Imprimir
 </button>
@@ -204,6 +209,28 @@ let contratos =
 JSON.parse(localStorage.getItem("contratos")) || [];
 
 let editando = null;
+
+// Lógica para salvar as informações digitadas em tempo real (antes de gerar)
+window.addEventListener("DOMContentLoaded", () => {
+    const campos = ["cliente", "servico", "valor", "inicio", "prazo", "pagamento", "obs"];
+    campos.forEach(id => {
+        const elemento = document.getElementById(id);
+        const valorSalvo = localStorage.getItem("temp_form_" + id);
+        if (valorSalvo) elemento.value = valorSalvo;
+        
+        elemento.addEventListener("input", () => {
+            localStorage.setItem("temp_form_" + id, elemento.value);
+        });
+    });
+    renderizar();
+});
+
+function limparRascunho() {
+    const campos = ["cliente", "servico", "valor", "inicio", "prazo", "pagamento", "obs"];
+    campos.forEach(id => {
+        localStorage.removeItem("temp_form_" + id);
+    });
+}
 
 function gerarContrato(){
 
@@ -242,41 +269,40 @@ const texto =
 `CONTRATO DE PRESTAÇÃO DE SERVIÇOS
 
 CONTRATANTE:
-`${cliente}
+${cliente}
 
 CONTRATADO:
 AUTÔNOMOFÁCIL
 
 SERVIÇO:
-$`{servico}
+${servico}
 
 VALOR:
 R$ ${valor}
 
 DATA DE INÍCIO:
-`${inicio}
+${inicio}
 
 PRAZO DE ENTREGA:
-$`{prazo}
+${prazo}
 
 CONDIÇÕES DE PAGAMENTO:
-`${pagamento}
+${pagamento}
 
 OBSERVAÇÕES:
-$`{obs}
+${obs}
 
 As partes concordam com os termos acima.
 
-───
-
+_________________________________
 ASSINATURA DO CLIENTE
 
-───
-
+_________________________________
 ASSINATURA DO PRESTADOR
 
 Data de emissão:
-${new Date().toLocaleDateString("pt-BR")};
+${new Date().toLocaleDateString("pt-BR")}
+`;
 
 document.getElementById("contrato").innerText =
 texto;
@@ -330,6 +356,7 @@ localStorage.setItem(
 JSON.stringify(contratos)
 );
 
+limparRascunho();
 renderizar();
 
 }
@@ -343,6 +370,22 @@ navigator.clipboard.writeText(texto);
 
 alert("Contrato copiado.");
 
+}
+
+function baixarPDF(){
+const texto = document.getElementById("contrato").innerText;
+if(texto.trim() === "Nenhum contrato gerado."){
+alert("Gere um contrato antes de baixar o PDF.");
+return;
+}
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF();
+doc.setFont("Helvetica", "normal");
+doc.setFontSize(12);
+const splitTexto = doc.splitTextToSize(texto, 170);
+doc.text(splitTexto, 20, 20);
+const nomeCliente = document.getElementById("cliente").value || "Contrato";
+doc.save(`${nomeCliente}_contrato.pdf`);
 }
 
 function excluir(id){
@@ -421,29 +464,26 @@ lista.innerHTML += `
 
 <div class="card">
 
-<b>$`{c.cliente}</b>
+<b>${c.cliente}</b>
 
 <br>
 
-<small>`${c.servico}</small>
+<small>${c.servico}</small>
 
 <br><br>
 
-💰 Rlatex
- 
-
-{c.valor}
+💰 R$ ${c.valor}
 
 <br>
 
 📅 Prazo:
-$`{c.prazo || "-"}
+${c.prazo || "-"}
 
 <div class="actions">
 
 <button
 class="edit"
-onclick="editar(`${c.id})">
+onclick="editar(${c.id})">
 ✏ Editar
 </button>
 
