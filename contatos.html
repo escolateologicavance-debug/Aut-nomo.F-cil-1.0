@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contatos - AutônomoFácil</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+
+body{
+font-family:Segoe UI,sans-serif;
+background:#f4f6f9;
+margin:0;
+padding:20px;
+}
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+h1{
+margin:0;
+color:#1565c0;
+}
+
+.home-btn{
+background:#1565c0;
+color:white;
+border:none;
+padding:10px 14px;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:15px;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
+margin-bottom:15px;
+}
+
+label{
+display:block;
+margin-top:10px;
+font-weight:bold;
+font-size:14px;
+}
+
+input, textarea{
+width:100%;
+padding:10px;
+border:1px solid #ddd;
+border-radius:10px;
+margin-top:5px;
+box-sizing:border-box;
+}
+
+textarea{
+resize:vertical;
+min-height:70px;
+}
+
+button{
+padding:10px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.salvar{
+width:100%;
+margin-top:10px;
+background:#1565c0;
+color:white;
+}
+
+.contador{
+font-size:18px;
+font-weight:bold;
+color:#1565c0;
+}
+
+.acoes{
+display:flex;
+gap:6px;
+flex-wrap:wrap;
+margin-top:10px;
+}
+
+.btn-whats{
+background:#25D366;
+color:white;
+}
+
+.btn-ligar{
+background:#2e7d32;
+color:white;
+}
+
+.btn-editar{
+background:#f9a825;
+color:white;
+}
+
+.btn-excluir{
+background:#c62828;
+color:white;
+}
+
+small{
+color:#666;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+
+<h1>👥 Contatos</h1>
+
+<button class="home-btn"
+onclick="location.href='index.html'">
+<i class="fa fa-home"></i> Início
+</button>
+
+</div>
+
+<div class="card">
+
+<div class="contador">
+Total de contatos:
+<span id="totalContatos">0</span>
+</div>
+
+</div>
+
+<div class="card">
+
+<label>Nome</label>
+<input type="text" id="nome">
+
+<label>Telefone</label>
+<input type="tel" id="telefone">
+
+<label>WhatsApp</label>
+<input type="tel" id="whatsapp">
+
+<label>E-mail</label>
+<input type="email" id="email">
+
+<label>Endereço</label>
+<input type="text" id="endereco">
+
+<label>Observações</label>
+<textarea id="obs"></textarea>
+
+<button class="salvar" onclick="salvarContato()">
+💾 Salvar Contato
+</button>
+
+</div>
+
+<div class="card">
+
+<label>🔍 Pesquisar</label>
+<input
+type="text"
+id="pesquisa"
+placeholder="Digite um nome..."
+onkeyup="renderizar()">
+
+</div>
+
+<div id="lista"></div>
+
+<script>
+
+let contatos =
+JSON.parse(localStorage.getItem("contatos")) || [];
+
+let editando = null;
+
+function salvarContato(){
+
+const nome =
+document.getElementById("nome").value.trim();
+
+if(!nome){
+alert("Informe o nome.");
+return;
+}
+
+const contato = {
+
+id: editando || Date.now(),
+
+nome,
+telefone:
+document.getElementById("telefone").value,
+
+whatsapp:
+document.getElementById("whatsapp").value,
+
+email:
+document.getElementById("email").value,
+
+endereco:
+document.getElementById("endereco").value,
+
+obs:
+document.getElementById("obs").value
+
+};
+
+if(editando){
+
+contatos = contatos.map(c =>
+c.id === editando ? contato : c
+);
+
+editando = null;
+
+}else{
+
+contatos.push(contato);
+
+}
+
+localStorage.setItem(
+"contatos",
+JSON.stringify(contatos)
+);
+
+limpar();
+renderizar();
+
+}
+
+function limpar(){
+
+document.getElementById("nome").value="";
+document.getElementById("telefone").value="";
+document.getElementById("whatsapp").value="";
+document.getElementById("email").value="";
+document.getElementById("endereco").value="";
+document.getElementById("obs").value="";
+
+}
+
+function editar(id){
+
+const c =
+contatos.find(x=>x.id===id);
+
+document.getElementById("nome").value=c.nome;
+document.getElementById("telefone").value=c.telefone;
+document.getElementById("whatsapp").value=c.whatsapp;
+document.getElementById("email").value=c.email;
+document.getElementById("endereco").value=c.endereco;
+document.getElementById("obs").value=c.obs;
+
+editando=id;
+
+window.scrollTo({
+top:0,
+behavior:"smooth"
+});
+
+}
+
+function excluir(id){
+
+if(!confirm("Excluir contato?")) return;
+
+contatos =
+contatos.filter(c=>c.id!==id);
+
+localStorage.setItem(
+"contatos",
+JSON.stringify(contatos)
+);
+
+renderizar();
+
+}
+
+function renderizar(){
+
+const lista =
+document.getElementById("lista");
+
+const busca =
+document.getElementById("pesquisa").value
+.toLowerCase();
+
+lista.innerHTML="";
+
+let filtrados = contatos.filter(c =>
+c.nome.toLowerCase().includes(busca)
+);
+
+filtrados.sort((a,b)=>
+a.nome.localeCompare(b.nome)
+);
+
+document.getElementById("totalContatos")
+.innerText = filtrados.length;
+
+if(filtrados.length===0){
+
+lista.innerHTML =
+"<div class='card'>Nenhum contato encontrado.</div>";
+
+return;
+
+}
+
+filtrados.forEach(c=>{
+
+lista.innerHTML += `
+
+<div class="card">
+
+<h3>$`{c.nome}</h3>
+
+📞 `${c.telefone || "-"}
+
+<br>
+
+💬 $`{c.whatsapp || "-"}
+
+<br>
+
+📧 `${c.email || "-"}
+
+<br>
+
+📍 $`{c.endereco || "-"}
+
+<br><br>
+
+<small>
+`${c.obs || ""}
+</small>
+
+<div class="acoes">
+
+<a href="tel:$`{c.telefone}">
+<button class="btn-ligar">
+📞 Ligar
+</button>
+</a>
+
+<a href="https://wa.me/55`${c.whatsapp}"
+target="_blank">
+
+<button class="btn-whats">
+💬 WhatsApp
+</button>
+
+</a>
+
+<button
+class="btn-editar"
+onclick="editar($`{c.id})">
+
+✏ Editar
+
+</button>
+
+<button
+class="btn-excluir"
+onclick="excluir(`${c.id})">
+
+🗑 Excluir
+
+</button>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+}
+
+renderizar();
+
+</script>
+
+</body>
+</html>
