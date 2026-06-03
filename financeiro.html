@@ -48,6 +48,10 @@ font-weight:bold;
 color:#2e7d32;
 }
 
+.negativo{
+color:#c62828;
+}
+
 .item{
 padding:10px;
 border-bottom:1px solid #eee;
@@ -63,11 +67,19 @@ margin-top:5px;
 }
 
 .recebido{background:#2e7d32}
-.saida{background:#c62828}
-.agendado{background:#1565c0}
+.despesa{background:#c62828}
 
-.valor{
-font-weight:bold;
+.filters{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+}
+
+select{
+flex:1;
+padding:10px;
+border-radius:10px;
+border:1px solid #ddd;
 }
 </style>
 </head>
@@ -84,7 +96,29 @@ font-weight:bold;
 
 <div class="card">
 <div>Total recebido:</div>
-<div class="total" id="total">R$` 0,00</div>
+<div class="total" id="totalRecebido">R$ 0,00</div>
+
+<br>
+
+<div>Total despesas:</div>
+<div class="total negativo" id="totalDespesas">R$ 0,00</div>
+
+<br>
+
+<div>💰 Lucro líquido:</div>
+<div class="total" id="lucro">R$ 0,00</div>
+</div>
+
+<div class="card">
+
+<h3>📅 Filtro por mês</h3>
+
+<div class="filters">
+<select id="filtroMes" onchange="renderizar()">
+<option value="">Todos os meses</option>
+</select>
+</div>
+
 </div>
 
 <div class="card">
@@ -97,59 +131,95 @@ font-weight:bold;
 let lancamentos = JSON.parse(localStorage.getItem("lancamentosFinanceiros")) || [];
 
 // ----------------------
-// CALCULAR TOTAL
+// GERAR MESES
 // ----------------------
-function calcularTotal(){
+function gerarMeses(){
 
-let total = 0;
+let select = document.getElementById("filtroMes");
+let meses = new Set();
 
-lancamentos.forEach(l => {
-if(l.tipo === "recebido"){
-total += Number(l.valor || 0);
+lancamentos.forEach(l=>{
+if(l.data){
+let mes = l.data.slice(3,10); // MM/AAAA
+meses.add(mes);
 }
 });
 
-document.getElementById("total").innerText =
-"R`$ " + total.toFixed(2).replace(".", ",");
-
+meses.forEach(m=>{
+select.innerHTML += `<option value="${m}">${m}</option>`;
+});
 }
 
 // ----------------------
-// RENDERIZAR LISTA
+// CALCULAR TOTAIS
+// ----------------------
+function calcularTotais(lista){
+
+let recebido = 0;
+let despesa = 0;
+
+lista.forEach(l=>{
+if(l.tipo === "recebido") recebido += Number(l.valor || 0);
+if(l.tipo === "despesa") despesa += Number(l.valor || 0);
+});
+
+document.getElementById("totalRecebido").innerText =
+"R$ " + recebido.toFixed(2).replace(".", ",");
+
+document.getElementById("totalDespesas").innerText =
+"R$ " + despesa.toFixed(2).replace(".", ",");
+
+document.getElementById("lucro").innerText =
+"R$ " + (recebido - despesa).toFixed(2).replace(".", ",");
+}
+
+// ----------------------
+// RENDERIZAR
 // ----------------------
 function renderizar(){
 
 const lista = document.getElementById("lista");
 lista.innerHTML = "";
 
-if(lancamentos.length === 0){
-lista.innerHTML = "<p>Nenhum lançamento ainda.</p>";
+let filtro = document.getElementById("filtroMes").value;
+
+let filtrados = lancamentos.filter(l=>{
+if(!filtro) return true;
+return l.data && l.data.includes(filtro);
+});
+
+if(filtrados.length === 0){
+lista.innerHTML = "<p>Nenhum lançamento.</p>";
+calcularTotais([]);
 return;
 }
 
-lancamentos.forEach(l => {
-
+filtrados.forEach(l=>{
 lista.innerHTML += `
 <div class="item">
 
-<div><b>$`{l.textoOriginal || "Lançamento"}</b></div>
+<b>${l.textoOriginal || "Lançamento"}</b><br>
 
-<div class="valor">R$ ${Number(l.valor || 0).toFixed(2).replace(".", ",")}</div>
+💰 R$ ${Number(l.valor || 0).toFixed(2).replace(".", ",")}
 
-<span class="tipo ${l.tipo}"&gt; ${l.tipo.toUpperCase()}
+<br>
+
+<span class="tipo ${l.tipo}">
+${l.tipo.toUpperCase()}
 </span>
 
-<div style="font-size:12px;color:#666;margin-top:5px">
-`${l.data || ""}
-</div>
+<br>
+<small>${l.data || ""}</small>
 
 </div>
 `;
 });
 
-calcularTotal();
+calcularTotais(filtrados);
 }
 
+// INIT
+gerarMeses();
 renderizar();
 
 </script>
