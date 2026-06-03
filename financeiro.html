@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financeiro - AutônomoFácil</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+body{
+font-family:Segoe UI;
+background:#f4f6f9;
+margin:0;
+padding:20px;
+}
+
+h1{color:#1565c0}
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:15px;
+}
+
+.home-btn{
+background:#1565c0;
+color:#fff;
+border:none;
+padding:10px 12px;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.card{
+background:#fff;
+padding:15px;
+border-radius:15px;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
+margin-bottom:15px;
+}
+
+.total{
+font-size:20px;
+font-weight:bold;
+color:#2e7d32;
+}
+
+.item{
+padding:10px;
+border-bottom:1px solid #eee;
+}
+
+.tipo{
+font-size:12px;
+padding:3px 8px;
+border-radius:10px;
+color:#fff;
+display:inline-block;
+margin-top:5px;
+}
+
+.recebido{background:#2e7d32}
+.saida{background:#c62828}
+.agendado{background:#1565c0}
+
+.valor{
+font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+<h1>💰 Financeiro</h1>
+
+<button class="home-btn" onclick="location.href='index.html'">
+<i class="fa fa-home"></i> Início
+</button>
+</div>
+
+<div class="card">
+<div>Total recebido:</div>
+<div class="total" id="total">R$` 0,00</div>
+</div>
+
+<div class="card">
+<h3>📊 Lançamentos</h3>
+<div id="lista"></div>
+</div>
+
+<script>
+
+let lancamentos = JSON.parse(localStorage.getItem("lancamentosFinanceiros")) || [];
+
+// ----------------------
+// CALCULAR TOTAL
+// ----------------------
+function calcularTotal(){
+
+let total = 0;
+
+lancamentos.forEach(l => {
+if(l.tipo === "recebido"){
+total += Number(l.valor || 0);
+}
+});
+
+document.getElementById("total").innerText =
+"R`$ " + total.toFixed(2).replace(".", ",");
+
+}
+
+// ----------------------
+// RENDERIZAR LISTA
+// ----------------------
+function renderizar(){
+
+const lista = document.getElementById("lista");
+lista.innerHTML = "";
+
+if(lancamentos.length === 0){
+lista.innerHTML = "<p>Nenhum lançamento ainda.</p>";
+return;
+}
+
+lancamentos.forEach(l => {
+
+lista.innerHTML += `
+<div class="item">
+
+<div><b>$`{l.textoOriginal || "Lançamento"}</b></div>
+
+<div class="valor">R$ ${Number(l.valor || 0).toFixed(2).replace(".", ",")}</div>
+
+<span class="tipo ${l.tipo}"&gt; ${l.tipo.toUpperCase()}
+</span>
+
+<div style="font-size:12px;color:#666;margin-top:5px">
+`${l.data || ""}
+</div>
+
+</div>
+`;
+});
+
+calcularTotal();
+}
+
+renderizar();
+
+</script>
+
+</body>
+</html>
