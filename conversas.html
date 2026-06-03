@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conversas - AutônomoFácil</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+
+body{
+font-family:Segoe UI,sans-serif;
+background:#f4f6f9;
+margin:0;
+padding:20px;
+}
+
+h1{
+color:#1565c0;
+margin:0;
+}
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.home-btn{
+background:#1565c0;
+color:#fff;
+border:none;
+padding:10px 15px;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.card{
+background:#fff;
+padding:15px;
+border-radius:15px;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
+margin-bottom:15px;
+}
+
+label{
+display:block;
+margin-top:10px;
+font-weight:bold;
+font-size:14px;
+}
+
+input, textarea, select{
+width:100%;
+padding:10px;
+border:1px solid #ddd;
+border-radius:10px;
+margin-top:5px;
+box-sizing:border-box;
+}
+
+textarea{
+min-height:100px;
+resize:vertical;
+}
+
+button{
+padding:10px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+margin-top:10px;
+}
+
+.primary{
+background:#1565c0;
+color:white;
+width:100%;
+}
+
+.copy{
+background:#2e7d32;
+color:white;
+width:100%;
+}
+
+.print{
+background:#f9a825;
+color:white;
+width:100%;
+}
+
+.delete{
+background:#c62828;
+color:white;
+}
+
+.edit{
+background:#f9a825;
+color:white;
+}
+
+.conversation-view{
+white-space:pre-line;
+background:#fafafa;
+padding:15px;
+border-radius:10px;
+border:1px solid #eee;
+margin-top:15px;
+}
+
+.actions{
+display:flex;
+gap:8px;
+margin-top:10px;
+}
+
+.actions button{
+flex:1;
+}
+
+small{
+color:#666;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+
+<h1>📄 Registro de Conversas</h1>
+
+<button class="home-btn" onclick="location.href='index.html'">
+<i class="fa fa-home"></i> Início
+</button>
+
+</div>
+
+<div class="card">
+
+<label>Cliente / Interlocutor</label>
+<input type="text" id="interlocutor" placeholder="Nome do contato ou cliente">
+
+<label>Assunto Principal</label>
+<input type="text" id="assunto" placeholder="Ex: Negociação de orçamento, Alinhamento de projeto">
+
+<label>Meio de Comunicação</label>
+<select id="meio">
+<option value="WhatsApp">WhatsApp</option>
+<option value="Ligação Telefônica">Ligação Telefônica</option>
+<option value="Reunião Presencial">Reunião Presencial</option>
+<option value="E-mail">E-mail</option>
+<option value="Outro">Outro</option>
+</select>
+
+<label>Data do Registro</label>
+<input type="date" id="data_registro">
+
+<label>Detalhamento da Conversa / Acordos</label>
+<textarea id="detalhes" placeholder="Registre aqui os pontos principais discutidos e o que ficou combinado..."></textarea>
+
+<button class="primary" onclick="salvarConversa()">
+💾 Salvar Registro
+</button>
+
+</div>
+
+<div class="card">
+
+<h3>Visualização da Conversa</h3>
+
+<div id="conversa_preview" class="conversation-view">
+Nenhum registro de conversa gerado no momento.
+</div>
+
+<button class="copy" onclick="coiparConversa()">
+📋 Copiar Texto
+</button>
+
+<button class="print" style="background:#e53935;" onclick="baixarPDF()">
+📕 Gerar e Baixar PDF
+</button>
+
+<button class="print" onclick="window.print()">
+🖨️ Imprimir
+</button>
+
+</div>
+
+<div class="card">
+
+<h3>📚 Histórico de Atendimentos e Alinhamentos</h3>
+
+<div id="lista"></div>
+
+</div>
+
+<script>
+
+let conversas =
+JSON.parse(localStorage.getItem("conversas")) || [];
+
+let editando = null;
+
+// Persistência em tempo real para evitar perdas durante digitação prolongada
+window.addEventListener("DOMContentLoaded", () => {
+// Definir data padrão de hoje no input de data
+const hoje = new Date().toISOString().split('T')[0];
+document.getElementById("data_registro").value = hoje;
+
+const campos = ["interlocutor", "assunto", "meio", "data_registro", "detalhes"];
+campos.forEach(id => {
+const elemento = document.getElementById(id);
+const valorSalvo = localStorage.getItem("temp_conv_" + id);
+if (valorSalvo) elemento.value = valorSalvo;
+
+elemento.addEventListener("input", () => {
+localStorage.setItem("temp_conv_" + id, elemento.value);
+});
+if(elemento.tagName === "SELECT") {
+elemento.addEventListener("change", () => {
+localStorage.setItem("temp_conv_" + id, elemento.value);
+});
+}
+});
+renderizar();
+});
+
+function limparRascunho() {
+const campos = ["interlocutor", "assunto", "meio", "data_registro", "detalhes"];
+campos.forEach(id => {
+localStorage.removeItem("temp_conv_" + id);
+});
+const hoje = new Date().toISOString().split('T')[0];
+document.getElementById("data_registro").value = hoje;
+}
+
+function salvarConversa(){
+
+const interlocutor = document.getElementById("interlocutor").value;
+const assunto = document.getElementById("assunto").value;
+const meio = document.getElementById("meio").value;
+const data_registro = document.getElementById("data_registro").value;
+const detalhes = document.getElementById("detalhes").value;
+
+if(!interlocutor || !assunto || !detalhes){
+alert("Preencha o Cliente/Interlocutor, Assunto e Detalhamento.");
+return;
+}
+
+// Formatando data para exibição no relatório
+const dataFormatada = data_registro ? data_registro.split('-').reverse().join('/') : new Date().toLocaleDateString("pt-BR");
+
+const texto =
+`REGISTRO DE ALINHAMENTO E CONVERSA
+
+INTERLOCUTOR/CLIENTE:
+$`{interlocutor}
+
+ASSUNTO DA PAUTA:
+`${assunto}
+
+MEIO DE CONTATO:
+$`{meio}
+
+DATA DA INTERAÇÃO:
+`${dataFormatada}
+
+DETALHES DA CONVERSA E ACORDOS:
+"$`{detalhes}"
+
+AutônomoFácil - Registro realizado em: ${new Date().toLocaleDateString("pt-BR")} às ${new Date().toLocaleTimeString("pt-BR", {hour: '2-digit', minute:'2-digit'})}
+`;
+
+document.getElementById("conversa_preview").innerText = texto;
+
+if(editando){
+conversas = conversas.map(c => {
+if(c.id === editando){
+return { ...f, interlocutor, assunto, meio, data_registro, detalhes, texto };
+}
+return c;
+});
+editando = null;
+} else {
+conversas.unshift({
+id: Date.now(),
+interlocutor,
+assunto,
+meio,
+data_registro,
+detalhes,
+texto
+});
+}
+
+localStorage.setItem("conversas", JSON.stringify(conversas));
+limparRascunho();
+renderizar();
+
+}
+
+function coiparConversa(){
+const texto = document.getElementById("conversa_preview").innerText;
+navigator.clipboard.writeText(texto);
+alert("Registro de conversa copiado.");
+}
+
+function baixarPDF(){
+const texto = document.getElementById("conversa_preview").innerText;
+if(texto.trim() === "Nenhum registro de conversa gerado no momento."){
+alert("Gere um registro antes de baixar o PDF.");
+return;
+}
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF();
+doc.setFont("Helvetica", "normal");
+doc.setFontSize(12);
+const splitTexto = doc.splitTextToSize(texto, 170);
+doc.text(splitTexto, 20, 20);
+const nomeInterlocutor = document.getElementById("interlocutor").value || "Conversa";
+doc.save(Registro_${nomeInterlocutor}.pdf`);
+}
+
+function excluir(id){
+if(!confirm("Excluir este registro de conversa?")) return;
+conversas = conversas.filter(c => c.id !== id);
+localStorage.setItem("conversas", JSON.stringify(conversas));
+renderizar();
+}
+
+function editar(id){
+const c = conversas.find(x => x.id === id);
+
+document.getElementById("interlocutor").value = c.interlocutor;
+document.getElementById("assunto").value = c.assunto;
+document.getElementById("meio").value = c.meio;
+document.getElementById("data_registro").value = c.data_registro;
+document.getElementById("detalhes").value = c.detalhes;
+document.getElementById("conversa_preview").innerText = c.texto;
+
+editando = id;
+window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function renderizar(){
+const lista = document.getElementById("lista");
+lista.innerHTML = "";
+
+if(conversas.length === 0){
+lista.innerHTML = "<p>Nenhum registro de conversa cadastrado.</p>";
+return;
+}
+
+conversas.forEach(c => {
+const dt = c.data_registro ? c.data_registro.split('-').reverse().join('/') : "-";
+lista.innerHTML += &lt;div class="card"&gt; &lt;b&gt;${c.interlocutor}</b>
+<br>
+<small>📌 Assunto: ${c.assunto}&lt;/small&gt; &lt;br&gt; &lt;small&gt;📱 Canal: ${c.meio} | 📅 Data: ${dt}&lt;/small&gt; &lt;br&gt;&lt;br&gt; &lt;p style="color: #333; margin: 5px 0; font-size: 14px; line-height: 1.4;"&gt;${c.detalhes}</p>
+<div class="actions">
+<button class="edit" onclick="editar(${c.id})"&gt;✏ Editar&lt;/button&gt; &lt;button class="delete" onclick="excluir(${c.id})"&gt;🗑 Excluir&lt;/button&gt; &lt;/div&gt; &lt;/div&gt;;
+});
+}
+
+renderizar();
+
+</script>
+
+</body>
+</html>
