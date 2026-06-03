@@ -32,7 +32,7 @@ color:white;
 padding:20px;
 display:flex;
 align-items:center;
-justify-content:between;
+justify-content:space-between;
 position:relative;
 }
 
@@ -64,7 +64,7 @@ background:white;
 padding:15px;
 border-radius:15px;
 margin:10px 15px;
-box-shadow:0 2px 8 rgba(0,0,0,0.05);
+box-shadow:0 2px 8px rgba(0,0,0,0.05);
 }
 
 .form-group{
@@ -211,7 +211,6 @@ font-weight:bold;
 <h2>Clientes</h2>
 </header>
 
-<!-- BLOCO 1: NOVO CADASTRO -->
 <div class="section-title">Cadastrar Novo Cliente</div>
 <div class="card">
 <div class="form-group">
@@ -230,17 +229,13 @@ font-weight:bold;
 <div id="msgSucessoCliente" class="msg-feedback">✅ Cliente cadastrado com sucesso!</div>
 </div>
 
-<!-- BLOCO 2: BUSCA E LISTAGEM -->
 <div class="section-title">Gerenciar Clientes</div>
 <div class="card busca-container">
 <input type="text" id="txtBuscaCliente" placeholder="Buscar cliente pelo nome...">
 </div>
 
-<div class="lista-clientes" id="containerListaClientes">
-<!-- Os clientes cadastrados vão aparecer aqui dinamicamente -->
-</div>
+<div class="lista-clientes" id="containerListaClientes"></div>
 
-<!-- BARRA DE NAVEGAÇÃO PADRÃO -->
 <nav class="bottom-nav">
 <a href="index.html"><i class="fa-solid fa-house"></i>Início</a>
 <a href="index.html"><i class="fa-solid fa-microphone"></i>Voz</a>
@@ -250,97 +245,97 @@ font-weight:bold;
 </nav>
 
 <script>
-const txtNome = document.getElementById("txtNomeCliente");
-const txtTelefone = document.getElementById("txtTelefoneCliente");
-const txtCidade = document.getElementById("txtCidadeCliente");
-const btnSalvar = document.getElementById("btnSalvarCliente");
-const msgSucesso = document.getElementById("msgSucessoCliente");
-const txtBusca = document.getElementById("txtBuscaCliente");
-const containerLista = document.getElementById("containerListaClientes");
+// Elementos da página mapeados com segurança
+const inputNome = document.getElementById("txtNomeCliente");
+const inputTelefone = document.getElementById("txtTelefoneCliente");
+const inputCidade = document.getElementById("txtCidadeCliente");
+const botaoSalvar = document.getElementById("btnSalvarCliente");
+const feedbackSucesso = document.getElementById("msgSucessoCliente");
+const inputBusca = document.getElementById("txtBuscaCliente");
+const listaContainer = document.getElementById("containerListaClientes");
 
-// Carrega a lista do localStorage ou inicia vazia
-let listaClientes = JSON.parse(localStorage.getItem("bancoClientesAutonomo")) || [];
+// Carrega os dados persistidos imediatamente ao abrir a tela
+let clientesCadastrados = JSON.parse(localStorage.getItem("bancoClientesAutonomo")) || [];
 
-// Função para exibir os clientes na tela
-function renderizarClientes(filtro = "") {
-containerLista.innerHTML = "";
+// Função que reconstrói a lista visual na tela
+function renderizarLista(filtroTexto = "") {
+listaContainer.innerHTML = "";
 
-const clientesFiltrados = listaClientes.filter(c =>
-c.nome.toLowerCase().includes(filtro.toLowerCase())
+const filtrados = clientesCadastrados.filter(c =>
+c.nome.toLowerCase().includes(filtroTexto.toLowerCase())
 );
 
-if(clientesFiltrados.length === 0) {
-containerLista.innerHTML = '<p style="text-align:center; color:#888; font-size:14px; padding:15px;">Nenhum cliente encontrado.</p>';
+if(filtrados.length === 0) {
+listaContainer.innerHTML = '<p style="text-align:center; color:#888; font-size:14px; padding:15px;">Nenhum cliente cadastrado.</p>';
 return;
 }
 
-clientesFiltrados.forEach((cliente, idOriginal) => {
-// Encontra o índice real no array principal para exclusão correta
-const indexReal = listaClientes.indexOf(cliente);
+filtrados.forEach(cliente => {
+const indiceReal = clientesCadastrados.indexOf(cliente);
 
-containerLista.innerHTML += &lt;div class="item-cliente"&gt; &lt;div class="info-cliente"&gt; &lt;h4&gt;${cliente.nome}</h4>
+listaContainer.innerHTML += &lt;div class="item-cliente"&gt; &lt;div class="info-cliente"&gt; &lt;h4&gt;${cliente.nome}</h4>
 <p><i class="fa-solid fa-phone" style="font-size:10px;"></i> ${cliente.telefone} | &lt;i class="fa-solid fa-location-dot" style="font-size:10px;"&gt;&lt;/i&gt; ${cliente.cidade}</p>
 </div>
-<button class="btn-excluir" onclick="excluirCliente(${indexReal})"&gt;&lt;i class="fa-solid fa-trash"&gt;&lt;/i&gt;&lt;/button&gt; &lt;/div&gt;;
+<button class="btn-excluir" onclick="removerClienteDoBanco(${indiceReal})"&gt;&lt;i class="fa-solid fa-trash"&gt;&lt;/i&gt;&lt;/button&gt; &lt;/div&gt;;
 });
 }
 
-// Evento para salvar o cliente de forma persistente
-btnSalvar.addEventListener("click", () => {
-const nomeVal = txtNome.value.trim();
-const telVal = txtTelefone.value.trim();
-const cidVal = txtCidade.value.trim();
+// Evento clique do botão Salvar
+botaoSalvar.onclick = function() {
+const nome = inputNome.value.trim();
+const telefone = inputTelefone.value.trim();
+const cidade = inputCidade.value.trim();
 
-if(!nomeVal) {
-alert("Por favor, digite pelo menos o nome do cliente.");
+if(!nome) {
+alert("Por favor, preencha o campo 'Nome Completo'.");
 return;
 }
 
-// Cria o objeto do novo cliente
-const novoCliente = {
-nome: nomeVal,
-telefone: telVal || "Não informado",
-cidade: cidVal || "Não informada"
+// Estrutura o objeto de dados
+const novoRegistro = {
+nome: nome,
+telefone: telefone || "Não informado",
+cidade: city = cidade || "Não informada"
 };
 
-// Adiciona no topo da lista
-listaClientes.unshift(novoCliente);
+// Insere no início da lista na memória ram
+clientesCadastrados.unshift(novoRegistro);
 
-// Grava de forma permanente no localStorage
-localStorage.setItem("bancoClientesAutonomo", JSON.stringify(listaClientes));
+// Salva permanentemente no HD/Memória interna do navegador
+localStorage.setItem("bancoClientesAutonomo", JSON.stringify(clientesCadastrados));
 
-// Limpa os campos do formulário
-txtNome.value = "";
-txtTelefone.value = "";
-txtCidade.value = "";
+// Limpa o formulário na tela
+inputNome.value = "";
+inputTelefone.value = "";
+inputCidade.value = "";
 
-// Mostra mensagem de sucesso
-msgSucesso.style.display = "block";
+// Exibe o balão verde de confirmação
+feedbackSucesso.style.display = "block";
 setTimeout(() => {
-msgSucesso.style.display = "none";
-}, 3000);
+feedbackSucesso.style.display = "none";
+}, 2500);
 
-// Atualiza a lista exibida
-renderizarClientes();
-});
+// Atualiza a listagem visual na hora
+renderizarLista();
+};
 
-// Função para excluir um cliente
-window.excluirCliente = function(index) {
-if(confirm("Deseja realmente remover este cliente?")) {
-listaClientes.splice(index, 1);
-localStorage.setItem("bancoClientesAutonomo", JSON.stringify(listaClientes));
-renderizarClientes(txtBusca.value);
+// Função global para excluir o cliente permanentemente
+window.removerClienteDoBanco = function(posicao) {
+if(confirm("Deseja realmente excluir este cliente da sua lista?")) {
+clientesCadastrados.splice(posicao, 1);
+localStorage.setItem("bancoClientesAutonomo", JSON.stringify(clientesCadastrados));
+renderizarLista(inputBusca.value);
 }
-}
+};
 
-// Evento de busca em tempo real conforme digita
-txtBusca.addEventListener("input", () => {
-renderizarClientes(txtBusca.value);
-});
+// Busca dinâmica enquanto o usuário digita
+inputBusca.oninput = function() {
+renderizarLista(inputBusca.value);
+};
 
-// Inicializa a tela carregando os dados salvos
-window.onload = () => {
-renderizarClientes();
+// Garante a renderização correta assim que a página termina de carregar
+window.onload = function() {
+renderizarLista();
 };
 </script>
 
