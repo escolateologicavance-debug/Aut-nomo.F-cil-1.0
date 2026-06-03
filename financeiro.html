@@ -156,7 +156,7 @@ flex:1;
 </div>
 
 <div class="card">
-<h3>Novo Lançamento</h3>
+<h3>Novo Lançamento Manual</h3>
 <label>Tipo de Fluxo</label>
 <select id="tipo">
 <option value="Receita">🟢 Receita (Ganho / Entrada)</option>
@@ -204,10 +204,57 @@ flex:1;
 </div>
 
 <script>
-let lancamentos = JSON.parse(localStorage.getItem("financas_facil")) || [];
+// Integração direta com o banco de dados das transações de voz e aplicativo
+function obterLancamentos() {
+    // Busca os lançamentos da chave padrão que o app usa
+    let doApp = JSON.parse(localStorage.getItem("atividades")) || JSON.parse(localStorage.getItem("historico")) || [];
+    let manuais = JSON.parse(localStorage.getItem("financas_facil")) || [];
+    
+    // Normaliza os dados para garantir compatibilidade total de formatos
+    let unificados = [];
+    
+    doApp.forEach(item => {
+        let tipo = "Receita";
+        if(item.tipo === "Despesa" || item.tipo === "Dev" || (item.texto && item.texto.toLowerCase().includes("dev"))) {
+            tipo = "Despesa";
+        }
+        
+        // Extrai valores numéricos do texto se necessário
+        let valorNum = parseFloat(item.valor) || 0;
+        if(!valorNum && item.texto) {
+            let matches = item.texto.match(/\d+([.,]\d+)?/);
+            if(matches) valorNum = parseFloat(matches[0].replace(',', '.'));
+        }
+
+        // Garante formato de data compatível (YYYY-MM-DD)
+        let dataIso = new Date().toISOString().split('T')[0];
+        if(item.data) {
+            if(item.data.includes("/")) {
+                let partes = item.data.split(" ")[0].split("/");
+                if(partes.length === 3) dataIso = `${partes[2]}-${partes[1]}-${partes[0]}`;
+            } else if(item.data.includes("-")) {
+                dataIso = item.data.split(" ")[0];
+            }
+        }
+
+        unificados.push({
+            id: item.id || Date.now() + Math.random(),
+            tipo: tipo,
+            descricao: item.descricao || item.texto || "Lançamento via Voz",
+            valor: valorNum,
+            data: dataIso
+        });
+    });
+
+    manuais.forEach(item => {
+        unificados.push(item);
+    });
+
+    // Ordena do mais recente para o mais antigo
+    return unificados.sort((a, b) => new Date(b.data) - new Date(a.data));
+}
 
 window.addEventListener("DOMContentLoaded", () => {
-    // Seta data atual por padrão
     document.getElementById("data_fin").value = new Date().toISOString().split('T')[0];
 
     const campos = ["tipo", "descricao", "valor", "data_fin", "filtroMes"];
@@ -248,7 +295,8 @@ function salvarLancamento(){
         return;
     }
 
-    lancamentos.unshift({
+    let manuais = JSON.parse(localStorage.getItem("financas_facil")) || [];
+    manuais.unshift({
         id: Date.now(),
         tipo,
         descricao,
@@ -256,15 +304,24 @@ function salvarLancamento(){
         data: data_fin
     });
 
-    localStorage.setItem("financas_facil", JSON.stringify(lancamentos));
+    localStorage.setItem("financas_facil", JSON.stringify(manuais));
     limparFormulario();
     atualizar();
 }
 
 function excluir(id){
     if(!confirm("Remover este lançamento do histórico?")) return;
-    lancamentos = lancamentos.filter(l => l.id !== id);
-    localStorage.setItem("financas_facil", JSON.stringify(lancamentos));
+    
+    // Remove tanto das listas manuais quanto das atividades se necessário
+    let manuais = JSON.parse(localStorage.getItem("financas_facil")) || [];
+    manuais = manuais.filter(l => l.id !== id);
+    localStorage.setItem("financas_facil", JSON.stringify(manuais));
+
+    let doApp = JSON.parse(localStorage.getItem("atividades")) || JSON.parse(localStorage.getItem("historico")) || [];
+    doApp = doApp.filter(l => l.id !== id);
+    localStorage.setItem("atividades", JSON.stringify(doApp));
+    localStorage.setItem("historico", JSON.stringify(doApp));
+
     atualizar();
 }
 
@@ -272,31 +329,33 @@ function atualizar(){
     const filtro = document.getElementById("filtroMes").value;
     const lista = document.getElementById("listaLancamentos");
     
+    let lancamentosTotais = obterLancamentos();
     let totalRec = 0;
     let totalDes = 0;
     
     lista.innerHTML = "";
 
-    // Filtra e calcula com base no mês selecionado
-    const lancamentosFiltrados = lancamentos.filter(l => {
+    // Filtra com base no mês selecionado
+    const lancamentosFiltrados = lancamentosTotais.filter(l => {
         if (filtro === "Todos") return true;
-        const mesLancamento = l.data.split("-")[1]; // Pega o MM de YYYY-MM-DD
+        if (!l.data) return false;
+        const mesLancamento = l.data.split("-")[1];
         return mesLancamento === filtro;
     });
 
-    // Calcula os totais do histórico completo para o topo do painel
-    lancamentos.forEach(l => {
+    // Calcula os totais com base em todos os registros encontrados
+    lancamentosTotais.forEach(l => {
         if(l.tipo === "Receita") totalRec += l.valor;
         if(l.tipo === "Despesa") totalDes += l.valor;
     });
 
-    // Atualiza os cards do topo de forma global
+    // Atualiza os displays numéricos da tela principal
     document.getElementById("totalRecebido").innerText = `R$ ${totalRec.toFixed(2).replace('.', ',')}`;
     document.getElementById("totalDespesas").innerText = `R$ ${totalDes.toFixed(2).replace('.', ',')}`;
     const lucro = totalRec - totalDes;
     const elLucro = document.getElementById("lucroLiquido");
     elLucro.innerText = `R$ ${lucro.toFixed(2).replace('.', ',')}`;
-    if(lucro < 0) { elLucro.style.color = "#c62828"; } else { elLucro.style.color = "#1565c0"; }
+    if(lucro < 0) { elLucro.style.color = "#c62828"; } else { elLucro.style.color = "#2e7d32"; }
 
     if(lancamentosFiltrados.length === 0){
         lista.innerHTML = "<p>Nenhum lançamento encontrado para este período.</p>";
@@ -304,7 +363,7 @@ function atualizar(){
     }
 
     lancamentosFiltrados.forEach(l => {
-        const dataFormatada = l.data.split('-').reverse().join('/');
+        const dataFormatada = l.data && l.data.includes('-') ? l.data.split('-').reverse().join('/') : l.data;
         const sinal = l.tipo === "Receita" ? "+" : "-";
         const corValor = l.tipo === "Receita" ? "#2e7d32" : "#c62828";
 
@@ -326,7 +385,8 @@ function atualizar(){
 }
 
 function obterTextoExtrato(){
-    if(lancamentos.length === 0) return "Nenhum movimento financeiro cadastrado.";
+    let lancamentosTotais = obterLancamentos();
+    if(lancamentosTotais.length === 0) return "Nenhum movimento financeiro cadastrado.";
     
     let texto = `AUTÔNOMOFÁCIL - EXTRATO DE MOVIMENTAÇÃO\n`;
     texto += `Gerado em: ${new Date().toLocaleDateString("pt-BR")}\n`;
@@ -335,8 +395,8 @@ function obterTextoExtrato(){
     let totalRec = 0;
     let totalDes = 0;
 
-    lancamentos.forEach(l => {
-        const dt = l.data.split('-').reverse().join('/');
+    lancamentosTotais.forEach(l => {
+        const dt = l.data && l.data.includes('-') ? l.data.split('-').reverse().join('/') : l.data;
         const sinal = l.tipo === "Receita" ? "(+)" : "(-)";
         texto += `${dt} - ${l.descricao}\n`;
         texto += `Tipo: ${l.tipo} | Valor: ${sinal} R$ ${l.valor.toFixed(2)}\n`;
