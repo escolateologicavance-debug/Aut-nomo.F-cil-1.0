@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutônomoFácil - Arquivos</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{
+font-family:Segoe UI,sans-serif;
+background:#f4f6f9;
+margin:0;
+padding:20px;
+}
+
+h2, h3{
+margin:0;
+}
+
+h2{
+color:#1565c0;
+}
+
+.topo{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.home-btn{
+background:#1565c0;
+color:#fff;
+border:none;
+padding:10px 15px;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+.card{
+background:#fff;
+padding:15px;
+border-radius:15px;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
+margin-bottom:15px;
+}
+
+label{
+display:block;
+margin-top:10px;
+font-weight:bold;
+font-size:14px;
+}
+
+input, select, textarea{
+width:100%;
+padding:10px;
+border:1px solid #ddd;
+border-radius:10px;
+margin-top:5px;
+box-sizing:border-box;
+}
+
+textarea{
+min-height:70px;
+resize:vertical;
+}
+
+button{
+padding:10px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+margin-top:10px;
+}
+
+.salvar{
+background:#1565c0;
+color:#fff;
+width:100%;
+}
+
+.print{
+background:#f9a825;
+color:white;
+width:100%;
+}
+
+.delete{
+background:#c62828;
+color:white;
+}
+
+.edit{
+background:#f9a825;
+color:white;
+}
+
+.actions{
+display:flex;
+gap:8px;
+margin-top:10px;
+}
+
+.actions button{
+flex:1;
+}
+
+.item-arquivo {
+border-bottom: 1px solid #eee;
+padding: 15px 0;
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+}
+
+.item-arquivo:last-child {
+border-bottom: none;
+}
+
+.info-arq {
+flex: 1;
+}
+
+.btn-acessar {
+background: #2e7d32;
+color: white;
+padding: 8px 12px;
+border-radius: 8px;
+text-decoration: none;
+font-weight: bold;
+font-size: 13px;
+display: inline-block;
+margin-top: 5px;
+}
+
+.badge {
+display: inline-block;
+padding: 3px 8px;
+font-size: 11px;
+font-weight: bold;
+border-radius: 20px;
+color: white;
+margin-bottom: 5px;
+}
+
+.badge-contrato { background: #1565c0; }
+.badge-recibo { background: #2e7d32; }
+.badge-foto { background: #f9a825; }
+.badge-outro { background: #7b1fa2; }
+
+@media print {
+body { background: white; padding: 0; }
+.topo, .card:nth-of-type(1), button, .btn-acessar { display: none !important; }
+.card { box-shadow: none; padding: 0; margin: 0; }
+.item-arquivo { border-bottom: 1px solid #000; }
+}
+</style>
+</head>
+<body>
+
+<div class="topo">
+<h2>📁 Central de Arquivos</h2>
+<button class="home-btn" onclick="location.href='index.html'">
+<i class="fa fa-home"></i> Início
+</button>
+</div>
+
+<div class="card">
+<h3>Catalogar Novo Documento / Link</h3>
+
+<label>Nome do Documento / Título</label>
+<input id="nome_arquivo" placeholder="Ex: Contrato assinado - Seu João ou Foto do Local">
+
+<label>Categoria</label>
+<select id="categoria">
+<option value="Contrato">Contrato</option>
+<option value="Recibo/Nota">Recibo ou Nota Fiscal</option>
+<option value="Foto/Imagens">Foto / Imagem do Projeto</option>
+<option value="Outros">Outros Documentos</option>
+</select>
+
+<label>Link de Acesso (Google Drive / OneDrive / Nuvem)</label>
+<input id="link_arquivo" placeholder="https://drive.google.com/...">
+
+<label>Observações / Descrição</label>
+<textarea id="obs_arquivo" placeholder="Escreva detalhes sobre o arquivo ou para que ele serve..."></textarea>
+
+<button class="salvar" onclick="salvarArquivo()">💾 Salvar na Central</button>
+</div>
+
+<div class="card">
+<h3>📚 Acervo de Documentos Salvos</h3>
+<div id="listaArquivos"></div>
+<div class="actions">
+<button class="print" onclick="window.print()">🖨️ Imprimir Lista</button>
+</div>
+</div>
+
+<script>
+let arquivos = JSON.parse(localStorage.getItem("arquivos_facil")) || [];
+let editando = null;
+
+// Autosave em tempo real para o formulário
+window.addEventListener("DOMContentLoaded", () => {
+const campos = ["nome_arquivo", "categoria", "link_arquivo", "obs_arquivo"];
+campos.forEach(id => {
+const elemento = document.getElementById(id);
+const valorSalvo = localStorage.getItem("temp_arq_" + id);
+if (valorSalvo) elemento.value = valorSalvo;
+
+elemento.addEventListener("input", () => {
+localStorage.setItem("temp_arq_" + id, elemento.value);
+});
+if(elemento.tagName === "SELECT") {
+elemento.addEventListener("change", () => {
+localStorage.setItem("temp_arq_" + id, elemento.value);
+});
+}
+});
+renderizar();
+});
+
+function limparRascunho() {
+const campos = ["nome_arquivo", "categoria", "link_arquivo", "obs_arquivo"];
+campos.forEach(id => {
+localStorage.removeItem("temp_arq_" + id);
+if(document.getElementById(id).tagName !== "SELECT") {
+document.getElementById(id).value = "";
+}
+});
+}
+
+function salvarArquivo(){
+const nome = document.getElementById("nome_arquivo").value;
+const categoria = document.getElementById("categoria").value;
+const link = document.getElementById("link_arquivo").value;
+const obs = document.getElementById("obs_arquivo").value;
+
+if(!nome || !link){
+alert("Por favor, preencha o Nome do arquivo e o Link de acesso.");
+return;
+}
+
+if(editando){
+arquivos = arquivos.map(a => {
+if(a.id === editando){
+return { ...a, nome, categoria, link, obs };
+}
+return a;
+});
+editando = null;
+} else {
+arquivos.unshift({
+id: Date.now(),
+nome,
+categoria,
+link,
+obs,
+data: new Date().toLocaleDateString("pt-BR")
+});
+}
+
+localStorage.setItem("arquivos_facil", JSON.stringify(arquivos));
+limparRascunho();
+renderizar();
+}
+
+function excluir(id){
+if(!confirm("Remover o registro deste arquivo da lista?")) return;
+arquivos = arquivos.filter(a => a.id !== id);
+localStorage.setItem("arquivos_facil", JSON.stringify(arquivos));
+renderizar();
+}
+
+function editar(id){
+const a = arquivos.find(x => x.id === id);
+
+document.getElementById("nome_arquivo").value = a.nome;
+document.getElementById("categoria").value = a.categoria;
+document.getElementById("link_arquivo").value = a.link;
+document.getElementById("obs_arquivo").value = a.obs;
+
+editando = id;
+window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function renderizar(){
+const lista = document.getElementById("listaArquivos");
+lista.innerHTML = "";
+
+if(arquivos.length === 0){
+lista.innerHTML = "<p>Nenhum arquivo ou documento catalogado.</p>";
+return;
+}
+
+arquivos.forEach(a => {
+let badgeClass = "badge-outro";
+if(a.categoria === "Contrato") badgeClass = "badge-contrato";
+if(a.categoria === "Recibo/Nota") badgeClass = "badge-recibo";
+if(a.categoria === "Foto/Imagens") badgeClass = "badge-foto";
+
+lista.innerHTML += &lt;div class="item-arquivo"&gt; &lt;div class="info-arq"&gt; &lt;span class="badge ${badgeClass}">${a.categoria}&lt;/span&gt; &lt;br&gt; &lt;b style="font-size:16px; color:#333;"&gt;${a.nome}</b>
+<br>
+<small>📅 Catalogado em: ${a.data}&lt;/small&gt; &lt;p style="margin:5px 0; color:#555; font-size:14px;"&gt;${a.obs || "Sem observações."}</p>
+<a href="`${a.link}" target="_blank" class="btn-acessar">
+<i class="fa fa-external-link"></i> Abrir / Acessar Arquivo
+</a>
+
+<div class="actions" style="max-width:200px; margin-top:10px;">
+<button class="edit" style="padding:4px 8px; font-size:12px;" onclick="editar(
+
+{a.id})">🗑️ Remover</button>
+</div>
+</div>
+</div>
+`;
+});
+}
+
+renderizar();
+</script>
+
+</body>
+</html>
