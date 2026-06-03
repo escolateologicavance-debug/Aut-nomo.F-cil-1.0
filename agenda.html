@@ -42,12 +42,21 @@ box-shadow:0 2px 8px rgba(0,0,0,.08);
 margin-bottom:15px;
 }
 
+label{
+font-size:13px;
+font-weight:bold;
+color:#444;
+display:block;
+margin-top:8px;
+}
+
 select, input{
 width:100%;
 padding:10px;
-margin:6px 0;
+margin-top:5px;
 border-radius:10px;
 border:1px solid #ddd;
+font-size:14px;
 }
 
 button{
@@ -58,7 +67,8 @@ background:#1565c0;
 color:#fff;
 cursor:pointer;
 font-weight:bold;
-margin-top:5px;
+margin-top:10px;
+width:100%;
 }
 
 .actions{
@@ -103,12 +113,24 @@ margin-top:5px;
 
 <div class="form">
 
-<select id="cliente"></select>
-<select id="servico"></select>
+<label>👤 Cliente</label>
+<select id="cliente">
+<option value="">Selecione um cliente</option>
+</select>
 
+<label>🛠️ Serviço</label>
+<select id="servico">
+<option value="">Selecione um serviço</option>
+</select>
+
+<label>📅 Data</label>
 <input type="date" id="data">
+
+<label>⏰ Hora</label>
 <input type="time" id="hora">
-<input type="text" id="obs" placeholder="Observações">
+
+<label>📝 Observações</label>
+<input type="text" id="obs" placeholder="Ex: levar material, confirmar antes...">
 
 <button onclick="salvar()">Agendar</button>
 
@@ -130,15 +152,15 @@ function carregarSelects(){
 const c = document.getElementById("cliente");
 const s = document.getElementById("servico");
 
-c.innerHTML = "<option>Selecione Cliente</option>";
-s.innerHTML = "<option>Selecione Serviço</option>";
+c.innerHTML = `<option value="">Selecione um cliente</option>`;
+s.innerHTML = `<option value="">Selecione um serviço</option>`;
 
 clientes.forEach(cli=>{
-c.innerHTML += <option value="${cli.nome}">${cli.nome}&lt;/option>;
+c.innerHTML += `<option value="${cli.nome}">${cli.nome}</option>`;
 });
 
 servicos.forEach(serv=>{
-s.innerHTML += <option value="${serv.nome}">${serv.nome}&lt;/option>;
+s.innerHTML += `<option value="${serv.nome}">${serv.nome}</option>`;
 });
 
 }
@@ -152,7 +174,7 @@ const hora = document.getElementById("hora").value;
 const obs = document.getElementById("obs").value;
 
 if(!cliente || !servico || !data || !hora){
-alert("Preencha todos os campos");
+alert("Preencha todos os campos!");
 return;
 }
 
@@ -191,6 +213,8 @@ function limpar(){
 document.getElementById("data").value="";
 document.getElementById("hora").value="";
 document.getElementById("obs").value="";
+document.getElementById("cliente").value="";
+document.getElementById("servico").value="";
 }
 
 function concluir(id){
@@ -203,7 +227,7 @@ let lancamentos = JSON.parse(localStorage.getItem("lancamentosFinanceiros")) || 
 lancamentos.unshift({
 valor:0,
 tipo:"recebido",
-textoOriginal:Serviço concluído: ${a.servico} para ${a.cliente},
+textoOriginal:`Serviço concluído: ${a.servico} para ${a.cliente}`,
 data:new Date().toLocaleString("pt-BR")
 });
 
@@ -229,13 +253,14 @@ renderizar();
 }
 
 function editar(id){
+
 let a = agendas.find(x=>x.id===id);
 
-document.getElementById("cliente").value = a.cliente;
-document.getElementById("servico").value = a.servico;
-document.getElementById("data").value = a.data;
-document.getElementById("hora").value = a.hora;
-document.getElementById("obs").value = a.obs;
+document.getElementById("cliente").value=a.cliente;
+document.getElementById("servico").value=a.servico;
+document.getElementById("data").value=a.data;
+document.getElementById("hora").value=a.hora;
+document.getElementById("obs").value=a.obs;
 
 editando=id;
 }
@@ -257,21 +282,20 @@ agendas.forEach(a=>{
 lista.innerHTML += `
 <div class="card">
 
-<h3>
+<h3>${a.servico}</h3>
+<p>👤 ${a.cliente}</p>
+<p>📅 ${a.data} às ${a.hora}</p>
+<p>${a.obs||""}</p>
 
-{a.cliente}</p>
-<p>📅 
-
-{a.hora}</p>
-<p>$`{a.obs||""}</p>
-
-<span class="status ${a.status}"&gt; ${a.status.toUpperCase()}
+<span class="status ${a.status}">
+${a.status.toUpperCase()}
 </span>
 
 <div class="actions">
 
-<button class="done" onclick="concluir(${a.id})"&gt;✔&lt;/button&gt; &lt;button class="cancel" onclick="cancelar(${a.id})">✖</button>
-<button class="edit" onclick="editar(`${a.id})">✏</button>
+<button class="done" onclick="concluir(${a.id})">✔</button>
+<button class="cancel" onclick="cancelar(${a.id})">✖</button>
+<button class="edit" onclick="editar(${a.id})">✏</button>
 <button class="cancel" onclick="deletar(${a.id})">🗑</button>
 
 </div>
