@@ -112,18 +112,13 @@ margin-top:5px;
 </div>
 
 <div class="form">
-<label>👤 Cliente</label>
-<select id="clienteSelect" onchange="preencherCliente()">
-<option value="">Selecione um cliente</option>
-</select>
 
+<label>👤 Cliente</label>
+<select id="clienteSelect"></select>
 <input id="clienteManual" placeholder="Ou digite novo cliente">
 
 <label>🛠️ Serviço</label>
-<select id="servicoSelect" onchange="preencherServico()">
-<option value="">Selecione um serviço</option>
-</select>
-
+<select id="servicoSelect"></select>
 <input id="servicoManual" placeholder="Ou digite novo serviço">
 
 <label>📅 Data</label>
@@ -149,11 +144,13 @@ let servicos = JSON.parse(localStorage.getItem("servicos")) || [];
 
 let editando = null;
 
-// preencher selects
+// ----------------------
+// CARREGAR SELECTS
+// ----------------------
 function carregarSelects(){
 
-const c = document.getElementById("cliente");
-const s = document.getElementById("servico");
+const c = document.getElementById("clienteSelect");
+const s = document.getElementById("servicoSelect");
 
 c.innerHTML = `<option value="">Selecione um cliente</option>`;
 s.innerHTML = `<option value="">Selecione um serviço</option>`;
@@ -168,10 +165,17 @@ s.innerHTML += `<option value="${serv.nome}">${serv.nome}</option>`;
 
 }
 
+// ----------------------
+// SALVAR
+// ----------------------
 function salvar(){
 
-const cliente = document.getElementById("cliente").value;
-const servico = document.getElementById("servico").value;
+const cliente = document.getElementById("clienteSelect").value 
+|| document.getElementById("clienteManual").value.trim();
+
+const servico = document.getElementById("servicoSelect").value 
+|| document.getElementById("servicoManual").value.trim();
+
 const data = document.getElementById("data").value;
 const hora = document.getElementById("hora").value;
 const obs = document.getElementById("obs").value;
@@ -185,7 +189,7 @@ if(editando){
 
 agendas = agendas.map(a=>{
 if(a.id === editando){
-return {...a,cliente,servico,data,hora,obs};
+return {...a, cliente, servico, data, hora, obs};
 }
 return a;
 });
@@ -195,7 +199,7 @@ editando = null;
 }else{
 
 agendas.unshift({
-id:Date.now(),
+id: Date.now(),
 cliente,
 servico,
 data,
@@ -212,14 +216,22 @@ limpar();
 renderizar();
 }
 
+// ----------------------
+// LIMPAR
+// ----------------------
 function limpar(){
 document.getElementById("data").value="";
 document.getElementById("hora").value="";
 document.getElementById("obs").value="";
-document.getElementById("cliente").value="";
-document.getElementById("servico").value="";
+document.getElementById("clienteSelect").value="";
+document.getElementById("clienteManual").value="";
+document.getElementById("servicoSelect").value="";
+document.getElementById("servicoManual").value="";
 }
 
+// ----------------------
+// CONCLUIR
+// ----------------------
 function concluir(id){
 
 let a = agendas.find(x=>x.id===id);
@@ -240,6 +252,9 @@ localStorage.setItem("agendas", JSON.stringify(agendas));
 renderizar();
 }
 
+// ----------------------
+// CANCELAR
+// ----------------------
 function cancelar(id){
 agendas = agendas.map(a=>{
 if(a.id===id)a.status="cancelado";
@@ -249,18 +264,24 @@ localStorage.setItem("agendas", JSON.stringify(agendas));
 renderizar();
 }
 
+// ----------------------
+// DELETAR
+// ----------------------
 function deletar(id){
 agendas = agendas.filter(a=>a.id!==id);
 localStorage.setItem("agendas", JSON.stringify(agendas));
 renderizar();
 }
 
+// ----------------------
+// EDITAR
+// ----------------------
 function editar(id){
 
 let a = agendas.find(x=>x.id===id);
 
-document.getElementById("cliente").value=a.cliente;
-document.getElementById("servico").value=a.servico;
+document.getElementById("clienteSelect").value=a.cliente;
+document.getElementById("servicoSelect").value=a.servico;
 document.getElementById("data").value=a.data;
 document.getElementById("hora").value=a.hora;
 document.getElementById("obs").value=a.obs;
@@ -268,6 +289,9 @@ document.getElementById("obs").value=a.obs;
 editando=id;
 }
 
+// ----------------------
+// RENDERIZAR
+// ----------------------
 function renderizar(){
 
 const lista = document.getElementById("lista");
@@ -310,6 +334,7 @@ ${a.status.toUpperCase()}
 
 }
 
+// INIT
 carregarSelects();
 renderizar();
 
