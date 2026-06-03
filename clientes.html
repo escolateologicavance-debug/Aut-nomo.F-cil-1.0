@@ -29,27 +29,18 @@ padding-bottom:90px;
 header{
 background:linear-gradient(135deg,var(--primary),var(--primary-dark));
 color:white;
-padding:20px;
+padding:15px 20px;
 display:flex;
 align-items:center;
 justify-content:space-between;
 position:relative;
-}
-
-header .btn-voltar{
-color:white;
-text-decoration:none;
-font-size:16px;
-display:flex;
-align-items:center;
-gap:8px;
+min-height: 70px;
 }
 
 header h2{
-position:absolute;
-right:20px;
 font-size:24px;
 font-weight:bold;
+margin: 0;
 }
 
 .section-title{
@@ -150,6 +141,11 @@ margin-bottom:2px;
 .info-cliente p{
 font-size:12px;
 color:#666;
+display: flex;
+align-items: center;
+gap: 5px;
+flex-wrap: wrap;
+margin-top: 4px;
 }
 
 .btn-excluir{
@@ -207,14 +203,13 @@ font-weight:bold;
 <body>
 
 <header>
-<a href="index.html" class="<button onclick="location.href='index.html'" style="background: #ffffff; color: #1565c0; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 14px;">
+<button onclick="location.href='index.html'" style="background: #ffffff; color: #1565c0; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 14px;">
     <i class="fa fa-home"></i> Início
 </button>
-</a>
 <h2>Clientes</h2>
 </header>
 
-<div class="section-title">Cadastrar Novo Cliente</div>
+<div class="section-title">Cadastrar Novo Client</div>
 <div class="card">
 <div class="form-group">
 <label>Nome Completo</label>
@@ -260,85 +255,121 @@ const listaContainer = document.getElementById("containerListaClientes");
 // Carrega os dados persistidos imediatamente ao abrir a tela
 let clientesCadastrados = JSON.parse(localStorage.getItem("bancoClientesAutonomo")) || [];
 
-// Função que reconstrói a lista visual na tela
-function renderizarLista(filtroTexto = "") {
-listaContainer.innerHTML = "";
+// Autosave em tempo real para os campos do formulário
+window.addEventListener("DOMContentLoaded", () => {
+    const campos = {
+        "txtNomeCliente": "temp_cli_nome",
+        "txtTelefoneCliente": "temp_cli_tel",
+        "txtCidadeCliente": "temp_cli_cid"
+    };
+    
+    Object.keys(campos).forEach(id => {
+        const elemento = document.getElementById(id);
+        const valorSalvo = localStorage.getItem(campos[id]);
+        if (valorSalvo) elemento.value = valorSalvo;
+        
+        elemento.addEventListener("input", () => {
+            localStorage.setItem(campos[id], elemento.value);
+        });
+    });
+});
 
-const filtrados = clientesCadastrados.filter(c =>
-c.nome.toLowerCase().includes(filtroTexto.toLowerCase())
-);
-
-if(filtrados.length === 0) {
-listaContainer.innerHTML = '<p style="text-align:center; color:#888; font-size:14px; padding:15px;">Nenhum cliente cadastrado.</p>';
-return;
+function limparRascunhos() {
+    localStorage.removeItem("temp_cli_nome");
+    localStorage.removeItem("temp_cli_tel");
+    localStorage.removeItem("temp_cli_cid");
+    inputNome.value = "";
+    inputTelefone.value = "";
+    inputCidade.value = "";
 }
 
-filtrados.forEach(cliente => {
-const indiceReal = clientesCadastrados.indexOf(cliente);
+// Função que reconstrói a lista visual na tela
+function renderizarLista(filtroTexto = "") {
+    listaContainer.innerHTML = "";
 
-listaContainer.innerHTML += &lt;div class="item-cliente"&gt; &lt;div class="info-cliente"&gt; &lt;h4&gt;${cliente.nome}</h4>
-<p><i class="fa-solid fa-phone" style="font-size:10px;"></i> ${cliente.telefone} | &lt;i class="fa-solid fa-location-dot" style="font-size:10px;"&gt;&lt;/i&gt; ${cliente.cidade}</p>
-</div>
-<button class="btn-excluir" onclick="removerClienteDoBanco(${indiceReal})"&gt;&lt;i class="fa-solid fa-trash"&gt;&lt;/i&gt;&lt;/button&gt; &lt;/div&gt;;
-});
+    const filtrados = clientesCadastrados.filter(c =>
+        c.nome && c.nome.toLowerCase().includes(filtroTexto.toLowerCase())
+    );
+
+    if(filtrados.length === 0) {
+        listaContainer.innerHTML = '<p style="text-align:center; color:#888; font-size:14px; padding:15px;">Nenhum cliente encontrado.</p>';
+        return;
+    }
+
+    filtrados.forEach(cliente => {
+        const indiceReal = clientesCadastrados.indexOf(cliente);
+
+        listaContainer.innerHTML += `
+            <div class="item-cliente">
+                <div class="info-cliente">
+                    <h4>${cliente.nome}</h4>
+                    <p>
+                        <i class="fa-solid fa-phone" style="font-size:10px;"></i> ${cliente.telefone} | 
+                        <i class="fa-solid fa-location-dot" style="font-size:10px;"></i> ${cliente.cidade}
+                    </p>
+                </div>
+                <button class="btn-excluir" onclick="removerClienteDoBanco(${indiceReal})">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        `;
+    });
 }
 
 // Evento clique do botão Salvar
 botaoSalvar.onclick = function() {
-const nome = inputNome.value.trim();
-const telefone = inputTelefone.value.trim();
-const cidade = inputCidade.value.trim();
+    const nome = inputNome.value.trim();
+    const telefone = inputTelefone.value.trim();
+    const cidade = inputCidade.value.trim();
 
-if(!nome) {
-alert("Por favor, preencha o campo 'Nome Completo'.");
-return;
-}
+    if(!nome) {
+        alert("Por favor, preencha o campo 'Nome Completo'.");
+        return;
+    }
 
-// Estrutura o objeto de dados
-const novoRegistro = {
-nome: nome,
-telefone: telefone || "Não informado",
-cidade: city = cidade || "Não informada"
-};
+    // Estrutura o objeto de dados corretamente
+    const novoRegistro = {
+        nome: nome,
+        telefone: telefone || "Não informado",
+        cidade: cidade || "Não informada"
+    };
 
-// Insere no início da lista na memória ram
-clientesCadastrados.unshift(novoRegistro);
+    // Insere no início da lista na memória ram
+    clientesCadastrados.unshift(novoRegistro);
 
-// Salva permanentemente no HD/Memória interna do navegador
-localStorage.setItem("bancoClientesAutonomo", JSON.stringify(clientesCadastrados));
+    // Salva permanentemente no localStorage
+    localStorage.setItem("bancoClientesAutonomo", JSON.stringify(clientesCadastrados));
 
-// Limpa o formulário na tela
-inputNome.value = "";
-inputTelefone.value = "";
-inputCidade.value = "";
+    // Limpa o formulário e os rascunhos temporários
+    limparRascunhos();
 
-// Exibe o balão verde de confirmação
-feedbackSucesso.style.display = "block";
-setTimeout(() => {
-feedbackSucesso.style.display = "none";
-}, 2500);
+    // Exibe o balão verde de confirmação
+    feedbackSucesso.style.display = "block";
+    setTimeout(() => {
+        feedbackSucesso.style.display = "none";
+    }, 2500);
 
-// Atualiza a listagem visual na hora
-renderizarLista();
+    // Atualiza a listagem visual na hora
+    renderizarLista();
 };
 
 // Função global para excluir o cliente permanentemente
 window.removerClienteDoBanco = function(posicao) {
-if(confirm("Deseja realmente excluir este cliente da sua lista?")) {
-clientesCadastrados.splice(posicao, 1);
-localStorage.setItem("bancoClientesAutonomo", JSON.stringify(clientesCadastrados));
-renderizarLista(inputBusca.value);
-}
+    if(confirm("Deseja realmente excluir este cliente da sua lista?")) {
+        clientesCadastrados.splice(posicao, 1);
+        localStorage.setItem("bancoClientesAutonomo", JSON.stringify(clientesCadastrados));
+        renderizarLista(inputBusca.value);
+    }
 };
 
 // Busca dinâmica enquanto o usuário digita
 inputBusca.oninput = function() {
-renderizarLista(inputBusca.value);
+    renderizarLista(inputBusca.value);
 };
 
 // Garante a renderização correta assim que a página termina de carregar
 window.onload = function() {
-renderizarLista();
+    renderizarLista();
 };
 </script>
 
