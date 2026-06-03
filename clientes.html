@@ -8,347 +8,209 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 <style>
-:root{
---primary:#1565c0;
---primary-dark:#0d47a1;
---bg:#f4f6f9;
---text:#222;
---white:#ffffff;
---green:#2e7d32;
---red:#c62828;
-}
-
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
-
 body{
-background:var(--bg);
-color:var(--text);
-padding-bottom:90px;
-}
-
-header{
-background:linear-gradient(135deg,var(--primary),var(--primary-dark));
-color:white;
+font-family:Segoe UI;
+background:#f4f6f9;
+margin:0;
 padding:20px;
-display:flex;
-align-items:center;
-justify-content:space-between;
-position:relative;
 }
 
-header .btn-voltar{
-color:white;
-text-decoration:none;
-font-size:16px;
-display:flex;
-align-items:center;
-gap:8px;
+h1{
+color:#1565c0;
+margin-bottom:10px;
 }
 
-header h2{
-position:absolute;
-right:20px;
-font-size:24px;
+.form{
+background:#fff;
+padding:15px;
+border-radius:15px;
+box-shadow:0 2px 10px rgba(0,0,0,.08);
+margin-bottom:20px;
+}
+
+input, select{
+width:100%;
+padding:10px;
+margin:8px 0;
+border-radius:10px;
+border:1px solid #ddd;
+}
+
+button{
+width:100%;
+padding:12px;
+border:none;
+border-radius:10px;
+background:#1565c0;
+color:#fff;
 font-weight:bold;
+cursor:pointer;
 }
 
-.section-title{
-padding:20px 15px 5px;
-font-size:18px;
-font-weight:700;
-color:#333;
+button:hover{
+background:#0d47a1;
 }
 
 .card{
-background:white;
+background:#fff;
 padding:15px;
 border-radius:15px;
-margin:10px 15px;
-box-shadow:0 2px 8px rgba(0,0,0,0.05);
-}
-
-.form-group{
 margin-bottom:12px;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
 }
 
-.form-group label{
-display:block;
+.card h3{
+margin:0;
+}
+
+.actions{
+display:flex;
+gap:10px;
+margin-top:10px;
+}
+
+.actions button{
+flex:1;
 font-size:12px;
-font-weight:600;
-margin-bottom:4px;
-color:#666;
 }
 
-.form-group input{
-width:100%;
-padding:10px;
-border:1px solid #ddd;
-border-radius:8px;
-font-size:14px;
-outline:none;
+.whats{
+background:#25D366;
 }
 
-.form-group input:focus{
-border-color:var(--primary);
+.delete{
+background:#c62828;
 }
 
-.btn-acao{
-width:100%;
-background:var(--primary);
-color:white;
-border:none;
-padding:12px;
-border-radius:8px;
-font-size:15px;
-font-weight:bold;
-cursor:pointer;
-box-shadow:0 3px 6px rgba(21,101,192,0.2);
-display:flex;
-align-items:center;
-justify-content:center;
-gap:8px;
-}
-
-.btn-acao:active{
-background:var(--primary-dark);
-}
-
-.busca-container {
-margin-bottom:5px;
-}
-
-.busca-container input {
-width:100%;
-padding:12px;
-border:1px solid #ddd;
-border-radius:8px;
-font-size:14px;
-outline:none;
-}
-
-.lista-clientes{
-margin:10px 15px;
-}
-
-.item-cliente{
-background:white;
-padding:15px;
-border-radius:12px;
-margin-bottom:10px;
-box-shadow:0 2px 5px rgba(0,0,0,0.03);
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
-
-.info-cliente h4{
-font-size:15px;
-color:#222;
-margin-bottom:2px;
-}
-
-.info-cliente p{
+.status{
 font-size:12px;
-color:#666;
+padding:3px 8px;
+border-radius:10px;
+color:#fff;
+display:inline-block;
+margin-top:5px;
 }
 
-.btn-excluir{
-background:none;
-border:none;
-color:var(--red);
-font-size:16px;
-cursor:pointer;
-padding:5px;
-}
+.ativo{background:#2e7d32;}
+.inativo{background:#777;}
 
-.msg-feedback{
-text-align:center;
-color:#2e7d32;
-font-weight:600;
-font-size:14px;
-margin-top:8px;
-display:none;
-}
-
-.bottom-nav{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-height:70px;
-background:white;
-display:flex;
-justify-content:space-around;
-align-items:center;
-box-shadow:0 -2px 15px rgba(0,0,0,.12);
-z-index:999;
-}
-
-.bottom-nav a{
-text-decoration:none;
-color:#444;
-font-size:11px;
-text-align:center;
-}
-
-.bottom-nav i{
-display:block;
-font-size:22px;
-margin-bottom:4px;
-color:var(--primary);
-}
-
-.bottom-nav a.active {
-color:var(--primary);
-font-weight:bold;
+.search{
+margin-bottom:15px;
 }
 </style>
 </head>
+
 <body>
 
-<header>
-<a href="index.html" class="btn-voltar"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
-<h2>Clientes</h2>
-</header>
+<h1>📁 Clientes</h1>
 
-<div class="section-title">Cadastrar Novo Cliente</div>
-<div class="card">
-<div class="form-group">
-<label>Nome Completo</label>
-<input type="text" id="txtNomeCliente" placeholder="Ex: João Lima">
-</div>
-<div class="form-group">
-<label>Telefone / WhatsApp</label>
-<input type="tel" id="txtTelefoneCliente" placeholder="Ex: (65) 99999-9999">
-</div>
-<div class="form-group">
-<label>Cidade / Localidade</label>
-<input type="text" id="txtCidadeCliente" placeholder="Ex: Itanhangá - MT">
-</div>
-<button type="button" class="btn-acao" id="btnSalvarCliente"><i class="fa-solid fa-plus"></i> Salvar Cliente</button>
-<div id="msgSucessoCliente" class="msg-feedback">✅ Cliente cadastrado com sucesso!</div>
+<div class="form">
+<input id="nome" placeholder="Nome do cliente">
+<input id="telefone" placeholder="Telefone (ex: 55999999999)">
+<select id="status">
+<option value="ativo">Ativo</option>
+<option value="inativo">Inativo</option>
+</select>
+
+<button onclick="salvarCliente()">Salvar Cliente</button>
 </div>
 
-<div class="section-title">Gerenciar Clientes</div>
-<div class="card busca-container">
-<input type="text" id="txtBuscaCliente" placeholder="Buscar cliente pelo nome...">
-</div>
+<input class="search" id="busca" placeholder="Buscar cliente..." oninput="renderizar()">
 
-<div class="lista-clientes" id="containerListaClientes"></div>
-
-<nav class="bottom-nav">
-<a href="index.html"><i class="fa-solid fa-house"></i>Início</a>
-<a href="index.html"><i class="fa-solid fa-microphone"></i>Voz</a>
-<a href="servicos.html"><i class="fa-solid fa-clipboard-list"></i>Serviços</a>
-<a href="financeiro.html"><i class="fa-solid fa-wallet"></i>Financeiro</a>
-<a href="clientes.html" class="active"><i class="fa-solid fa-users"></i>Clientes</a>
-</nav>
+<div id="lista"></div>
 
 <script>
-(function() {
-const inputNome = document.getElementById("txtNomeCliente");
-const inputTelefone = document.getElementById("txtTelefoneCliente");
-const inputCidade = document.getElementById("txtCidadeCliente");
-const botaoSalvar = document.getElementById("btnSalvarCliente");
-const feedbackSucesso = document.getElementById("msgSucessoCliente");
-const inputBusca = document.getElementById("txtBuscaCliente");
-const listaContainer = document.getElementById("containerListaClientes");
 
-function obterClientes() {
-try {
-return JSON.parse(localStorage.getItem("bancoClientesAutonomo")) || [];
-} catch (e) {
-console.error("Erro ao ler localStorage", e);
-return [];
-}
+let clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+
+function salvarCliente(){
+
+const nome = document.getElementById("nome").value.trim();
+const telefone = document.getElementById("telefone").value.trim();
+const status = document.getElementById("status").value;
+
+if(!nome || !telefone){
+alert("Preencha nome e telefone");
+return;
 }
 
-function renderizarLista(filtroTexto = "") {
-if (!listaContainer) return;
-listaContainer.innerHTML = "";
+clientes.unshift({
+id:Date.now(),
+nome,
+telefone,
+status,
+data:new Date().toLocaleString("pt-BR")
+});
 
-const clientesCadastrados = obterClientes();
-const filtrados = clientesCadastrados.filter(c =>
-c.nome.toLowerCase().includes(filtroTexto.toLowerCase())
+localStorage.setItem("clientes", JSON.stringify(clientes));
+
+document.getElementById("nome").value="";
+document.getElementById("telefone").value="";
+
+renderizar();
+}
+
+function deletar(id){
+clientes = clientes.filter(c => c.id !== id);
+localStorage.setItem("clientes", JSON.stringify(clientes));
+renderizar();
+}
+
+function whatsapp(telefone, nome){
+
+const msg = encodeURIComponent("Olá " + nome + ", tudo bem?");
+const url = `https://wa.me/${telefone}?text=${msg}`;
+window.open(url, "_blank");
+
+}
+
+function renderizar(){
+
+const lista = document.getElementById("lista");
+const busca = document.getElementById("busca").value.toLowerCase();
+
+lista.innerHTML="";
+
+let filtrados = clientes.filter(c =>
+c.nome.toLowerCase().includes(busca)
 );
 
-if(filtrados.length === 0) {
-listaContainer.innerHTML = '<p style="text-align:center; color:#888; font-size:14px; padding:15px;">Nenhum cliente cadastrado.</p>';
+if(filtrados.length === 0){
+lista.innerHTML = "<p>Nenhum cliente encontrado.</p>";
 return;
 }
 
-filtrados.forEach(cliente => {
-const indiceReal = clientesCadastrados.findIndex(c => c.nome === cliente.nome && c.telefone === cliente.telefone);
+filtrados.forEach(c => {
 
-listaContainer.innerHTML += &lt;div class="item-cliente"&gt; &lt;div class="info-cliente"&gt; &lt;h4&gt;${cliente.nome}</h4>
-<p><i class="fa-solid fa-phone" style="font-size:10px;"></i> ${cliente.telefone} | &lt;i class="fa-solid fa-location-dot" style="font-size:10px;"&gt;&lt;/i&gt; ${cliente.cidade}</p>
+lista.innerHTML += `
+<div class="card">
+<h3>${c.nome}</h3>
+
+<div class="status ${c.status}">
+${c.status.toUpperCase()}
 </div>
-<button type="button" class="btn-excluir" data-index="${indiceReal}"&gt;&lt;i class="fa-solid fa-trash"&gt;&lt;/i&gt;&lt;/button&gt; &lt;/div&gt;;
+
+<p>📞 ${c.telefone}</p>
+<small>${c.data}</small>
+
+<div class="actions">
+<button class="whats" onclick="whatsapp('${c.telefone}','${c.nome}')">
+<i class="fa-brands fa-whatsapp"></i> Whats
+</button>
+
+<button class="delete" onclick="deletar(${c.id})">
+<i class="fa fa-trash"></i>
+</button>
+</div>
+</div>
+`;
+
 });
 
-listaContainer.querySelectorAll(".btn-excluir").forEach(btn => {
-btn.onclick = function(e) {
-e.preventDefault();
-const idx = this.getAttribute("data-index");
-if(confirm("Deseja realmente excluir este cliente?")) {
-const atualizado = obterClientes();
-atualizado.splice(idx, 1);
-localStorage.setItem("bancoClientesAutonomo", JSON.stringify(atualizado));
-renderizarLista(inputBusca.value);
-}
-};
-});
 }
 
-if (botaoSalvar) {
-botaoSalvar.onclick = function(e) {
-e.preventDefault();
+renderizar();
 
-const nome = inputNome.value.trim();
-const telefone = inputTelefone.value.trim();
-const cidade = inputCidade.value.trim();
-
-if(!nome) {
-alert("Por favor, preencha o campo 'Nome Completo'.");
-return;
-}
-
-const novoRegistro = {
-nome: nome,
-telefone: telefone || "Não informado",
-cidade: cidade || "Não informada"
-};
-
-const listaAtual = obterClientes();
-listaAtual.unshift(novoRegistro);
-
-localStorage.setItem("bancoClientesAutonomo", JSON.stringify(listaAtual));
-
-inputNome.value = "";
-inputTelefone.value = "";
-inputCidade.value = "";
-
-if (feedbackSucesso) {
-feedbackSucesso.style.display = "block";
-setTimeout(() => { feedbackSucesso.style.display = "none"; }, 2000);
-}
-
-renderizarLista();
-};
-}
-
-if (inputBusca) {
-inputBusca.oninput = function() {
-renderizarLista(this.value);
-};
-}
-
-if (document.readyState === "complete" || document.readyState === "interactive") {
-renderizarLista();
-} else {
-window.addEventListener("DOMContentLoaded", () => renderizarLista());
-}
-})();
 </script>
 
 </body>
