@@ -128,6 +128,14 @@ small{
 color:#666;
 }
 
+/* Regra de impressão para o window.print() não sair com a tela toda cagada */
+@media print {
+    body { background: white; padding: 0; }
+    .topbar, .card:nth-of-type(1), .card:nth-of-type(3), button { display: none !important; }
+    .card { box-shadow: none; padding: 0; margin: 0; }
+    .conversation-view { border: none; background: transparent; padding: 0; font-size: 14pt; }
+}
+
 </style>
 </head>
 
@@ -180,7 +188,7 @@ color:#666;
 Nenhum registro de conversa gerado no momento.
 </div>
 
-<button class="copy" onclick="coiparConversa()">
+<button class="copy" onclick="copiarConversa()">
 📋 Copiar Texto
 </button>
 
@@ -209,37 +217,35 @@ JSON.parse(localStorage.getItem("conversas")) || [];
 
 let editando = null;
 
-// Persistência em tempo real para evitar perdas durante digitação prolongada
 window.addEventListener("DOMContentLoaded", () => {
-// Definir data padrão de hoje no input de data
-const hoje = new Date().toISOString().split('T')[0];
-document.getElementById("data_registro").value = hoje;
+    const hoje = new Date().toISOString().split('T')[0];
+    document.getElementById("data_registro").value = hoje;
 
-const campos = ["interlocutor", "assunto", "meio", "data_registro", "detalhes"];
-campos.forEach(id => {
-const elemento = document.getElementById(id);
-const valorSalvo = localStorage.getItem("temp_conv_" + id);
-if (valorSalvo) elemento.value = valorSalvo;
-
-elemento.addEventListener("input", () => {
-localStorage.setItem("temp_conv_" + id, elemento.value);
-});
-if(elemento.tagName === "SELECT") {
-elemento.addEventListener("change", () => {
-localStorage.setItem("temp_conv_" + id, elemento.value);
-});
-}
-});
-renderizar();
+    const campos = ["interlocutor", "assunto", "meio", "data_registro", "detalhes"];
+    campos.forEach(id => {
+        const elemento = document.getElementById(id);
+        const valorSalvo = localStorage.getItem("temp_conv_" + id);
+        if (valorSalvo) elemento.value = valorSalvo;
+        
+        elemento.addEventListener("input", () => {
+            localStorage.setItem("temp_conv_" + id, elemento.value);
+        });
+        if(elemento.tagName === "SELECT") {
+            elemento.addEventListener("change", () => {
+                localStorage.setItem("temp_conv_" + id, elemento.value);
+            });
+        }
+    });
+    renderizar();
 });
 
 function limparRascunho() {
-const campos = ["interlocutor", "assunto", "meio", "data_registro", "detalhes"];
-campos.forEach(id => {
-localStorage.removeItem("temp_conv_" + id);
-});
-const hoje = new Date().toISOString().split('T')[0];
-document.getElementById("data_registro").value = hoje;
+    const campos = ["interlocutor", "assunto", "meio", "data_registro", "detalhes"];
+    campos.forEach(id => {
+        localStorage.removeItem("temp_conv_" + id);
+    });
+    const hoje = new Date().toISOString().split('T')[0];
+    document.getElementById("data_registro").value = hoje;
 }
 
 function salvarConversa(){
@@ -255,26 +261,25 @@ alert("Preencha o Cliente/Interlocutor, Assunto e Detalhamento.");
 return;
 }
 
-// Formatando data para exibição no relatório
 const dataFormatada = data_registro ? data_registro.split('-').reverse().join('/') : new Date().toLocaleDateString("pt-BR");
 
-const texto =
+const texto = 
 `REGISTRO DE ALINHAMENTO E CONVERSA
 
 INTERLOCUTOR/CLIENTE:
-$`{interlocutor}
+${interlocutor}
 
 ASSUNTO DA PAUTA:
-`${assunto}
+${assunto}
 
 MEIO DE CONTATO:
-$`{meio}
+${meio}
 
 DATA DA INTERAÇÃO:
-`${dataFormatada}
+${dataFormatada}
 
 DETALHES DA CONVERSA E ACORDOS:
-"$`{detalhes}"
+${detalhes}
 
 AutônomoFácil - Registro realizado em: ${new Date().toLocaleDateString("pt-BR")} às ${new Date().toLocaleTimeString("pt-BR", {hour: '2-digit', minute:'2-digit'})}
 `;
@@ -284,7 +289,7 @@ document.getElementById("conversa_preview").innerText = texto;
 if(editando){
 conversas = conversas.map(c => {
 if(c.id === editando){
-return { ...f, interlocutor, assunto, meio, data_registro, detalhes, texto };
+return { ...c, interlocutor, assunto, meio, data_registro, detalhes, texto };
 }
 return c;
 });
@@ -307,7 +312,7 @@ renderizar();
 
 }
 
-function coiparConversa(){
+function copiarConversa(){
 const texto = document.getElementById("conversa_preview").innerText;
 navigator.clipboard.writeText(texto);
 alert("Registro de conversa copiado.");
@@ -326,7 +331,7 @@ doc.setFontSize(12);
 const splitTexto = doc.splitTextToSize(texto, 170);
 doc.text(splitTexto, 20, 20);
 const nomeInterlocutor = document.getElementById("interlocutor").value || "Conversa";
-doc.save(Registro_${nomeInterlocutor}.pdf`);
+doc.save(`Registro_${nomeInterlocutor}.pdf`);
 }
 
 function excluir(id){
@@ -361,11 +366,21 @@ return;
 
 conversas.forEach(c => {
 const dt = c.data_registro ? c.data_registro.split('-').reverse().join('/') : "-";
-lista.innerHTML += &lt;div class="card"&gt; &lt;b&gt;${c.interlocutor}</b>
+lista.innerHTML += `
+<div class="card">
+<b>${c.interlocutor}</b>
 <br>
-<small>📌 Assunto: ${c.assunto}&lt;/small&gt; &lt;br&gt; &lt;small&gt;📱 Canal: ${c.meio} | 📅 Data: ${dt}&lt;/small&gt; &lt;br&gt;&lt;br&gt; &lt;p style="color: #333; margin: 5px 0; font-size: 14px; line-height: 1.4;"&gt;${c.detalhes}</p>
+<small>📌 Assunto: ${c.assunto}</small>
+<br>
+<small>📱 Canal: ${c.meio} | 📅 Data: ${dt}</small>
+<br><br>
+<p style="color: #333; margin: 5px 0; font-size: 14px; line-height: 1.4; white-space: pre-line;">${c.detalhes}</p>
 <div class="actions">
-<button class="edit" onclick="editar(${c.id})"&gt;✏ Editar&lt;/button&gt; &lt;button class="delete" onclick="excluir(${c.id})"&gt;🗑 Excluir&lt;/button&gt; &lt;/div&gt; &lt;/div&gt;;
+<button class="edit" onclick="editar(${c.id})">✏ Editar</button>
+<button class="delete" onclick="excluir(${c.id})">🗑 Excluir</button>
+</div>
+</div>
+`;
 });
 }
 
