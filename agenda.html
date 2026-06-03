@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda - AutônomoFácil</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+body{
+font-family:Segoe UI;
+background:#f4f6f9;
+margin:0;
+padding:20px;
+}
+
+h1{color:#1565c0}
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:15px;
+}
+
+.home-btn{
+background:#1565c0;
+color:#fff;
+border:none;
+padding:10px 12px;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.form, .card{
+background:#fff;
+padding:15px;
+border-radius:15px;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
+margin-bottom:15px;
+}
+
+select, input{
+width:100%;
+padding:10px;
+margin:6px 0;
+border-radius:10px;
+border:1px solid #ddd;
+}
+
+button{
+padding:10px;
+border:none;
+border-radius:10px;
+background:#1565c0;
+color:#fff;
+cursor:pointer;
+font-weight:bold;
+margin-top:5px;
+}
+
+.actions{
+display:flex;
+gap:8px;
+margin-top:10px;
+}
+
+.actions button{
+flex:1;
+font-size:12px;
+}
+
+.done{background:#2e7d32}
+.cancel{background:#c62828}
+.edit{background:#f9a825}
+
+.status{
+font-size:12px;
+padding:3px 8px;
+border-radius:10px;
+color:#fff;
+display:inline-block;
+margin-top:5px;
+}
+
+.agendado{background:#1565c0}
+.concluido{background:#2e7d32}
+.cancelado{background:#c62828}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+<h1>📅 Agenda</h1>
+
+<button class="home-btn" onclick="location.href='index.html'">
+<i class="fa fa-home"></i> Início
+</button>
+</div>
+
+<div class="form">
+
+<select id="cliente"></select>
+<select id="servico"></select>
+
+<input type="date" id="data">
+<input type="time" id="hora">
+<input type="text" id="obs" placeholder="Observações">
+
+<button onclick="salvar()">Agendar</button>
+
+</div>
+
+<div id="lista"></div>
+
+<script>
+
+let agendas = JSON.parse(localStorage.getItem("agendas")) || [];
+let clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+let servicos = JSON.parse(localStorage.getItem("servicos")) || [];
+
+let editando = null;
+
+// preencher selects
+function carregarSelects(){
+
+const c = document.getElementById("cliente");
+const s = document.getElementById("servico");
+
+c.innerHTML = "<option>Selecione Cliente</option>";
+s.innerHTML = "<option>Selecione Serviço</option>";
+
+clientes.forEach(cli=>{
+c.innerHTML += <option value="${cli.nome}">${cli.nome}&lt;/option>;
+});
+
+servicos.forEach(serv=>{
+s.innerHTML += <option value="${serv.nome}">${serv.nome}&lt;/option>;
+});
+
+}
+
+function salvar(){
+
+const cliente = document.getElementById("cliente").value;
+const servico = document.getElementById("servico").value;
+const data = document.getElementById("data").value;
+const hora = document.getElementById("hora").value;
+const obs = document.getElementById("obs").value;
+
+if(!cliente || !servico || !data || !hora){
+alert("Preencha todos os campos");
+return;
+}
+
+if(editando){
+
+agendas = agendas.map(a=>{
+if(a.id === editando){
+return {...a,cliente,servico,data,hora,obs};
+}
+return a;
+});
+
+editando = null;
+
+}else{
+
+agendas.unshift({
+id:Date.now(),
+cliente,
+servico,
+data,
+hora,
+obs,
+status:"agendado"
+});
+
+}
+
+localStorage.setItem("agendas", JSON.stringify(agendas));
+
+limpar();
+renderizar();
+}
+
+function limpar(){
+document.getElementById("data").value="";
+document.getElementById("hora").value="";
+document.getElementById("obs").value="";
+}
+
+function concluir(id){
+
+let a = agendas.find(x=>x.id===id);
+a.status="concluido";
+
+let lancamentos = JSON.parse(localStorage.getItem("lancamentosFinanceiros")) || [];
+
+lancamentos.unshift({
+valor:0,
+tipo:"recebido",
+textoOriginal:Serviço concluído: ${a.servico} para ${a.cliente},
+data:new Date().toLocaleString("pt-BR")
+});
+
+localStorage.setItem("lancamentosFinanceiros", JSON.stringify(lancamentos));
+localStorage.setItem("agendas", JSON.stringify(agendas));
+
+renderizar();
+}
+
+function cancelar(id){
+agendas = agendas.map(a=>{
+if(a.id===id)a.status="cancelado";
+return a;
+});
+localStorage.setItem("agendas", JSON.stringify(agendas));
+renderizar();
+}
+
+function deletar(id){
+agendas = agendas.filter(a=>a.id!==id);
+localStorage.setItem("agendas", JSON.stringify(agendas));
+renderizar();
+}
+
+function editar(id){
+let a = agendas.find(x=>x.id===id);
+
+document.getElementById("cliente").value = a.cliente;
+document.getElementById("servico").value = a.servico;
+document.getElementById("data").value = a.data;
+document.getElementById("hora").value = a.hora;
+document.getElementById("obs").value = a.obs;
+
+editando=id;
+}
+
+function renderizar(){
+
+const lista = document.getElementById("lista");
+lista.innerHTML="";
+
+if(agendas.length===0){
+lista.innerHTML="<p>Nenhum agendamento ainda.</p>";
+return;
+}
+
+agendas.sort((a,b)=>new Date(a.data)-new Date(b.data));
+
+agendas.forEach(a=>{
+
+lista.innerHTML += `
+<div class="card">
+
+<h3>
+
+{a.cliente}</p>
+<p>📅 
+
+{a.hora}</p>
+<p>$`{a.obs||""}</p>
+
+<span class="status ${a.status}"&gt; ${a.status.toUpperCase()}
+</span>
+
+<div class="actions">
+
+<button class="done" onclick="concluir(${a.id})"&gt;✔&lt;/button&gt; &lt;button class="cancel" onclick="cancelar(${a.id})">✖</button>
+<button class="edit" onclick="editar(`${a.id})">✏</button>
+<button class="cancel" onclick="deletar(${a.id})">🗑</button>
+
+</div>
+
+</div>
+`;
+
+});
+
+}
+
+carregarSelects();
+renderizar();
+
+</script>
+
+</body>
+</html>
