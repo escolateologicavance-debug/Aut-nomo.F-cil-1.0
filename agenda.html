@@ -112,16 +112,19 @@ margin-top:5px;
 </div>
 
 <div class="form">
-
 <label>👤 Cliente</label>
-<select id="cliente">
+<select id="clienteSelect" onchange="preencherCliente()">
 <option value="">Selecione um cliente</option>
 </select>
 
+<input id="clienteManual" placeholder="Ou digite novo cliente">
+
 <label>🛠️ Serviço</label>
-<select id="servico">
+<select id="servicoSelect" onchange="preencherServico()">
 <option value="">Selecione um serviço</option>
 </select>
+
+<input id="servicoManual" placeholder="Ou digite novo serviço">
 
 <label>📅 Data</label>
 <input type="date" id="data">
