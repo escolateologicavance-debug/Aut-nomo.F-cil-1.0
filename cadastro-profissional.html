@@ -130,10 +130,6 @@ O AutônomoFácil não tem vínculo e Responsabilidade alguma com Nenhum dos Aut
 </footer>
 
 <script>
-// Captura as chaves diretamente do ambiente configurado na Vercel
-const SUPABASE_URL = window._env_?.NEXT_PUBLIC_SUPABASE_URL || window.process?.env?.NEXT_PUBLIC_SUPABASE_URL || "";
-const SUPABASE_KEY = window._env_?.NEXT_PUBLIC_SUPABASE_ANON_KEY || window.process?.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-
 const chkTermos = document.getElementById("chkTermos");
 const btnCadastrar = document.getElementById("btnCadastrar");
 const formCadastro = document.getElementById("formCadastro");
@@ -159,40 +155,41 @@ formCadastro.addEventListener("submit", async function(e) {
     btnCadastrar.innerText = "Salvando na Nuvem...";
     btnCadastrar.disabled = true;
 
+    // Organiza os dados que serão enviados para a API
     const dados = {
         nome: document.getElementById("nome").value,
         profissao: document.getElementById("profissao").value,
         cidade: document.getElementById("cidade").value,
         whatsapp: document.getElementById("whatsapp").value,
-        status: "Disponível"
+        status: "Disponível",
+        criado_em: new Date().toISOString()
     };
 
     try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/profissionais`, { 
+        // Envia os dados para a sua nova rota segura na Vercel
+        const response = await fetch('/api/cadastrar-profissional', { 
             method: "POST", 
             headers: { 
-                "apikey": SUPABASE_KEY, 
-                "Authorization": `Bearer ${SUPABASE_KEY}`,
-                "Content-Type": "application/json",
-                "Prefer": "return=minimal"
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(dados)
         });
 
-        if (response.ok) {
+        const resultado = await response.json();
+
+        if (response.ok && resultado.success) {
             alert("Cadastro realizado com sucesso na nuvem!");
             window.location.href = "profissionais.html"; 
         } else {
-            throw new Error("Falha ao salvar os dados no Supabase.");
+            throw new Error(resultado.error || "Falha ao salvar no banco.");
         }
     } catch (error) {
-        alert("Erro ao conectar com o servidor do Supabase. Verifique a sua conexão e as chaves na Vercel.");
+        alert("Erro ao cadastrar profissional: " + error.message);
         console.error(error);
         btnCadastrar.innerText = "Concluir Cadastro";
         gerenciarBotao();
     }
 });
 </script>
-
 </body>
 </html>
