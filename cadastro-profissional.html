@@ -134,13 +134,19 @@ const chkTermos = document.getElementById("chkTermos");
 const btnCadastrar = document.getElementById("btnCadastrar");
 const formCadastro = document.getElementById("formCadastro");
 
-// CONFIGURAÇÃO REAL DO SEU SUPABASE (CONECTADO DIRETO AO SEU PROJETO)
-const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co";
-const SUPABASE_KEY = "SUA_ANON_KEY_REAL_AQUI"; 
+// BUSCA AUTOMÁTICA DE CREDENCIAIS (Lê as Environment Variables da Vercel via pasta API)
+async function carregarConfiguracoes() {
+    try {
+        const response = await fetch('/api/config');
+        if (!response.ok) throw new Error("Erro ao ler endpoint de configuração.");
+        return await response.json();
+    } catch (e) {
+        console.error("Não foi possível carregar variáveis de ambiente de forma dinâmica:", e);
+        return null;
+    }
+}
 
-// ATENÇÃO: Substitua o texto "SUA_ANON_KEY_REAL_AQUI" acima pela chave longa (anon/public) 
-// que você usou na sua página de perfil para funcionar perfeitamente!
-
+// CORREÇÃO DO BOTÃO FOSCO NO MOBILE (Gerencia cliques e mudanças)
 function gerenciarBotao() {
     if (chkTermos.checked) {
         btnCadastrar.disabled = false;
@@ -154,47 +160,58 @@ function gerenciarBotao() {
 chkTermos.addEventListener("change", gerenciarBotao);
 chkTermos.addEventListener("click", gerenciarBotao);
 
+// ENVIO COMPLETO PARA A NUVEM
 formCadastro.addEventListener("submit", async function(e) {
-e.preventDefault();
+    e.preventDefault();
 
-if(!chkTermos.checked) return;
+    if(!chkTermos.checked) return;
 
-btnCadastrar.innerText = "Salvando na Nuvem...";
-btnCadastrar.disabled = true;
+    btnCadastrar.innerText = "Salvando na Nuvem...";
+    btnCadastrar.disabled = true;
 
-const dados = {
-nome: document.getElementById("nome").value,
-profissao: document.getElementById("profissao").value,
-cidade: document.getElementById("cidade").value,
-whatsapp: document.getElementById("whatsapp").value,
-status: "Disponível",
-criado_em: new Date().toISOString()
-};
+    // Obtém os dados de conexão injetados com segurança pela Vercel
+    const config = await carregarConfiguracoes();
 
-try {
-const response = await fetch(`${SUPABASE_URL}/rest/v1/profissionais`, { 
-    method: "POST", 
-    headers: { 
-        "apikey": SUPABASE_KEY, 
-        "Authorization": `Bearer ${SUPABASE_KEY}`,
-        "Content-Type": "application/json",
-        "Prefer": "return=minimal"
-    },
-    body: JSON.stringify(dados)
-});
+    if (!config || !config.SUPABASE_URL || !config.SUPABASE_KEY) {
+        alert("Erro interno: As variáveis de ambiente não foram detectadas na Vercel.");
+        btnCadastrar.innerText = "Concluir Cadastro";
+        gerenciarBotao();
+        return;
+    }
 
-if (response.ok) {
-alert("Cadastro realizado com sucesso na nuvem!");
-window.location.href = "profissionais.html"; 
-} else {
-throw new Error("Falha ao salvar no banco.");
-}
-} catch (error) {
-alert("Erro ao conectar com o servidor do Supabase. Verifique a conexão.");
-console.error(error);
-btnCadastrar.innerText = "Concluir Cadastro";
-gerenciarBotao();
-}
+    const dados = {
+        nome: document.getElementById("nome").value,
+        profissao: document.getElementById("profissao").value,
+        cidade: document.getElementById("cidade").value,
+        whatsapp: document.getElementById("whatsapp").value,
+        status: "Disponível",
+        criado_em: new Date().toISOString()
+    };
+
+    try {
+        const response = await fetch(`${config.SUPABASE_URL}/rest/v1/profissionais`, { 
+            method: "POST", 
+            headers: { 
+                "apikey": config.SUPABASE_KEY, 
+                "Authorization": `Bearer ${config.SUPABASE_KEY}`,
+                "Content-Type": "application/json",
+                "Prefer": "return=minimal"
+            },
+            body: JSON.stringify(dados)
+        });
+
+        if (response.ok) {
+            alert("Cadastro realizado com sucesso na nuvem!");
+            window.location.href = "profissionais.html"; 
+        } else {
+            throw new Error("Falha ao salvar no banco.");
+        }
+    } catch (error) {
+        alert("Erro ao conectar com o servidor do Supabase. Verifique a conexão.");
+        console.error(error);
+        btnCadastrar.innerText = "Concluir Cadastro";
+        gerenciarBotao();
+    }
 });
 </script>
 </body>
