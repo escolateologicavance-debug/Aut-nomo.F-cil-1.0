@@ -17,7 +17,7 @@
 --text: #222;
 }
 
-• { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
 
 body { background: var(--bg); color: var(--text); padding-bottom: 40px; }
 
@@ -138,10 +138,20 @@ const formCadastro = document.getElementById("formCadastro");
 const SUPABASE_URL = "https://SEU_PROJETO.supabase.co";
 const SUPABASE_KEY = "SUA_ANON_KEY_DO_SUPABASE";
 
-// Libera ou bloqueia o botão de envio baseado no checkbox dos termos
-chkTermos.addEventListener("change", function() {
-btnCadastrar.disabled = !this.checked;
-});
+// FUNÇÃO ATUALIZADA: Força o navegador a recalcular o estado do botão no mobile
+function gerenciarBotao() {
+    if (chkTermos.checked) {
+        btnCadastrar.disabled = false;
+        btnCadastrar.style.background = "var(--primary)";
+    } else {
+        btnCadastrar.disabled = true;
+        btnCadastrar.style.background = "#b0bec5";
+    }
+}
+
+// Escuta mudanças e cliques diretos (essencial para PWAs no Android/iOS)
+chkTermos.addEventListener("change", gerenciarBotao);
+chkTermos.addEventListener("click", gerenciarBotao);
 
 formCadastro.addEventListener("submit", async function(e) {
 e.preventDefault();
@@ -162,11 +172,15 @@ criado_em: new Date().toISOString()
 
 try {
 // Envia direto para a tabela correspondente no seu banco Supabase
-const response = await fetch(${SUPABASE_URL}/rest/v1/profissionais, { method: "POST", headers: { "apikey": SUPABASE_KEY, "Authorization":Bearer ${SUPABASE_KEY},
-"Content-Type": "application/json",
-"Prefer": "return=minimal"
-},
-body: JSON.stringify(dados)
+const response = await fetch(`${SUPABASE_URL}/rest/v1/profissionais`, { 
+    method: "POST", 
+    headers: { 
+        "apikey": SUPABASE_KEY, 
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal"
+    },
+    body: JSON.stringify(dados)
 });
 
 if (response.ok) {
@@ -179,7 +193,7 @@ throw new Error("Falha ao salvar no banco.");
 alert("Erro ao conectar com o servidor do Supabase. Verifique a conexão.");
 console.error(error);
 btnCadastrar.innerText = "Concluir Cadastro";
-btnCadastrar.disabled = false;
+gerenciarBotao();
 }
 });
 </script>
