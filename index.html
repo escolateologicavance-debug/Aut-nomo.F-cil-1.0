@@ -112,6 +112,9 @@ color:#222;
 .shortcut i{font-size:28px;color:var(--primary);margin-bottom:10px;}
 .shortcut span{display:block;font-size:13px;font-weight:600;}
 
+/* Destaque visual sutil para os novos botões de atalho */
+.shortcut.destaque i{color:var(--green);}
+
 .activities{padding:0 20px;}
 .activity-box{
 background:white;
@@ -142,6 +145,7 @@ text-decoration:none;
 color:#444;
 font-size:11px;
 text-align:center;
+flex:1;
 }
 
 .bottom-nav i{
@@ -161,15 +165,6 @@ color:var(--primary);
 <div class="logo">AutônomoFácil</div>
 <div class="version">Versão 1.0</div>
 </div>
-<a href="profissionais.html" class="nav-item">
-  <img src="icons/search-workers.svg" alt="Buscar">
-  <span>Autônomos</span>
-</a>
-
-<a href="cadastro-profissional.html" class="nav-item">
-  <img src="icons/register-worker.svg" alt="Cadastrar">
-  <span>Cadastrar-se</span>
-</a>    
 
 <div>
 <a href="perfil.html" style="color:white;text-decoration:none;">
@@ -224,6 +219,10 @@ Aguardando comando de voz...
 <div class="section-title">Ações Rápidas</div>
 
 <section class="shortcuts">
+<!-- Protagonismo nas Ações Rápidas -->
+<a class="shortcut destaque" href="profissionais.html"><i class="fa-solid fa-magnifying-glass-location"></i><span>Autônomos</span></a>
+<a class="shortcut destaque" href="cadastro-profissional.html"><i class="fa-solid fa-id-card"></i><span>Cadastrar-se</span></a>
+
 <a class="shortcut" href="clientes.html"><i class="fa-solid fa-users"></i><span>Clientes</span></a>
 <a class="shortcut" href="servicos.html"><i class="fa-solid fa-clipboard-list"></i><span>Serviços</span></a>
 <a class="shortcut" href="agenda.html"><i class="fa-solid fa-calendar"></i><span>Agenda</span></a>
@@ -241,16 +240,18 @@ Aguardando comando de voz...
 <div class="activity-box" id="activityBox"></div>
 </section>
 
+<!-- Protagonismo na Barra Inferior Integrada -->
 <nav class="bottom-nav">
 <a href="index.html"><i class="fa-solid fa-house"></i>Início</a>
-<a href="#"><i class="fa-solid fa-microphone"></i>Voz</a>
-<a href="servicos.html"><i class="fa-solid fa-clipboard-list"></i>Serviços</a>
+<a href="profissionais.html"><i class="fa-solid fa-users-viewfinder"></i>Autônomos</a>
+<a href="#" id="btnNavVoz"><i class="fa-solid fa-microphone"></i>Voz</a>
+<a href="cadastro-profissional.html"><i class="fa-solid fa-user-plus"></i>Cadastrar</a>
 <a href="financeiro.html"><i class="fa-solid fa-wallet"></i>Financeiro</a>
-<a href="clientes.html"><i class="fa-solid fa-users"></i>Clientes</a>
 </nav>
 
 <script>
 const btnVoice = document.getElementById("btnVoice");
+const btnNavVoz = document.getElementById("btnNavVoz");
 const voiceResult = document.getElementById("voiceResult");
 const activityBox = document.getElementById("activityBox");
 
@@ -348,16 +349,19 @@ voiceResult.innerHTML = `✅ Salvo: ${formatarMoeda(valor)}`;
 atualizarInterface();
 }
 
+function iniciarGravacao(){
+voiceResult.innerHTML="🎙️ Ouvindo... Fale agora.";
+rec.start();
+}
+
 if(SpeechRecognition){
-const rec = new SpeechRecognition();
+var rec = new SpeechRecognition();
 rec.lang="pt-BR";
 rec.continuous = false;
 rec.interimResults = false;
 
-btnVoice.onclick=()=>{
-voiceResult.innerHTML="🎙️ Ouvindo... Fale agora.";
-rec.start();
-};
+btnVoice.onclick = iniciarGravacao;
+btnNavVoz.onclick = (e) => { e.preventDefault(); iniciarGravacao(); };
 
 rec.onresult=e=>{
 const resultadoTexto = e.results[0][0].transcript;
