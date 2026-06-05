@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cadastro de Profissional - AutônomoFácil</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="https://cloudflare.com">
 
 <style>
 :root {
@@ -165,10 +165,8 @@ formCadastro.addEventListener("submit", async function(e) {
     };
 
     try {
-        // Agora envia para a sua nova rota na pasta api
-        const response = await fetch('https://vercel.app', {
-
-
+        // Envia diretamente para a rota segura da sua API ativa na Vercel
+        const response = await fetch('https://vercel.app', { 
             method: "POST", 
             headers: { 
                 "Content-Type": "application/json"
