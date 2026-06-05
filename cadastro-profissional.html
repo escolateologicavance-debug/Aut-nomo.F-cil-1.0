@@ -166,7 +166,8 @@ formCadastro.addEventListener("submit", async function(e) {
 
     try {
         // Agora envia para a sua nova rota na pasta api
-        const response = await fetch('/api/cadastrar-profissional', { 
+        const response = await fetch('/api/cadastrar-profissional.js', { 
+
             method: "POST", 
             headers: { 
                 "Content-Type": "application/json"
