@@ -134,11 +134,13 @@ const chkTermos = document.getElementById("chkTermos");
 const btnCadastrar = document.getElementById("btnCadastrar");
 const formCadastro = document.getElementById("formCadastro");
 
-// Configurações do seu Supabase (Substitua pelos seus dados reais do projeto)
-const SUPABASE_URL = "https://SEU_PROJETO.supabase.co";
-const SUPABASE_KEY = "SUA_ANON_KEY_DO_SUPABASE";
+// CONFIGURAÇÃO REAL DO SEU SUPABASE (CONECTADO DIRETO AO SEU PROJETO)
+const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co";
+const SUPABASE_KEY = "SUA_ANON_KEY_REAL_AQUI"; 
 
-// FUNÇÃO ATUALIZADA: Força o navegador a recalcular o estado do botão no mobile
+// ATENÇÃO: Substitua o texto "SUA_ANON_KEY_REAL_AQUI" acima pela chave longa (anon/public) 
+// que você usou na sua página de perfil para funcionar perfeitamente!
+
 function gerenciarBotao() {
     if (chkTermos.checked) {
         btnCadastrar.disabled = false;
@@ -149,7 +151,6 @@ function gerenciarBotao() {
     }
 }
 
-// Escuta mudanças e cliques diretos (essencial para PWAs no Android/iOS)
 chkTermos.addEventListener("change", gerenciarBotao);
 chkTermos.addEventListener("click", gerenciarBotao);
 
@@ -166,12 +167,11 @@ nome: document.getElementById("nome").value,
 profissao: document.getElementById("profissao").value,
 cidade: document.getElementById("cidade").value,
 whatsapp: document.getElementById("whatsapp").value,
-status: "Disponível", // Define como disponível por padrão ao cadastrar
+status: "Disponível",
 criado_em: new Date().toISOString()
 };
 
 try {
-// Envia direto para a tabela correspondente no seu banco Supabase
 const response = await fetch(`${SUPABASE_URL}/rest/v1/profissionais`, { 
     method: "POST", 
     headers: { 
@@ -185,7 +185,7 @@ const response = await fetch(`${SUPABASE_URL}/rest/v1/profissionais`, {
 
 if (response.ok) {
 alert("Cadastro realizado com sucesso na nuvem!");
-window.location.href = "profissionais.html"; // Redireciona para ver a lista
+window.location.href = "profissionais.html"; 
 } else {
 throw new Error("Falha ao salvar no banco.");
 }
