@@ -155,7 +155,6 @@ formCadastro.addEventListener("submit", async function(e) {
     btnCadastrar.innerText = "Salvando na Nuvem...";
     btnCadastrar.disabled = true;
 
-    // Organiza os dados que serão enviados para a API
     const dados = {
         nome: document.getElementById("nome").value,
         profissao: document.getElementById("profissao").value,
@@ -166,7 +165,7 @@ formCadastro.addEventListener("submit", async function(e) {
     };
 
     try {
-        // Envia os dados para a sua nova rota segura na Vercel
+        // Agora envia para a sua nova rota na pasta api
         const response = await fetch('/api/cadastrar-profissional', { 
             method: "POST", 
             headers: { 
@@ -177,19 +176,19 @@ formCadastro.addEventListener("submit", async function(e) {
 
         const resultado = await response.json();
 
-        if (response.ok && resultado.success) {
+        if (response.ok) {
             alert("Cadastro realizado com sucesso na nuvem!");
             window.location.href = "profissionais.html"; 
         } else {
             throw new Error(resultado.error || "Falha ao salvar no banco.");
         }
     } catch (error) {
-        alert("Erro ao cadastrar profissional: " + error.message);
-        console.error(error);
+        alert("Erro no cadastro: " + error.message);
         btnCadastrar.innerText = "Concluir Cadastro";
         gerenciarBotao();
     }
 });
 </script>
+
 </body>
 </html>
