@@ -130,23 +130,15 @@ O AutônomoFácil não tem vínculo e Responsabilidade alguma com Nenhum dos Aut
 </footer>
 
 <script>
+// 1. ADICIONE SUAS CREDENCIAIS ENTRE AS ASPAS NAS DUAS LINHAS ABAIXO:
+const SUPABASE_URL = "SUA_URL_DO_SUPABASE_AQUI"; 
+const SUPABASE_KEY = "SUA_CHAVE_ANON_AQUI";
+
 const chkTermos = document.getElementById("chkTermos");
 const btnCadastrar = document.getElementById("btnCadastrar");
 const formCadastro = document.getElementById("formCadastro");
 
-// BUSCA AUTOMÁTICA DE CREDENCIAIS (Lê as Environment Variables da Vercel via pasta API)
-async function carregarConfiguracoes() {
-    try {
-        const response = await fetch('/api/config');
-        if (!response.ok) throw new Error("Erro ao ler endpoint de configuração.");
-        return await response.json();
-    } catch (e) {
-        console.error("Não foi possível carregar variáveis de ambiente de forma dinâmica:", e);
-        return null;
-    }
-}
-
-// CORREÇÃO DO BOTÃO FOSCO NO MOBILE (Gerencia cliques e mudanças)
+// GERENCIA O BOTÃO
 function gerenciarBotao() {
     if (chkTermos.checked) {
         btnCadastrar.disabled = false;
@@ -169,16 +161,6 @@ formCadastro.addEventListener("submit", async function(e) {
     btnCadastrar.innerText = "Salvando na Nuvem...";
     btnCadastrar.disabled = true;
 
-    // Obtém os dados de conexão injetados com segurança pela Vercel
-    const config = await carregarConfiguracoes();
-
-    if (!config || !config.SUPABASE_URL || !config.SUPABASE_KEY) {
-        alert("Erro interno: As variáveis de ambiente não foram detectadas na Vercel.");
-        btnCadastrar.innerText = "Concluir Cadastro";
-        gerenciarBotao();
-        return;
-    }
-
     const dados = {
         nome: document.getElementById("nome").value,
         profissao: document.getElementById("profissao").value,
@@ -189,11 +171,12 @@ formCadastro.addEventListener("submit", async function(e) {
     };
 
     try {
-        const response = await fetch(`${config.SUPABASE_URL}/rest/v1/profissionais`, { 
+        // Envia direto para a tabela "profissionais" do seu Supabase
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/profissionais`, { 
             method: "POST", 
             headers: { 
-                "apikey": config.SUPABASE_KEY, 
-                "Authorization": `Bearer ${config.SUPABASE_KEY}`,
+                "apikey": SUPABASE_KEY, 
+                "Authorization": `Bearer ${SUPABASE_KEY}`,
                 "Content-Type": "application/json",
                 "Prefer": "return=minimal"
             },
@@ -214,5 +197,6 @@ formCadastro.addEventListener("submit", async function(e) {
     }
 });
 </script>
+
 </body>
 </html>
