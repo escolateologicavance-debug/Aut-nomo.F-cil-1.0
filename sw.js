@@ -1,4 +1,4 @@
-const CACHE_NAME = "autonomofacil-v2";
+const CACHE_NAME = "autonomofacil-v3";
 
 const urlsToCache = [
 "/",
@@ -16,6 +16,8 @@ const urlsToCache = [
 "/conversas.html",
 "/veiculos.html",
 "/arquivos.html",
+"/profissionais.html",
+"/cadastro-profissional.html",
 
 // base
 "/manifest.json",
