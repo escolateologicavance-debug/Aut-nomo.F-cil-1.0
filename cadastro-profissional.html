@@ -130,15 +130,14 @@ O AutônomoFácil não tem vínculo e Responsabilidade alguma com Nenhum dos Aut
 </footer>
 
 <script>
-// 1. COLE SUAS CREDENCIAIS REAIS DO SUPABASE DENTRO DAS ASPAS ABAIXO:
-const SUPABASE_URL = "SEU_LINK_DO_SUPABASE"; 
-const SUPABASE_KEY = "SUA_CHAVE_ANON_LONGA";
+// Captura as chaves diretamente do ambiente configurado na Vercel
+const SUPABASE_URL = window._env_?.NEXT_PUBLIC_SUPABASE_URL || window.process?.env?.NEXT_PUBLIC_SUPABASE_URL || "";
+const SUPABASE_KEY = window._env_?.NEXT_PUBLIC_SUPABASE_ANON_KEY || window.process?.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
 const chkTermos = document.getElementById("chkTermos");
 const btnCadastrar = document.getElementById("btnCadastrar");
 const formCadastro = document.getElementById("formCadastro");
 
-// GERENCIA O BOTÃO
 function gerenciarBotao() {
     if (chkTermos.checked) {
         btnCadastrar.disabled = false;
@@ -152,7 +151,6 @@ function gerenciarBotao() {
 chkTermos.addEventListener("change", gerenciarBotao);
 chkTermos.addEventListener("click", gerenciarBotao);
 
-// ENVIO COMPLETO PARA A NUVEM
 formCadastro.addEventListener("submit", async function(e) {
     e.preventDefault();
 
@@ -166,12 +164,10 @@ formCadastro.addEventListener("submit", async function(e) {
         profissao: document.getElementById("profissao").value,
         cidade: document.getElementById("cidade").value,
         whatsapp: document.getElementById("whatsapp").value,
-        status: "Disponível",
-        criado_em: new Date().toISOString()
+        status: "Disponível"
     };
 
     try {
-        // Envia direto para a tabela "profissionais" do seu Supabase
         const response = await fetch(`${SUPABASE_URL}/rest/v1/profissionais`, { 
             method: "POST", 
             headers: { 
@@ -187,10 +183,10 @@ formCadastro.addEventListener("submit", async function(e) {
             alert("Cadastro realizado com sucesso na nuvem!");
             window.location.href = "profissionais.html"; 
         } else {
-            throw new Error("Falha ao salvar no banco.");
+            throw new Error("Falha ao salvar os dados no Supabase.");
         }
     } catch (error) {
-        alert("Erro ao conectar com o servidor do Supabase. Verifique a conexão.");
+        alert("Erro ao conectar com o servidor do Supabase. Verifique a sua conexão e as chaves na Vercel.");
         console.error(error);
         btnCadastrar.innerText = "Concluir Cadastro";
         gerenciarBotao();
