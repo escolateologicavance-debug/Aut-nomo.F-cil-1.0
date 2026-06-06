@@ -358,26 +358,37 @@ font-size: 8px;
 <li><a class="category-item"><span>Social Media / Gestor de Redes</span><span class="badge" data-profissao="Social Media / Gestor de Redes">Em breve</span></a></li>
 <li><a class="category-item"><span>Técnico em Informática</span><span class="badge" data-profissao="Técnico em Informática">Em breve</span></a></li>
 </ul>
-</div>
-
+</div
+    
 <script>
 // 1. CONFIGURAÇÃO OFICIAL DO SEU AUTÔNOMOFÁCIL
-const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
+const SUPABASE_URL = "https://supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
+
+// Função auxiliar para limpar textos (remove acentos, maiúsculas e espaços)
+function normalizarTexto(texto) {
+    if (!texto) return "";
+    return texto
+        .toString()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // Remove acentos
+        .trim();
+}
 
 // 2. SISTEMA DE BUSCA EM TEMPO REAL (LINHA DIGITÁVEL)
 const inputBusca = document.getElementById("inputBusca");
 if (inputBusca) {
     inputBusca.addEventListener("input", function() {
-        const termo = this.value.toLowerCase().trim();
+        const termo = normalizarTexto(this.value);
         const grupos = document.querySelectorAll(".grupo-categoria");
 
         grupos.forEach(grupo => {
-            const itens = grupo.querySelectorAll("li");
+            const itens = group.querySelectorAll("li");
             let algumItemVisivel = false;
 
             itens.forEach(item => {
-                const nomeProfissao = item.querySelector("span").innerText.toLowerCase();
+                const nomeProfissao = normalizarTexto(item.querySelector("span").innerText);
                 if (nomeProfissao.includes(termo)) {
                     item.style.display = "block";
                     algumItemVisivel = true;
@@ -409,30 +420,36 @@ async function atualizarStatusProfissionais() {
         
         const profissionais = await response.json();
 
-        // Cria uma lista de profissões ativas (mapeando apenas as válidas)
+        // Cria uma lista apenas com os profissionais válidos e com textos normalizados
         const profissoesAtivas = [];
-        
         profissionais.forEach(p => {
-            const statusValido = !p.status || p.status.toLowerCase() === "disponível" || p.status.toLowerCase() === "disponivel";
+            const statusTexto = normalizarTexto(p.status);
+            const statusValido = !statusTexto || statusTexto === "disponivel";
+            
             if (statusValido && p.profissao && p.whatsapp) {
                 profissoesAtivas.push({
-                    profissao: p.profissao.trim().toLowerCase(),
-                    whatsapp: p.whatsapp,
-                    nome: p.name
+                    profissaoLimpa: normalizarTexto(p.profissao),
+                    whatsapp: p.whatsapp
                 });
             }
         });
 
-        // Varre todos os badges da tela para atualizar o texto e o link do WhatsApp
+        // Varre todos os badges da tela
         const badges = document.querySelectorAll(".badge");
         badges.forEach(badge => {
-            const profBadge = badge.getAttribute("data-profissao")?.trim().toLowerCase();
+            // Se você esqueceu o atributo data-profissao, o script pega o texto do span automaticamente
+            let textoCategoria = badge.getAttribute("data-profissao");
+            if (!textoCategoria) {
+                const spanIrmao = badge.previousElementSibling;
+                textoCategoria = spanIrmao ? spanIrmao.innerText : "";
+            }
 
-            if (profBadge) {
-                // CORREÇÃO DA BUSCA: Procura se existe algum profissional cujo termo cadastrado bata com o badge
-                // Isso resolve o problema de você cadastrar "Pedreiro" e o badge ser "Pedreiro de Alvenaria"
+            const categoriaLimpa = normalizarTexto(textoCategoria);
+
+            if (categoriaLimpa) {
+                // Procura correspondência cruzada (se o banco contém a categoria ou vice-versa)
                 const profissionalEncontrado = profissoesAtivas.find(p => 
-                    profBadge.includes(p.profissao) || p.profissao.includes(profBadge)
+                    categoriaLimpa.includes(p.profissaoLimpa) || p.profissaoLimpa.includes(categoriaLimpa)
                 );
 
                 if (profissionalEncontrado) {
@@ -446,7 +463,6 @@ async function atualizarStatusProfissionais() {
                             e.preventDefault();
                             const numLimpo = profissionalEncontrado.whatsapp.toString().replace(/\D/g, "");
                             const celularFinal = numLimpo.startsWith("55") ? numLimpo : "55" + numLimpo;
-                            // CORREÇÃO: Inclusão do $ que faltava na interpolação da URL
                             window.open(`https://wa.me{celularFinal}`, '_blank');
                         };
                     }
@@ -463,7 +479,6 @@ window.addEventListener("DOMContentLoaded", () => {
     atualizarStatusProfissionais();
 });
 </script>
-
 
 </body>
 </html>
