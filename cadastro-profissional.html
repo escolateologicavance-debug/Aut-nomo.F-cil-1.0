@@ -165,22 +165,17 @@ formCadastro.addEventListener("submit", async function(e) {
     };
 
     try {
-        // Rota corrigida com o seu link real da Vercel e o caminho exato da API
-        const response = await fetch('/api/cadastrar-profissional', {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify(dados)
-});
-            method: "POST", 
-            headers: { 
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(dados)
-        });
+    try {
 
-        const resultado = await response.json();
+    const response = await fetch('/api/cadastrar-profissional', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(dados)
+    });
+
+    const resultado = await response.json();
 
         if (response.ok) {
             alert("Cadastro realizado com sucesso na nuvem!");
