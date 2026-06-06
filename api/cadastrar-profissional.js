@@ -1,10 +1,8 @@
 export default async function handler(req, res) {
-    // 🚨 ESTA LINHA CONSERTA O ERRO DE FETCH (Libera o acesso CORS)
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    // Responde rapidamente a requisições de teste do navegador
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
@@ -21,9 +19,11 @@ export default async function handler(req, res) {
 
     try {
         const url = process.env.SUPABASE_URL;
-        const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        // 🔄 CORREÇÃO 1: Usando a chave correta que está na sua Vercel
+        const key = process.env.SUPABASE_ANON_KEY; 
 
-        const response = await fetch(`${url}/rest/v1/profissionais`, {
+        // 🔄 CORREÇÃO 2: Enviando para a tabela 'cadastro' em vez de 'profissionais'
+        const response = await fetch(`${url}/rest/v1/cadastro`, {
             method: 'POST',
             headers: {
                 'apikey': key,
@@ -46,9 +46,10 @@ export default async function handler(req, res) {
             throw new Error(txtErro || 'Erro interno no Supabase');
         }
 
-        return res.status(200).json({ success: true });
+        // Retorna uma mensagem limpa de sucesso
+        return res.status(200).send("Cadastro realizado com sucesso na nuvem!");
         
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        return res.status(500).send("Erro no servidor: " + error.message);
     }
 }
