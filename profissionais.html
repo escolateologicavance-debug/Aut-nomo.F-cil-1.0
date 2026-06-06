@@ -361,9 +361,9 @@ font-size: 8px;
 </div>
 
 <script>
-// 1. CHAVES DO SUPABASE (Insira os valores reais aqui para funcionar diretamente na Vercel)
-const SUPABASE_URL = "SUA_URL_DO_SUPABASE_AQUI"; 
-const SUPABASE_KEY = "SUA_CHAVE_ANON_AQUI";
+// 1. CONFIGURAÇÃO OFICIAL DO SEU AUTÔNOMOFÁCIL
+const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
+const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
 
 // 2. SISTEMA DE BUSCA EM TEMPO REAL (LINHA DIGITÁVEL)
 const inputBusca = document.getElementById("inputBusca");
@@ -386,22 +386,16 @@ if (inputBusca) {
                 }
             });
 
-            // Oculta o título da categoria inteira se nenhum profissional dela bater com a busca
             grupo.style.display = algumItemVisivel ? "block" : "none";
         });
     });
 }
 
-// 3. BUSCA DINÂMICA DE STATUS NO SUPABASE (Muda "Em breve" para "Disponível")
+// 3. BUSCA DINÂMICA DE STATUS NO SUPABASE (Lê a tabela 'cadastro')
 async function atualizarStatusProfissionais() {
-    if (!SUPABASE_URL || !SUPABASE_KEY || SUPABASE_URL.includes("SUA_URL")) {
-        console.warn("Chaves do Supabase não configuradas no profissionais.html");
-        return;
-    }
-
     try {
-        // Buscando as colunas corretas. Adicionei 'nome' ou 'nome_completo' caso precise usar no futuro
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/profissionais?select=profissao,whatsapp,status,nome,nome_completo`, { 
+        // Buscando da tabela 'cadastro' e trazendo as colunas correspondentes do seu banco
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=profissao,whatsapp,status,name`, { 
             method: "GET", 
             headers: { 
                 "apikey": SUPABASE_KEY, 
@@ -419,25 +413,22 @@ async function atualizarStatusProfissionais() {
         // Mapeia os profissionais ativos
         const baseProfissionais = {};
         profissionais.forEach(p => {
-            // CORREÇÃO AQUI: Se o status for nulo, vazio ou "Disponível", nós aceitamos o profissional
+            // Se o status for nulo, vazio ou "Disponível", nós aceitamos o profissional
             const statusValido = !p.status || p.status === "Disponível";
             
             if (statusValido && p.profissao) {
-                // Salva o profissional na lista usando a profissão como chave
                 baseProfissionais[p.profissao.trim().toLowerCase()] = p;
             }
         });
 
-        // Varre todos os badges da tela para atualizar o texto, o estilo e o link do WhatsApp
+        // Varre todos os badges da tela para atualizar o texto e o link do WhatsApp
         const badges = document.querySelectorAll(".badge");
         badges.forEach(badge => {
             const profNome = badge.getAttribute("data-profissao")?.trim().toLowerCase();
 
             if (profNome && baseProfissionais[profNome]) {
                 const profissionalEncontrado = baseProfissionais[profNome];
-                
-                // Pega o número do WhatsApp cadastrado
-                const rawWhatsapp = profissionalEncontrado.whatsapp || profissionalEncontrado.numero_do_whatsapp || "";
+                const rawWhatsapp = profissionalEncontrado.whatsapp || "";
                 
                 if (rawWhatsapp) {
                     badge.innerText = "Disponível";
@@ -448,12 +439,9 @@ async function atualizarStatusProfissionais() {
                         itemClicavel.style.cursor = "pointer";
                         itemClicavel.onclick = (e) => {
                             e.preventDefault();
-                            // Limpa caracteres especiais do número
                             const numLimpo = rawWhatsapp.toString().replace(/\D/g, "");
-                            // Se o número digitado não tiver o código do país (55), adiciona automaticamente
                             const celularFinal = numLimpo.startsWith("55") ? numLimpo : "55" + numLimpo;
-                            
-                            window.open(`https://wa.me/${celularFinal}`, '_blank');
+                            window.open(`https://wa.me{celularFinal}`, '_blank');
                         };
                     }
                 }
@@ -464,11 +452,12 @@ async function atualizarStatusProfissionais() {
     }
 }
 
-// Inicializa a verificação na nuvem assim que a página abre
+// Inicializa a verificação assim que a página abre
 window.addEventListener("DOMContentLoaded", () => {
     atualizarStatusProfissionais();
 });
 </script>
+
 
 </body>
 </html>
