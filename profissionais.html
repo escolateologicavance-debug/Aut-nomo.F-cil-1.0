@@ -358,7 +358,7 @@ font-size: 8px;
 <li><a class="category-item"><span>Social Media / Gestor de Redes</span><span class="badge" data-profissao="Social Media / Gestor de Redes">Em breve</span></a></li>
 <li><a class="category-item"><span>Técnico em Informática</span><span class="badge" data-profissao="Técnico em Informática">Em breve</span></a></li>
 </ul>
-</div
+</div>
     
 <script>
 // 1. CONFIGURAÇÃO OFICIAL DO SEU AUTÔNOMOFÁCIL
@@ -386,6 +386,7 @@ if (inputBusca) {
                 }
             });
 
+            grupo.style.display = someItemVisible => algumItemVisivel ? "block" : "none";
             grupo.style.display = algumItemVisivel ? "block" : "none";
         });
     });
@@ -441,7 +442,7 @@ async function atualizarStatusProfissionais() {
                             e.preventDefault();
                             const numLimpo = profissionalEncontrado.whatsapp.toString().replace(/\D/g, "");
                             const celularFinal = numLimpo.startsWith("55") ? numLimpo : "55" + numLimpo;
-                            window.open(`https://wa.me{celularFinal}`, '_blank');
+                            window.open(`https://wa.me/${celularFinal}`, '_blank');
                         };
                     }
                 }
@@ -456,8 +457,6 @@ window.addEventListener("DOMContentLoaded", () => {
     atualizarStatusProfissionais();
 });
 </script>
-
-
 
 </body>
 </html>
