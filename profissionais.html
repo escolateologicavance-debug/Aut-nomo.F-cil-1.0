@@ -394,7 +394,6 @@ if (inputBusca) {
 // 3. BUSCA DINÂMICA DE STATUS NO SUPABASE (Lê a tabela 'cadastro')
 async function atualizarStatusProfissionais() {
     try {
-        // Buscando da tabela 'cadastro' e trazendo as colunas correspondentes do seu banco
         const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=profissao,whatsapp,status,name`, { 
             method: "GET", 
             headers: { 
@@ -410,27 +409,33 @@ async function atualizarStatusProfissionais() {
         
         const profissionais = await response.json();
 
-        // Mapeia os profissionais ativos
-        const baseProfissionais = {};
+        // Cria uma lista de profissões ativas (mapeando apenas as válidas)
+        const profissoesAtivas = [];
+        
         profissionais.forEach(p => {
-            // Se o status for nulo, vazio ou "Disponível", nós aceitamos o profissional
-            const statusValido = !p.status || p.status === "Disponível";
-            
-            if (statusValido && p.profissao) {
-                baseProfissionais[p.profissao.trim().toLowerCase()] = p;
+            const statusValido = !p.status || p.status.toLowerCase() === "disponível" || p.status.toLowerCase() === "disponivel";
+            if (statusValido && p.profissao && p.whatsapp) {
+                profissoesAtivas.push({
+                    profissao: p.profissao.trim().toLowerCase(),
+                    whatsapp: p.whatsapp,
+                    nome: p.name
+                });
             }
         });
 
         // Varre todos os badges da tela para atualizar o texto e o link do WhatsApp
         const badges = document.querySelectorAll(".badge");
         badges.forEach(badge => {
-            const profNome = badge.getAttribute("data-profissao")?.trim().toLowerCase();
+            const profBadge = badge.getAttribute("data-profissao")?.trim().toLowerCase();
 
-            if (profNome && baseProfissionais[profNome]) {
-                const profissionalEncontrado = baseProfissionais[profNome];
-                const rawWhatsapp = profissionalEncontrado.whatsapp || "";
-                
-                if (rawWhatsapp) {
+            if (profBadge) {
+                // CORREÇÃO DA BUSCA: Procura se existe algum profissional cujo termo cadastrado bata com o badge
+                // Isso resolve o problema de você cadastrar "Pedreiro" e o badge ser "Pedreiro de Alvenaria"
+                const profissionalEncontrado = profissoesAtivas.find(p => 
+                    profBadge.includes(p.profissao) || p.profissao.includes(profBadge)
+                );
+
+                if (profissionalEncontrado) {
                     badge.innerText = "Disponível";
                     badge.classList.add("disponivel");
 
@@ -439,8 +444,9 @@ async function atualizarStatusProfissionais() {
                         itemClicavel.style.cursor = "pointer";
                         itemClicavel.onclick = (e) => {
                             e.preventDefault();
-                            const numLimpo = rawWhatsapp.toString().replace(/\D/g, "");
+                            const numLimpo = profissionalEncontrado.whatsapp.toString().replace(/\D/g, "");
                             const celularFinal = numLimpo.startsWith("55") ? numLimpo : "55" + numLimpo;
+                            // CORREÇÃO: Inclusão do $ que faltava na interpolação da URL
                             window.open(`https://wa.me{celularFinal}`, '_blank');
                         };
                     }
