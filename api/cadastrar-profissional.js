@@ -1,4 +1,14 @@
 export default async function handler(req, res) {
+    // 🚨 ESTA LINHA CONSERTA O ERRO DE FETCH (Libera o acesso CORS)
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    // Responde rapidamente a requisições de teste do navegador
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Metodo nao permitido' });
     }
@@ -10,7 +20,6 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Envia os dados usando a URL e a Chave que salvamos na Vercel
         const url = process.env.SUPABASE_URL;
         const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
