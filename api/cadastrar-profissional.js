@@ -18,11 +18,11 @@ export default async function handler(req, res) {
     }
 
     try {
+        // 🔑 Lendo as chaves EXATAS que aparecem no seu print da Vercel
         const url = process.env.SUPABASE_URL;
-        // 🔄 CORREÇÃO 1: Usando a chave correta que está na sua Vercel
-        const key = process.env.SUPABASE_ANON_KEY; 
+        const key = process.env.SUPABASE_SERVICE_ROLE_KEY; 
 
-        // 🔄 CORREÇÃO 2: Enviando para a tabela 'cadastro' em vez de 'profissionais'
+        // 📊 Salvando milimetricamente na tabela 'cadastro' que você criou no Supabase
         const response = await fetch(`${url}/rest/v1/cadastro`, {
             method: 'POST',
             headers: {
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
             throw new Error(txtErro || 'Erro interno no Supabase');
         }
 
-        // Retorna uma mensagem limpa de sucesso
+        // Retorna o texto esperado pelo alert do seu HTML
         return res.status(200).send("Cadastro realizado com sucesso na nuvem!");
         
     } catch (error) {
