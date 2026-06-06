@@ -163,8 +163,7 @@ formCadastro.addEventListener("submit", async function(e) {
         status: "Disponível",
         criado_em: new Date().toISOString()
     };
-
-    try {
+    
     try {
 
     const response = await fetch('/api/cadastrar-profissional', {
