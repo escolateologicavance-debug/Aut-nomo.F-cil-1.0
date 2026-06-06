@@ -1,4 +1,4 @@
-const CACHE_NAME = "autonomofacil-v3";
+const CACHE_NAME = "autonomofacil-v4";
 
 const urlsToCache = [
 "/",
@@ -58,6 +58,12 @@ self.clients.claim();
 
 // FETCH (offline first)
 self.addEventListener("fetch", event => {
+
+// NÃO INTERCEPTA REQUISIÇÕES DA API
+if (event.request.url.includes("/api/")) {
+return;
+}
+
 event.respondWith(
 caches.match(event.request).then(response => {
 return response || fetch(event.request).catch(() => {
