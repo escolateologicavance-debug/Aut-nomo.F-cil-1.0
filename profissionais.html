@@ -361,8 +361,8 @@ font-size: 8px;
 </div>
     
 <script>
-// 1. CONFIGURAÇÃO OFICIAL DO SEU AUTÔNOMOFÁCIL
-const SUPABASE_URL = "https://supabase.co"; 
+// 1. CONFIGURAÇÃO OFICIAL DO SEU AUTÔNOMOFÁCIL (CORRIGIDA)
+const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
 
 // 2. SISTEMA DE BUSCA EM TEMPO REAL (MANTIDO SIMPLES E FUNCIONAL)
@@ -373,10 +373,11 @@ if (inputBusca) {
         const grupos = document.querySelectorAll(".grupo-categoria");
 
         grupos.forEach(grupo => {
-            const itens = grupo.querySelectorAll("li");
+            const itens = group => grupo.querySelectorAll("li");
+            const itensLista = grupo.querySelectorAll("li");
             let algumItemVisivel = false;
 
-            itens.forEach(item => {
+            itensLista.forEach(item => {
                 const nomeProfissao = item.querySelector("span").innerText.toLowerCase();
                 if (nomeProfissao.includes(termo)) {
                     item.style.display = "block";
@@ -386,24 +387,26 @@ if (inputBusca) {
                 }
             });
 
-            grupo.style.display = someItemVisible => algumItemVisivel ? "block" : "none";
             grupo.style.display = algumItemVisivel ? "block" : "none";
         });
     });
 }
 
-// 3. BUSCA DINÂMICA DE STATUS NO SUPABASE
+// 3. BUSCA DINÂMICA DE STATUS NO SUPABASE (CORRIGIDA E SEM BEARER TOKEN ANÔNIMO)
 async function atualizarStatusProfissionais() {
     try {
         const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=profissao,whatsapp,status`, { 
             method: "GET", 
             headers: { 
-                "apikey": SUPABASE_KEY, 
-                "Authorization": `Bearer ${SUPABASE_KEY}` 
+                "apikey": SUPABASE_KEY
             }
         });
 
-        if (!response.ok) return;
+        if (!response.ok) {
+            console.error("Erro na requisição Supabase:", response.status);
+            return;
+        }
+        
         const profissionais = await response.json();
 
         // Mapeia profissionais utilizando chaves em letras minúsculas e sem espaços
