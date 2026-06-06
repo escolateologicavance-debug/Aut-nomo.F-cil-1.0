@@ -372,7 +372,7 @@ function normalizarTexto(texto) {
         .toString()
         .toLowerCase()
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "") // Remove acentos
+        .replace(/[\u0300-\u036f]/g, "")
         .trim();
 }
 
@@ -384,7 +384,7 @@ if (inputBusca) {
         const grupos = document.querySelectorAll(".grupo-categoria");
 
         grupos.forEach(grupo => {
-            const itens = group.querySelectorAll("li");
+            const itens = grupo.querySelectorAll("li"); // CORRIGIDO: Era 'group', agora está 'grupo'
             let algumItemVisivel = false;
 
             itens.forEach(item => {
@@ -437,7 +437,6 @@ async function atualizarStatusProfissionais() {
         // Varre todos os badges da tela
         const badges = document.querySelectorAll(".badge");
         badges.forEach(badge => {
-            // Se você esqueceu o atributo data-profissao, o script pega o texto do span automaticamente
             let textoCategoria = badge.getAttribute("data-profissao");
             if (!textoCategoria) {
                 const spanIrmao = badge.previousElementSibling;
@@ -447,7 +446,6 @@ async function atualizarStatusProfissionais() {
             const categoriaLimpa = normalizarTexto(textoCategoria);
 
             if (categoriaLimpa) {
-                // Procura correspondência cruzada (se o banco contém a categoria ou vice-versa)
                 const profissionalEncontrado = profissoesAtivas.find(p => 
                     categoriaLimpa.includes(p.profissaoLimpa) || p.profissaoLimpa.includes(categoriaLimpa)
                 );
@@ -479,6 +477,7 @@ window.addEventListener("DOMContentLoaded", () => {
     atualizarStatusProfissionais();
 });
 </script>
+
 
 </body>
 </html>
