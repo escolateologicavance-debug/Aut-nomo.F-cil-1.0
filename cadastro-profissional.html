@@ -174,7 +174,9 @@ formCadastro.addEventListener("submit", async function(e) {
         body: JSON.stringify(dados)
     });
 
-    const resultado = await response.json();
+    const texto = await response.text();
+alert(texto);
+return;
 
         if (response.ok) {
             alert("Cadastro realizado com sucesso na nuvem!");
