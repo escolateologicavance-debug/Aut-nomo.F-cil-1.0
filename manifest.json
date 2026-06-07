@@ -3,8 +3,9 @@
 "short_name": "AutônomoFácil",
 "description": "App para assessorar autônomos através de comandos de voz.",
 
-"start_url": "/profissionais.html",
+"start_url": "/",
 "scope": "/",
+
 
 "display": "standalone",
 "orientation": "portrait",
