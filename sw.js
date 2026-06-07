@@ -50,19 +50,19 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-// FETCH: Estratégia Offline-First para páginas locais
+// FETCH: Estratégia Offline-First para páginas locais com desvio seguro para nuvem
 self.addEventListener("fetch", event => {
-
-  // SINCERA OBRIGAÇÃO: SUA ORDEM EXPLÍCITA MANTIDA EXATAMENTE IGUAL:
-  if (event.request.url.includes("/api/")) {
-    return;
+  // IGNORE MÉTODOS DE CADASTRO (POST, PUT, DELETE): Deixa passar direto para a nuvem sem passar pelo cache
+  if (event.request.method !== "GET") {
+    return fetch(event.request);
   }
 
-  // TRAVA COMPLEMENTAR: Não intercepta as buscas diretas do banco Supabase
-  if (event.request.url.includes("/rest/v1/")) {
-    return;
+  // DESVIO SEGURO PARA API E SUPABASE: Entrega a requisição direto para a rede de forma oficial
+  if (event.request.url.includes("/api/") || event.request.url.includes("/rest/v1/")) {
+    return fetch(event.request);
   }
 
+  // Tratamento das páginas estáticas normais do cache
   event.respondWith(
     caches.match(event.request).then(response => {
       return response || fetch(event.request);
