@@ -3,10 +3,8 @@ const CACHE_NAME = "autonomofacil-v4";
 const urlsToCache = [
 "/",
 "/index.html",
-"/index3.html",
 "/perfil.html",
-
-// módulos
+// módulos",
 "/clientes.html",
 "/servicos.html",
 "/agenda.html",
@@ -26,10 +24,8 @@ const urlsToCache = [
 
 // imagens (IMPORTANTE)
 "/icon-192.png",
-"/icon-512.png",
-
-// fallback offline (opcional)
-"/offline.html"
+"/icon-512.png"
+"/
 ];
 
 // INSTALL
