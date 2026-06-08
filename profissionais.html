@@ -381,42 +381,28 @@ font-size: 8px;
 </ul>
 </div>
     
-<script>
-// 1. CONFIGURAÇÃO OFICIAL DO SEU AUTÔNOMOFÁCIL (CORRIGIDA)
+// 1. CONFIGURAÇÃO OFICIAL DO SEU AUTÔNOMOFÁCIL
 const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
 
-// 2. SISTEMA DE BUSCA EM TEMPO REAL (MANTIDO SIMPLES E FUNCIONAL)
+let profissionaisCadastradosGlobal = [];
+
+// 2. SISTEMA DE BUSCA EM TEMPO REAL POR TEXTO
 const inputBusca = document.getElementById("inputBusca");
 if (inputBusca) {
-    inputBusca.addEventListener("input", function() {
-        const termo = this.value.toLowerCase().trim();
-        const grupos = document.querySelectorAll(".grupo-categoria");
-
-        grupos.forEach(grupo => {
-            const itens = group => grupo.querySelectorAll("li");
-            const itensLista = grupo.querySelectorAll("li");
-            let algumItemVisivel = false;
-
-            itensLista.forEach(item => {
-                const nomeProfissao = item.querySelector("span").innerText.toLowerCase();
-                if (nomeProfissao.includes(termo)) {
-                    item.style.display = "block";
-                    algumItemVisivel = true;
-                } else {
-                    item.style.display = "none";
-                }
-            });
-
-            grupo.style.display = algumItemVisivel ? "block" : "none";
-        });
-    });
+    inputBusca.addEventListener("input", executarFiltrosCombinados);
 }
 
-// 3. BUSCA DINÂMICA DE STATUS NO SUPABASE (CORRIGIDA E SEM BEARER TOKEN ANÔNIMO)
+// 3. MONITOR DO FILTRO DE CIDADES (DISPARA A ATUALIZAÇÃO AO MUDAR A CIDADE)
+const filtroCidade = document.getElementById("filtroCidade");
+if (filtroCidade) {
+    filtroCidade.addEventListener("change", executarFiltrosCombinados);
+}
+
+// 4. BUSCA DINÂMICA DE STATUS NO SUPABASE E MONTAGEM DO MENU DE CIDADES
 async function atualizarStatusProfissionais() {
     try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=profissao,whatsapp,status`, { 
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=profissao,whatsapp,status,cidade`, { 
             method: "GET", 
             headers: { 
                 "apikey": SUPABASE_KEY
@@ -428,59 +414,125 @@ async function atualizarStatusProfissionais() {
             return;
         }
         
-        const profissionais = await response.json();
+        profissionaisCadastradosGlobal = await response.json();
 
-        // Mapeia profissionais utilizando chaves em letras minúsculas e sem espaços
-        const baseProfissionais = {};
-        profissionais.forEach(p => {
-            const statusTexto = p.status ? p.status.toLowerCase().trim() : "";
-            const statusValido = !statusTexto || statusTexto === "disponivel" || statusTexto === "disponível";
+        // Monta o menu de cidades dinamicamente com base no banco de dados
+        if (filtroCidade) {
+            filtroCidade.innerHTML = '<option value="todos">🌍 Todas as Cidades</option>';
             
-            if (statusValido && p.profissao && p.whatsapp) {
-                const chaveFormatada = p.profissao.toLowerCase().trim();
-                baseProfissionais[chaveFormatada] = p;
-            }
-        });
+            const cidadesDisponiveis = [...new Set(profissionaisCadastradosGlobal
+                .map(p => p.cidade ? p.cidade.trim() : "")
+                .filter(cidade => cidade !== "")
+            )].sort();
 
-        // Atualiza os badges na tela
-        const badges = document.querySelectorAll(".badge");
-        badges.forEach(badge => {
-            let textoCategoria = badge.getAttribute("data-profissao");
-            if (!textoCategoria) {
-                const spanIrmao = badge.previousElementSibling;
-                textoCategoria = spanIrmao ? spanIrmao.innerText : "";
-            }
+            cidadesDisponiveis.forEach(cidade => {
+                const option = document.createElement("option");
+                option.value = cidade.toLowerCase().trim();
+                option.textContent = cidade;
+                filtroCidade.appendChild(option);
+            });
+        }
 
-            if (textoCategoria) {
-                const chaveBadge = textoCategoria.toLowerCase().trim();
-                const profissionalEncontrado = baseProfissionais[chaveBadge];
+        executarFiltrosCombinados();
 
-                if (profissionalEncontrado) {
-                    badge.innerText = "Disponível";
-                    badge.classList.add("disponivel");
-
-                    const itemClicavel = badge.closest(".category-item");
-                    if (itemClicavel) {
-                        itemClicavel.style.cursor = "pointer";
-                        itemClicavel.onclick = (e) => {
-                            e.preventDefault();
-                            const numLimpo = profissionalEncontrado.whatsapp.toString().replace(/\D/g, "");
-                            const celularFinal = numLimpo.startsWith("55") ? numLimpo : "55" + numLimpo;
-                            window.open(`https://wa.me/${celularFinal}`, '_blank');
-                        };
-                    }
-                }
-            }
-        });
     } catch (err) {
         console.error("Erro ao processar dados:", err);
     }
 }
 
+// 5. FUNÇÃO CENTRAL QUE CONTROLA AS CORES, OS TEXTOS, O WHATSAPP E A VISIBILIDADE DAS LINHAS
+function executarFiltrosCombinados() {
+    const termoBusca = inputBusca ? inputBusca.value.toLowerCase().trim() : "";
+    const cidadeSelecionada = filtroCidade ? filtroCidade.value.toLowerCase().trim() : "todos";
+
+    // Mapeia os profissionais ativos que passam no filtro da cidade selecionada
+    const baseProfissionaisFiltrados = {};
+    profissionaisCadastradosGlobal.forEach(p => {
+        const statusTexto = p.status ? p.status.toLowerCase().trim() : "";
+        const statusValido = !statusTexto || statusTexto === "disponivel" || statusTexto === "disponível";
+        
+        const cidadeProfissional = p.cidade ? p.cidade.toLowerCase().trim() : "";
+        const bateCidade = cidadeSelecionada === "todos" || cidadeProfissional.includes(cidadeSelecionada);
+
+        if (statusValido && p.profissao && p.whatsapp && bateCidade) {
+            const chaveFormatada = p.profissao.toLowerCase().trim();
+            baseProfissionaisFiltrados[chaveFormatada] = p;
+        }
+    });
+
+    // Varre todas as linhas de profissão para atualizar textos, links e visibilidade
+    const badges = document.querySelectorAll(".badge");
+    badges.forEach(badge => {
+        let textoCategoria = badge.getAttribute("data-profissao");
+        if (!textoCategoria) {
+            const spanIrmao = badge.previousElementSibling;
+            textoCategoria = spanIrmao ? spanIrmao.innerText : "";
+        }
+
+        const itemLista = badge.closest("li");
+        const itemClicavel = badge.closest(".category-item");
+
+        if (textoCategoria) {
+            const chaveBadge = textoCategoria.toLowerCase().trim();
+            const profissionalEncontrado = baseProfissionaisFiltrados[chaveBadge];
+
+            // Se encontrar um profissional ativo para essa profissão e nessa cidade:
+            if (profissionalEncontrado) {
+                badge.innerText = "Disponível";
+                badge.className = "badge disponivel";
+
+                if (itemClicavel) {
+                    itemClicavel.style.cursor = "pointer";
+                    itemClicavel.onclick = (e) => {
+                        e.preventDefault();
+                        const numLimpo = profissionalEncontrado.whatsapp.toString().replace(/\D/g, "");
+                        const celularFinal = numLimpo.startsWith("55") ? numLimpo : "55" + numLimpo;
+                        window.open(`https://wa.me/${celularFinal}`, '_blank');
+                    };
+                }
+            } else {
+                // Caso não encontre profissionais disponíveis na cidade
+                badge.innerText = "Em breve";
+                badge.className = "badge";
+                if (itemClicavel) {
+                    itemClicavel.style.cursor = "default";
+                    itemClicavel.onclick = null;
+                }
+            }
+
+            // Regra de Ouro da Ocultação Visual (Barra de busca + Filtro de Cidade)
+            const nomeProfissaoParaBusca = textoCategoria.toLowerCase();
+            const bateTextoBusca = nomeProfissaoParaBusca.includes(termoBusca);
+            
+            // Se filtrou por cidade e não tem profissional, oculta a linha. Se for "todos", mantém visível.
+            const deveExibirLinha = bateTextoBusca && (profissionalEncontrado || cidadeSelecionada === "todos");
+
+            if (itemLista) {
+                itemLista.style.display = deveExibirLinha ? "block" : "none";
+            }
+        }
+    });
+
+    // Controla se o bloco inteiro da categoria (Ex: Construção Civil) deve sumir ou aparecer
+    const grupos = document.querySelectorAll(".grupo-categoria");
+    grupos.forEach(grupo => {
+        const itensLista = grupo.querySelectorAll("li");
+        let algumItemVisivel = false;
+
+        itensLista.forEach(item => {
+            if (item.style.display !== "none") {
+                algumItemVisivel = true;
+            }
+        });
+
+        grupo.style.display = algumItemVisivel ? "block" : "none";
+    });
+}
+
 window.addEventListener("DOMContentLoaded", () => {
     atualizarStatusProfissionais();
 });
-</script>
+
 
 </body>
 </html>
