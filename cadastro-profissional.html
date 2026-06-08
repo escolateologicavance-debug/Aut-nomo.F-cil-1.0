@@ -166,6 +166,10 @@ formCadastro.addEventListener("submit", async function(e) {
     btnCadastrar.innerText = "Salvando na Nuvem...";
     btnCadastrar.disabled = true;
 
+    // Configuração Oficial do Supabase para conexão direta estável
+    const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
+    const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
+
     const dados = {
         nome: document.getElementById("nome").value,
         profissao: document.getElementById("profissao").value,
@@ -176,24 +180,25 @@ formCadastro.addEventListener("submit", async function(e) {
     };
     
     try {
-
-    const response = await fetch('/api/cadastrar-profissional', {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(dados)
-    });
-
-    const texto = await response.text();
-alert(texto);
-return;
+        // Correção definitiva da rota: salvando direto na tabela 'cadastro'
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro`, {
+            method: "POST",
+            headers: {
+                "apikey": SUPABASE_KEY,
+                "Authorization": `Bearer ${SUPABASE_KEY}`,
+                "Content-Type": "application/json",
+                "Prefer": "return=representation"
+            },
+            body: JSON.stringify(dados)
+        });
 
         if (response.ok) {
             alert("Cadastro realizado com sucesso na nuvem!");
             window.location.href = "profissionais.html"; 
         } else {
-            throw new Error(resultado.error || "Falha ao salvar no banco.");
+            const detalheErro = await response.text();
+            console.error("Erro retornado pelo servidor:", detalheErro);
+            throw new Error("O servidor do banco de dados recusou a gravação.");
         }
     } catch (error) {
         alert("Erro no cadastro: " + error.message);
