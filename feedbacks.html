@@ -1,374 +1,258 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Feedbacks - AutônomoFácil</title>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<style>
-
-body{
-font-family:Segoe UI,sans-serif;
-background:#f4f6f9;
-margin:0;
-padding:20px;
-}
-
-h1{
-color:#1565c0;
-margin:0;
-}
-
-.topbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
-}
-
-.home-btn{
-background:#1565c0;
-color:#fff;
-border:none;
-padding:10px 15px;
-border-radius:10px;
-font-weight:bold;
-cursor:pointer;
-}
-
-.card{
-background:#fff;
-padding:15px;
-border-radius:15px;
-box-shadow:0 2px 8px rgba(0,0,0,.08);
-margin-bottom:15px;
-}
-
-label{
-display:block;
-margin-top:10px;
-font-weight:bold;
-font-size:14px;
-}
-
-input, textarea, select{
-width:100%;
-padding:10px;
-border:1px solid #ddd;
-border-radius:10px;
-margin-top:5px;
-box-sizing:border-box;
-}
-
-textarea{
-min-height:80px;
-resize:vertical;
-}
-
-button{
-padding:10px;
-border:none;
-border-radius:10px;
-cursor:pointer;
-font-weight:bold;
-margin-top:10px;
-}
-
-.primary{
-background:#1565c0;
-color:white;
-width:100%;
-}
-
-.copy{
-background:#2e7d32;
-color:white;
-width:100%;
-}
-
-.print{
-background:#f9a825;
-color:white;
-width:100%;
-}
-
-.delete{
-background:#c62828;
-color:white;
-}
-
-.edit{
-background:#f9a825;
-color:white;
-}
-
-.feedback-view{
-white-space:pre-line;
-background:#fafafa;
-padding:15px;
-border-radius:10px;
-border:1px solid #eee;
-margin-top:15px;
-}
-
-.actions{
-display:flex;
-gap:8px;
-margin-top:10px;
-}
-
-.actions button{
-flex:1;
-}
-
-small{
-color:#666;
-}
-
-.stars {
-color: #f9a825;
-font-size: 18px;
-margin-top: 5px;
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedbacks - AutônomoFácil</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        body {
+            font-family: Segoe UI, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #1565c0;
+            margin: 0;
+        }
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .home-btn {
+            background: #1565c0;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        button {
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .primary {
+            background: #1565c0;
+            color: white;
+            width: 100%;
+        }
+        .delete {
+            background: #c62828;
+            color: white;
+        }
+        .stars {
+            color: #f9a825;
+            font-size: 16px;
+            margin-top: 3px;
+        }
+        .feedback-item {
+            border-bottom: 1px solid #eee;
+            padding: 12px 0;
+        }
+        .feedback-item:last-child {
+            border-bottom: none;
+        }
+        small {
+            color: #666;
+            display: block;
+            margin-top: 2px;
+        }
+    </style>
 </head>
-
 <body>
 
 <div class="topbar">
-
-<h1>💬 Feedbacks</h1>
-
-<button class="home-btn" onclick="location.href='index.html'">
-<i class="fa fa-home"></i> Início
-</button>
-
+    <h1>💬 Feedbacks</h1>
+    <button class="home-btn" onclick="location.href='index.html'">
+        <i class="fa fa-home"></i> Início
+    </button>
 </div>
 
 <div class="card">
+    <label>Nome do Profissional Avaliado</label>
+    <input type="text" id="profissional_nome" placeholder="Ex: Gilberto Moreira">
 
-<label>Nome do Cliente</label>
-<input type="text" id="cliente" placeholder="Ex: João Silva">
+    <label>Nome do Cliente</label>
+    <input type="text" id="cliente" placeholder="Ex: João Silva">
 
-<label>Serviço Prestado</label>
-<input type="text" id="servico" placeholder="Ex: Pintura Residencial">
+    <label>Serviço Prestado</label>
+    <input type="text" id="servico" placeholder="Ex: Pintura Residencial">
 
-<label>Avaliação (1 a 5 Estrelas)</label>
-<select id="nota">
-<option value="5">⭐⭐⭐⭐⭐ (Excelente)</option>
-<option value="4">⭐⭐⭐⭐ (Muito Bom)</option>
-<option value="3">⭐⭐⭐ (Bom)</option>
-<option value="2">⭐⭐ (Regular)</option>
-<option value="1">⭐ (Ruim)</option>
-</select>
+    <label>Avaliação (1 a 5 Estrelas)</label>
+    <select id="nota">
+        <option value="5">⭐⭐⭐⭐⭐ (Excelente)</option>
+        <option value="4">⭐⭐⭐⭐ (Muito Bom)</option>
+        <option value="3">⭐⭐⭐ (Bom)</option>
+        <option value="2">⭐⭐ (Regular)</option>
+        <option value="1">⭐ (Ruim)</option>
+    </select>
 
-<label>Depoimento / Comentários</label>
-<textarea id="depoimento" placeholder="Escreva o feedback do cliente aqui..."></textarea>
+    <label>Depoimento / Comentários</label>
+    <textarea id="depoimento" placeholder="Escreva o feedback do cliente aqui..."></textarea>
 
-<button class="primary" onclick="salvarFeedback()">
-💾 Salvar Feedback
-</button>
+    <label>Indicaria este profissional a um amigo?</label>
+    <select id="indique_amigo">
+        <option value="Sim">Sim, com certeza!</option>
+        <option value="Talvez">Talvez</option>
+        <option value="Não">Não recomendo</option>
+    </select>
 
+    <button class="primary" id="btnSalvar" onclick="salvarFeedback()">
+        💾 Salvar Feedback
+    </button>
 </div>
 
 <div class="card">
-
-<h3>Visualização do Registro</h3>
-
-<div id="feedback_preview" class="feedback-view">
-Nenhum feedback registrado no momento.
-</div>
-
-<button class="copy" onclick="copiarFeedback()">
-📋 Copiar Texto
-</button>
-
-<button class="print" style="background:#e53935;" onclick="baixarPDF()">
-📕 Gerar e Baixar PDF
-</button>
-
-<button class="print" onclick="window.print()">
-🖨️ Imprimir
-</button>
-
-</div>
-
-<div class="card">
-
-<h3>📚 Histórico de Depoimentos</h3>
-
-<div id="lista"></div>
-
+    <h3>📚 Histórico de Depoimentos (Nuvem)</h3>
+    <div id="lista">Carregando depoimentos...</div>
 </div>
 
 <script>
+// Dados de Acesso Direto do seu Supabase (as mesmas credenciais de sucesso do seu cadastro)
+const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
+const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
 
-let feedbacks =
-JSON.parse(localStorage.getItem("feedbacks")) || [];
-
-let editando = null;
-
-// Persistência em tempo real para não perder o que está digitando
+// Carrega os feedbacks salvos assim que a página abre
 window.addEventListener("DOMContentLoaded", () => {
-const campos = ["cliente", "servico", "nota", "depoimento"];
-campos.forEach(id => {
-const elemento = document.getElementById(id);
-const valorSalvo = localStorage.getItem("temp_feed_" + id);
-if (valorSalvo) elemento.value = valorSalvo;
-
-elemento.addEventListener("input", () => {
-localStorage.setItem("temp_feed_" + id, elemento.value);
-});
-if(elemento.tagName === "SELECT") {
-elemento.addEventListener("change", () => {
-localStorage.setItem("temp_feed_" + id, elemento.value);
-});
-}
-});
-renderizar();
+    puxarFeedbacks();
 });
 
-function limparRascunho() {
-const campos = ["cliente", "servico", "nota", "depoimento"];
-campos.forEach(id => {
-localStorage.removeItem("temp_feed_" + id);
-});
+// Função para SALVAR o feedback direto no Supabase
+async function salvarFeedback() {
+    const profissional_nome = document.getElementById("profissional_nome").value.trim();
+    const cliente_nome = document.getElementById("cliente").value.trim();
+    const servico_prestado = document.getElementById("servico").value.trim();
+    const estrelas = document.getElementById("nota").value;
+    const comentario = document.getElementById("depoimento").value.trim();
+    const indique_a_um_amigo = document.getElementById("indique_amigo").value;
+
+    if (!profissional_nome || !cliente_nome || !servico_prestado || !comentario) {
+        alert("Por favor, preencha todos os campos do feedback.");
+        return;
+    }
+
+    const btn = document.getElementById("btnSalvar");
+    btn.disabled = true;
+    btn.innerText = "⏳ Gravando na Nuvem...";
+
+    try {
+        const dadosFormulario = {
+            profissional_nome,
+            cliente_nome,
+            servico_prestado,
+            estrelas,
+            comentario,
+            indique_a_um_amigo
+        };
+
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro_feedbacks`, {
+            method: "POST",
+            headers: {
+                "apikey": SUPABASE_KEY,
+                "Authorization": `Bearer ${SUPABASE_KEY}`,
+                "Content-Type": "application/json",
+                "Prefer": "return=representation"
+            },
+            body: JSON.stringify([dadosFormulario])
+        });
+
+        if (!response.ok) {
+            const erroTxt = await response.text();
+            throw new Error(erroTxt);
+        }
+
+        alert("🎉 Feedback registrado e salvo com sucesso!");
+        
+        // Limpa apenas os dados do cliente e comentário para a próxima avaliação
+        document.getElementById("cliente").value = "";
+        document.getElementById("servico").value = "";
+        document.getElementById("depoimento").value = "";
+        
+        // Atualiza a lista na tela com o novo registro
+        puxarFeedbacks();
+
+    } catch (error) {
+        console.error(error);
+        alert("Erro ao salvar no Supabase: " + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "💾 Salvar Feedback";
+    }
 }
 
-function salvarFeedback(){
+// Função para BUSCAR os feedbacks gravados na nuvem e renderizar no histórico
+async function puxarFeedbacks() {
+    const lista = document.getElementById("lista");
 
-const cliente = document.getElementById("cliente").value;
-const servico = document.getElementById("servico").value;
-const nota = document.getElementById("nota").value;
-const depoimento = document.getElementById("depoimento").value;
+    try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro_feedbacks?order=created_at.desc`, {
+            method: "GET",
+            headers: {
+                "apikey": SUPABASE_KEY,
+                "Authorization": `Bearer ${SUPABASE_KEY}`
+            }
+        });
 
-if(!cliente || !servico || !depoimento){
-alert("Preencha o Nome, Serviço e o Depoimento.");
-return;
+        if (!response.ok) throw new Error("Não foi possível carregar o histórico.");
+
+        const dados = await response.json();
+        lista.innerHTML = "";
+
+        if (dados.length === 0) {
+            lista.innerHTML = "<p>Nenhum feedback cadastrado no momento.</p>";
+            return;
+        }
+
+        dados.forEach(f => {
+            const visualEstrelas = "⭐".repeat(parseInt(f.stars || f.estrelas || 5));
+            lista.innerHTML += `
+                <div class="feedback-item">
+                    <b>Profissional:</b> ${f.profissional_nome || 'Não Informado'} <br>
+                    <b>Cliente:</b> ${f.cliente_nome} <small>Serviço: ${f.servico_prestado}</small>
+                    <div class="stars">${visualEstrelas}</div>
+                    <p style="font-style: italic; color: #444; margin: 5px 0 2px 0;">"${f.comentario}"</p>
+                    <small>👍 Indicou para amigo: <b>${f.indique_a_um_amigo || 'Sim'}</b></small>
+                </div>
+            `;
+        });
+
+    } catch (error) {
+        lista.innerHTML = `<p style="color:red;">Erro ao atualizar histórico: ${error.message}</p>`;
+    }
 }
-
-const estrelas = "⭐".repeat(parseInt(nota));
-const texto =
-`REGISTRO DE FEEDBACK DO CLIENTE
-
-CLIENTE:
-$`{cliente}
-
-SERVIÇO PRESTADO:
-`${servico}
-
-AVALIAÇÃO:
-
-{nota}/5)
-
-DEPOIMENTO:
-"$`{depoimento}"
-
-Data de registro:
-${new Date().toLocaleDateString("pt-BR")};
-
-document.getElementById("feedback_preview").innerText = texto;
-
-if(editando){
-feedbacks = feedbacks.map(f => {
-if(f.id === editando){
-return { ...f, cliente, servico, nota, depoimento, texto };
-}
-return f;
-});
-editando = null;
-} else {
-feedbacks.unshift({
-id: Date.now(),
-cliente,
-servico,
-nota,
-depoimento,
-texto
-});
-}
-
-localStorage.setItem("feedbacks", JSON.stringify(feedbacks));
-limparRascunho();
-renderizar();
-
-}
-
-function copiarFeedback(){
-const texto = document.getElementById("feedback_preview").innerText;
-navigator.clipboard.writeText(texto);
-alert("Feedback copiado para a área de transferência.");
-}
-
-function baixarPDF(){
-const texto = document.getElementById("feedback_preview").innerText;
-if(texto.trim() === "Nenhum feedback registrado no momento."){
-alert("Registre um feedback antes de baixar o PDF.");
-return;
-}
-const { jsPDF } = window.jspdf;
-const doc = new jsPDF();
-doc.setFont("Helvetica", "normal");
-doc.setFontSize(12);
-const splitTexto = doc.splitTextToSize(texto, 170);
-doc.text(splitTexto, 20, 20);
-const nomeCliente = document.getElementById("cliente").value || "Feedback";
-doc.save(Feedback_${nomeCliente}.pdf`);
-}
-
-function excluir(id){
-if(!confirm("Excluir este feedback?")) return;
-feedbacks = feedbacks.filter(f => f.id !== id);
-localStorage.setItem("feedbacks", JSON.stringify(feedbacks));
-renderizar();
-}
-
-function editar(id){
-const f = feedbacks.find(x => x.id === id);
-
-document.getElementById("cliente").value = f.cliente;
-document.getElementById("servico").value = f.servico;
-document.getElementById("nota").value = f.nota;
-document.getElementById("depoimento").value = f.depoimento;
-document.getElementById("feedback_preview").innerText = f.texto;
-
-editando = id;
-window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-function renderizar(){
-const lista = document.getElementById("lista");
-lista.innerHTML = "";
-
-if(feedbacks.length === 0){
-lista.innerHTML = "<p>Nenhum feedback cadastrado.</p>";
-return;
-}
-
-feedbacks.forEach(f => {
-const estrelas = "⭐".repeat(parseInt(f.nota));
-lista.innerHTML += &lt;div class="card"&gt; &lt;b&gt;${f.cliente}</b>
-<br>
-<small>
-
-{estrelas}</div>
-<br>
-<p style="font-style: italic; color: #444; margin: 5px 0;">"
-
-{f.id})">✏ Editar</button>
-<button class="delete" onclick="excluir(${f.id})">🗑 Excluir</button>
-</div>
-</div>
-`;
-});
-}
-
-renderizar();
-
 </script>
 
 </body>
