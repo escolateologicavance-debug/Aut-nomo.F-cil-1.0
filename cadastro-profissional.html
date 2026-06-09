@@ -17,6 +17,37 @@
 --text: #222;
 }
 
+/* Caixa de Alerta de Licença Comercial */
+.licenca-box {
+    background: #fff9e6;
+    border-left: 5px solid #f57c00;
+    padding: 15px;
+    margin: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+.licenca-titulo {
+    color: #e65100;
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+.licenca-texto {
+    font-size: 13px;
+    color: #444;
+    line-height: 1.5;
+}
+/* Efeito de piscar discreto para o gatilho de centavos */
+.piscar-alerta {
+    color: var(--red);
+    font-weight: bold;
+    animation: efeitoPiscar 1.5s infinite alternate;
+}
+@keyframes efeitoPiscar {
+    0% { opacity: 1; }
+    100% { opacity: 0.4; }
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
 
 body { background: var(--bg); color: var(--text); padding-bottom: 40px; }
@@ -95,7 +126,16 @@ color: var(--red); font-weight: 600; line-height: 1.4;
 
 </header>
 
-
+<div class="licenca-box">
+    <div class="licenca-titulo">
+        <i class="fa-solid fa-clock"></i> Período de Avaliação Profissional
+    </div>
+    <p class="licenca-texto">
+        O <strong>AutônomoFácil</strong> disponibiliza <strong>7 dias de licença gratuita</strong> com acesso integral às ferramentas de gestão e visibilidade na busca regional.<br><br>
+        <strong>Sem mensalidades:</strong> Após o prazo de 7 dias, a taxa de manutenção para permanência na vitrine ativa é de apenas <strong>R$ 59,00 por ANO</strong>.<br>
+        <span class="piscar-alerta">🔴 Isso representa menos de 16 centavos por dia para manter seu negócio ativo!</span>
+    </p>
+</div>
 
 <div class="container">
 <div class="form-box">
