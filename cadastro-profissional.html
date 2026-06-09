@@ -139,7 +139,7 @@ color: var(--red); font-weight: 600; line-height: 1.4;
 <footer>
 O AutônomoFácil não tem vínculo e Responsabilidade alguma com Nenhum dos Autônomos Cadastrados, E Livre de Comprometimento nos resultados de quaisquer trabalho de seus afiliados-cadastrados.
 </footer>
-
+    
 <script>
 const chkTermos = document.getElementById("chkTermos");
 const btnCadastrar = document.getElementById("btnCadastrar");
@@ -163,24 +163,49 @@ formCadastro.addEventListener("submit", async function(e) {
 
     if(!chkTermos.checked) return;
 
-    btnCadastrar.innerText = "Salvando na Nuvem...";
+    btnCadastrar.innerText = "Verificando dados...";
     btnCadastrar.disabled = true;
 
     // Configuração Oficial do Supabase para conexão direta estável
     const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
     const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
 
-    const dados = {
-        nome: document.getElementById("nome").value,
-        profissao: document.getElementById("profissao").value,
-        cidade: document.getElementById("cidade").value,
-        whatsapp: document.getElementById("whatsapp").value,
-        status: "Disponível",
-        criado_em: new Date().toISOString()
-    };
+    const whatsappDigitado = document.getElementById("whatsapp").value.trim();
     
     try {
-        // Correção definitiva da rota: salvando direto na tabela 'cadastro'
+        // 🛡️ 1. FISCALIZAÇÃO ANTIDUPLICIDADE: Verifica se o WhatsApp já existe na nuvem
+        const checarResposta = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?whatsapp=eq.${encodeURIComponent(whatsappDigitado)}`, {
+            method: "GET",
+            headers: {
+                "apikey": SUPABASE_KEY,
+                "Authorization": `Bearer ${SUPABASE_KEY}`
+            }
+        });
+
+        if (checarResposta.ok) {
+            const profissionaisEncontrados = await checarResposta.json();
+            // Se encontrou algum registro com esse WhatsApp, barra o ciclo vicioso
+            if (profissionaisEncontrados.length > 0) {
+                alert("Este número de WhatsApp já possui um período de testes ou cadastro registrado. Para acessar seu painel de ferramentas, insira sua chave de ativação.");
+                btnCadastrar.innerText = "Concluir Cadastro";
+                gerenciarBotao();
+                return; // Encerra o envio aqui
+            }
+        }
+
+        // Se passou pela checagem, prepara os dados para salvar
+        btnCadastrar.innerText = "Salvando na Nuvem...";
+        
+        const dados = {
+            nome: document.getElementById("nome").value,
+            profissao: document.getElementById("profissao").value,
+            cidade: document.getElementById("cidade").value,
+            whatsapp: whatsappDigitado,
+            status: "Disponível",
+            criado_em: new Date().toISOString()
+        };
+    
+        // 2. SALVAMENTO NORMAL DO CADASTRO
         const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro`, {
             method: "POST",
             headers: {
@@ -193,7 +218,11 @@ formCadastro.addEventListener("submit", async function(e) {
         });
 
         if (response.ok) {
-            alert("Cadastro realizado com sucesso na nuvem!");
+            // 📱 3. CARIMBO DIGITAL: Ativa os 7 dias de avaliação gratuita no aparelho
+            localStorage.setItem("autonomofacil_data_cadastro", new Date().toISOString());
+            localStorage.setItem("autonomofacil_status", "teste");
+
+            alert("Cadastro realizado com sucesso na nuvem! Seu período de 7 dias de teste começou.");
             window.location.href = "profissionais.html"; 
         } else {
             const detalheErro = await response.text();
