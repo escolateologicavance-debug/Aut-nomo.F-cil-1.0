@@ -303,27 +303,32 @@ return;
 }
 
 arquivos.forEach(a => {
-let badgeClass = "badge-outro";
-if(a.categoria === "Contrato") badgeClass = "badge-contrato";
-if(a.categoria === "Recibo/Nota") badgeClass = "badge-recibo";
-if(a.categoria === "Foto/Imagens") badgeClass = "badge-foto";
+    let badgeClass = "badge-outro";
+    if(a.categoria === "Contrato") badgeClass = "badge-contrato";
+    if(a.categoria === "Recibo/Nota") badgeClass = "badge-recibo";
+    if(a.categoria === "Foto/Imagens") badgeClass = "badge-foto";
 
-lista.innerHTML += &lt;div class="item-arquivo"&gt; &lt;div class="info-arq"&gt; &lt;span class="badge ${badgeClass}">${a.categoria}&lt;/span&gt; &lt;br&gt; &lt;b style="font-size:16px; color:#333;"&gt;${a.nome}</b>
-<br>
-<small>📅 Catalogado em: ${a.data}&lt;/small&gt; &lt;p style="margin:5px 0; color:#555; font-size:14px;"&gt;${a.obs || "Sem observações."}</p>
-<a href="`${a.link}" target="_blank" class="btn-acessar">
-<i class="fa fa-external-link"></i> Abrir / Acessar Arquivo
-</a>
-
-<div class="actions" style="max-width:200px; margin-top:10px;">
-<button class="edit" style="padding:4px 8px; font-size:12px;" onclick="editar(
-
-{a.id})">🗑️ Remover</button>
-</div>
-</div>
-</div>
-`;
+    lista.innerHTML += `
+        <div class="item-arquivo">
+            <div class="info-arq">
+                <span class="badge ${badgeClass}">${a.categoria}</span>
+                <br>
+                <b style="font-size:16px; color:#333;">${a.nome}</b>
+                <br>
+                <small>📅 Catalogado em: ${a.data}</small>
+                <p style="margin:5px 0; color:#555; font-size:14px;">${a.obs || "Sem observações."}</p>
+                <a href="${a.link}" target="_blank" class="btn-acessar">
+                    <i class="fa fa-external-link"></i> Abrir / Acessar
+                </a>
+            </div>
+            <div class="actions" style="flex-direction: column; width: 80px;">
+                <button class="edit" style="padding:4px;" onclick="editar(${a.id})">✏️ Editar</button>
+                <button class="delete" style="padding:4px;" onclick="excluir(${a.id})">🗑️ Excluir</button>
+            </div>
+        </div>
+    `;
 });
+
 }
 
 renderizar();
