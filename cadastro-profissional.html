@@ -264,28 +264,42 @@ formCadastro.addEventListener("submit", async function(e) {
         gerenciarBotao();
     }
 });
-
-// 2. FISCAL DA RAIZ: Executa de imediato ao abrir a página
+// 2. FISCAL DA RAIZ ATUALIZADO (Olhando a data de expiração)
 (async function fiscalizarFluxoCompleto() {
     const whatsappSalvo = localStorage.getItem("autonomofacil_whatsapp");
-    const dataCadastroStr = localStorage.getItem("autonomofacil_data_cadastro");
-    
-    if (!whatsappSalvo || !dataCadastroStr) return; 
+    if (!whatsappSalvo) return;
 
-    const dataCadastro = new Date(dataCadastroStr);
+    // Busca o status atual no banco para saber a data de expiração
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?whatsapp=eq.${encodeURIComponent(whatsappSalvo)}`, {
+        method: "GET",
+        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+    });
+    
+    const dados = await response.json();
+    if (dados.length === 0) return;
+
+    const usuario = dados[0];
     const hoje = new Date();
+    const dataExpiracao = usuario.data_expiracao ? new Date(usuario.data_expiracao) : new Date(usuario.criado_em);
     
-    // Calcula a diferença real em dias inteiros (evita bloqueio prematuro por arredondamento)
-    const diferencaMilissegundos = hoje.getTime() - dataCadastro.getTime();
-    const diasCorridos = Math.floor(diferencaMilissegundos / (1000 * 60 * 60 * 24));
+    // Se for novo cadastro, soma 7 dias de teste
+    if (!usuario.data_expiracao) {
+        dataExpiracao.setDate(dataExpiracao.getDate() + 7);
+    }
 
-    // Bloqueia se estourar 12 dias reais (7 teste + 5 tolerância)
-    if (diasCorridos > 12) {
-        await atualizarStatusNuvem(whatsappSalvo, "Inativo");
-        localStorage.setItem("autonomofacil_status", "expirado");
+    // Lógica de Bloqueio e Avisos
+    if (hoje > dataExpiracao) {
+        // Bloqueia e mostra tela de pagamento
         aplicarBloqueioCobranca(whatsappSalvo);
+    } else {
+        // Se faltam menos de 15 dias, mostra aviso de renovação
+        const diasRestantes = Math.ceil((dataExpiracao - hoje) / (1000 * 60 * 60 * 24));
+        if (diasRestantes <= 15) {
+            alert("Atenção: Sua licença vence em " + diasRestantes + " dias. Renove para não perder a visibilidade.");
+        }
     }
 })();
+
 
 // 3. RETENÇÃO VISUAL E GERADOR DE INTERFACE DO PIX
 function aplicarBloqueioCobranca(whatsapp) {
@@ -374,12 +388,26 @@ async function verificarSeFoiPago(whatsapp) {
         });
         const data = await response.json();
 
-        if (data.results?.[0]?.status === "approved") {
-            await atualizarStatusNuvem(whatsapp, "Disponível");
-            localStorage.setItem("autonomofacil_status", "ativo");
-            alert("Pagamento Aprovado! Seu cadastro voltou para a vitrine de buscas.");
-            window.location.reload();
-        }
+     if (data.results?.[0]?.status === "approved") {
+    // Calcula 1 ano a partir de hoje
+    const novaData = new Date();
+    novaData.setFullYear(novaData.getFullYear() + 1);
+
+    // Atualiza o banco com a nova data de expiração
+    await fetch(`${SUPABASE_URL}/rest/v1/cadastro?whatsapp=eq.${encodeURIComponent(whatsapp)}`, {
+        method: "PATCH",
+        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+            status: "Disponível",
+            data_expiracao: novaData.toISOString()
+        })
+    });
+
+    localStorage.setItem("autonomofacil_status", "ativo");
+    alert("Pagamento Aprovado! Sua licença foi renovada por mais 1 ano.");
+    window.location.reload();
+}
+
     } catch (e) {
         console.error(e);
     }
