@@ -179,7 +179,7 @@ const btnCadastrar = document.getElementById("btnCadastrar");
 const formCadastro = document.getElementById("formCadastro");
 
 // Credenciais Oficiais e Imutáveis do Sistema
-const MP_ACCESS_TOKEN = "APP_USR-5566486977720830-111319-2a921774301cae014946b495bf439bc9-436233346";
+
 const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
 const VALOR_LICENCA = 59.00;
@@ -359,24 +359,19 @@ function aplicarBloqueioCobranca(whatsapp) {
 
 // 4. EMISSÃO DE SOLICITAÇÃO AO MERCADO PAGO
 async function criarPixMercadoPago(whatsapp) {
-    const refExclusiva = `recarga_${whatsapp.replace(/\D/g, '')}`;
     try {
-        const response = await fetch("https://api.mercadopago.com/v1/payments", {
+        const response = await fetch("/api/gerar-pix", {
             method: "POST",
-            headers: { "Authorization": `Bearer ${MP_ACCESS_TOKEN}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-                transaction_amount: VALOR_LICENCA,
-                description: "Ativação Anual - AutônomoFácil",
-                payment_method_id: "pix",
-                external_reference: refExclusiva,
-                payer: { email: "sistema@autonomofacil.com", first_name: "Profissional", last_name: "Autônomo" }
-            })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ whatsapp: whatsapp })
         });
         const data = await response.json();
         return data.point_of_interaction?.transaction_data?.qr_code || null;
     } catch (e) {
+        console.error("Erro na API:", e);
         return null;
     }
+}
 }
 
 // 5. CHECAGEM SÍNCRONA DE RECEBIMENTO
