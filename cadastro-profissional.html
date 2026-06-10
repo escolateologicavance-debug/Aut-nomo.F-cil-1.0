@@ -275,7 +275,100 @@ formCadastro.addEventListener("submit", async function(e) {
         gerenciarBotao();
     }
 });
-</script>
+// CONFIGURAÇÕES DA SUA INTEGRAÇÃO - AUTÔNOMOFÁCIL
+const MP_ACCESS_TOKEN = "APP_USR-5566486977720830-111319-2a921774301cae014946b495bf439bc9-436233346";
+const VALOR_ATIVACAO = 59.00;
+const CHAVE_PIX_REMETENTE = "escolateologicavance@gmail.com";
+
+// 1. Função que gera o Pix Automático no Mercado Pago quando o app vence
+async function gerarPixAssinatura(usuarioEmail, usuarioWhatsApp) {
+    const url = "https://api.mercadopago.com/v1/payments";
+    
+    // Identificador único do pagamento para o seu sistema não se perder
+    const externalReference = `recarga_${usuarioWhatsApp.replace(/\D/g, '')}`;
+
+    const paymentData = {
+        transaction_amount: VALOR_ATIVACAO,
+        description: "Ativação Anual - Aplicativo AutônomoFácil",
+        payment_method_id: "pix",
+        external_reference: externalReference,
+        payer: {
+            email: usuarioEmail || "cliente@autonomofacil.com",
+            first_name: "Profissional",
+            last_name: "Autônomo"
+        }
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${MP_ACCESS_TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(paymentData)
+        });
+
+        const data = await response.json();
+        
+        if (data.point_of_interaction && data.point_of_interaction.transaction_data) {
+            // Retorna o código "Copia e Cola" prontinho para o botão da tela
+            return data.point_of_interaction.transaction_data.qr_code;
+        } else {
+            console.error("Erro ao gerar dados do Pix", data);
+            return null;
+        }
+    } catch (error) {
+        console.error("Erro na conexão com Mercado Pago:", error);
+        return null;
+    }
+}
+
+// 2. Função "Olho de Águia" - Checa se o Pix foi pago para destravar no Supabase
+async function verificarPagamentoAutomatico(usuarioWhatsApp, supabaseClient) {
+    const refExclusiva = `recarga_${usuarioWhatsApp.replace(/\D/g, '')}`;
+    const url = `https://api.mercadopago.com/v1/payments/search?external_reference=${refExclusiva}`;
+
+    try {
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${MP_ACCESS_TOKEN}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.results && data.results.length > 0) {
+            // Busca o pagamento mais recente gerado para esse número
+            const pagamento = data.results[0];
+
+            // Se o status no Mercado Pago for approved (aprovado)
+            if (pagamento.status === "approved") {
+                
+                // ATUALIZAÇÃO MÁGICA NO SUPABASE: Muda o status do profissional sozinho!
+                const { error } = await supabaseClient
+                    .from('profissionais')
+                    .update({ status: 'ativo', data_vencimento: calcularNovaDataVencimento() })
+                    .eq('whatsapp', usuarioWhatsApp);
+
+                if (!error) {
+                    alert("¡Acesso Liberado com Sucesso! Obrigado pelo pagamento.");
+                    window.location.reload(); // Recarrega o app já desbloqueado
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Erro ao verificar pagamento:", error);
+    }
+}
+
+// Função auxiliar para estender o acesso por 1 ano inteiro (365 dias)
+function calcularNovaDataVencimento() {
+    const hoje = new Date();
+    hoje.setFullYear(hoje.getFullYear() + 1);
+    return hoje.toISOString().split('T')[0];
+}
 
 </body>
 </html>
