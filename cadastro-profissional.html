@@ -178,6 +178,12 @@ const chkTermos = document.getElementById("chkTermos");
 const btnCadastrar = document.getElementById("btnCadastrar");
 const formCadastro = document.getElementById("formCadastro");
 
+// Credenciais Oficiais e Imutáveis do Sistema
+const MP_ACCESS_TOKEN = "APP_USR-5566486977720830-111319-2a921774301cae014946b495bf439bc9-436233346";
+const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
+const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
+const VALOR_LICENCA = 59.00;
+
 function gerenciarBotao() {
     if (chkTermos.checked) {
         btnCadastrar.disabled = false;
@@ -191,6 +197,7 @@ function gerenciarBotao() {
 chkTermos.addEventListener("change", gerenciarBotao);
 chkTermos.addEventListener("click", gerenciarBotao);
 
+// 1. PROCESSO DE CADASTRO ORIGINAL ATUALIZADO
 formCadastro.addEventListener("submit", async function(e) {
     e.preventDefault();
 
@@ -199,34 +206,25 @@ formCadastro.addEventListener("submit", async function(e) {
     btnCadastrar.innerText = "Verificando dados...";
     btnCadastrar.disabled = true;
 
-    // Configuração Oficial do Supabase para conexão direta estável
-    const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
-    const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
-
     const whatsappDigitado = document.getElementById("whatsapp").value.trim();
     
     try {
-        // 🛡️ 1. FISCALIZAÇÃO ANTIDUPLICIDADE: Verifica se o WhatsApp já existe na nuvem
+        // 🛡️ Fiscalização Antiduplicidade
         const checarResposta = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?whatsapp=eq.${encodeURIComponent(whatsappDigitado)}`, {
             method: "GET",
-            headers: {
-                "apikey": SUPABASE_KEY,
-                "Authorization": `Bearer ${SUPABASE_KEY}`
-            }
+            headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
         });
 
         if (checarResposta.ok) {
             const profissionaisEncontrados = await checarResposta.json();
-            // Se encontrou algum registro com esse WhatsApp, barra o ciclo vicioso
             if (profissionaisEncontrados.length > 0) {
-                alert("Este número de WhatsApp já possui um período de testes ou cadastro registrado. Para acessar seu painel de ferramentas, insira sua chave de ativação.");
+                alert("Este número de WhatsApp já possui um período de testes ou cadastro registrado.");
                 btnCadastrar.innerText = "Concluir Cadastro";
                 gerenciarBotao();
-                return; // Encerra o envio aqui
+                return;
             }
         }
 
-        // Se passou pela checagem, prepara os dados para salvar
         btnCadastrar.innerText = "Salvando na Nuvem...";
         
         const dados = {
@@ -238,7 +236,6 @@ formCadastro.addEventListener("submit", async function(e) {
             criado_em: new Date().toISOString()
         };
     
-        // 2. SALVAMENTO NORMAL DO CADASTRO
         const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro`, {
             method: "POST",
             headers: {
@@ -251,15 +248,14 @@ formCadastro.addEventListener("submit", async function(e) {
         });
 
         if (response.ok) {
-            // 📱 3. CARIMBO DIGITAL: Ativa os 7 dias de avaliação gratuita no aparelho
+            // 📱 Carimbo Digital completo no aparelho do usuário
+            localStorage.setItem("autonomofacil_whatsapp", whatsappDigitado);
             localStorage.setItem("autonomofacil_data_cadastro", new Date().toISOString());
             localStorage.setItem("autonomofacil_status", "teste");
 
             alert("Cadastro realizado com sucesso na nuvem! Seu período de 7 dias de teste começou.");
             window.location.href = "profissionais.html"; 
         } else {
-            const detalheErro = await response.text();
-            console.error("Erro retornado pelo servidor:", detalheErro);
             throw new Error("O servidor do banco de dados recusou a gravação.");
         }
     } catch (error) {
@@ -269,87 +265,26 @@ formCadastro.addEventListener("submit", async function(e) {
     }
 });
 
-// ============================================================================
-// MOTOR DE INTEGRAÇÃO DO MERCADO PAGO - AUTOMÁTICO
-// ============================================================================
-const MP_ACCESS_TOKEN = "APP_USR-5566486977720830-111319-2a921774301cae014946b495bf439bc9-436233346";
-const VALOR_ATIVACAO = 59.00;
-const CHAVE_PIX_REMETENTE = "escolateologicavance@gmail.com";
-
-// 1. Função que gera o Pix Automático no Mercado Pago quando o app vence
-async function gerarPixAssinatura(usuarioEmail, usuarioWhatsApp) {
-    const url = "https://api.mercadopago.com/v1/payments";
-    const externalReference = `recarga_${usuarioWhatsApp.replace(/\D/g, '')}`;
-
-    const paymentData = {
-        transaction_amount: VALOR_ATIVACAO,
-        description: "Ativação Anual - Aplicativo AutônomoFácil",
-        payment_method_id: "pix",
-        external_reference: externalReference,
-        payer: {
-            email: usuarioEmail || "cliente@autonomofacil.com",
-            first_name: "Profissional",
-            last_name: "Autônomo"
-        }
-    };
-
-    try {
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${MP_ACCESS_TOKEN}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(paymentData)
-        });
-
-        const data = await response.json();
-        
-        if (data.point_of_interaction && data.point_of_interaction.transaction_data) {
-            return data.point_of_interaction.transaction_data.qr_code;
-        } else {
-            console.error("Erro ao gerar dados do Pix", data);
-            return null;
-        }
-    } catch (error) {
-        console.error("Erro na conexão com Mercado Pago:", error);
-        return null;
-    }
-}
-
-// 2. Função "Olho de Águia" - Checa o pagamento para destravar na tabela 'cadastro'
-async function verificarPagamentoAutomatico(usuarioWhatsApp) {
-    const refExclusiva = `recarga_${usuarioWhatsApp.replace(/\D/g, '')}`;
-<script>
-// 1. CREDENCIAIS CONFIGURADAS (Mercado Pago e Supabase)
-const MP_ACCESS_TOKEN = "APP_USR-5566486977720830-111319-2a921774301cae014946b495bf439bc9-436233346";
-const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
-const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
-const VALOR_LICENCA = 59.00;
-
-// 2. FISCAL DA RAIZ: Roda imediatamente ao abrir a página de cadastro
+// 2. FISCAL DA RAIZ: Executa de imediato ao abrir a página
 (async function fiscalizarFluxoCompleto() {
     const whatsappSalvo = localStorage.getItem("autonomofacil_whatsapp");
     const dataCadastroStr = localStorage.getItem("autonomofacil_data_cadastro");
     
-    if (!whatsappSalvo || !dataCadastroStr) return; // Se é usuário novo, não faz nada e deixa cadastrar
+    if (!whatsappSalvo || !dataCadastroStr) return; 
 
     const dataCadastro = new Date(dataCadastroStr);
     const hoje = new Date();
     const diasCorridos = Math.ceil(Math.abs(hoje - dataCadastro) / (1000 * 60 * 60 * 24));
 
-    // Define o limite: 7 dias de teste + 5 dias de tolerância = 12 dias
+    // Bloqueia se estourar 12 dias (7 teste + 5 tolerância)
     if (diasCorridos > 12) {
-        // Corta o rastro dele na vitrine do Supabase imediatamente
         await atualizarStatusNuvem(whatsappSalvo, "Inativo");
         localStorage.setItem("autonomofacil_status", "expirado");
-        
-        // Bloqueia a tela de cadastro e exibe a cobrança do Pix
         aplicarBloqueioCobranca(whatsappSalvo);
     }
 })();
 
-// 3. FUNÇÃO QUE TRAVA A TELA E MOSTRA O PIX PARA O INADIMPLENTE
+// 3. RETENÇÃO VISUAL E GERADOR DE INTERFACE DO PIX
 function aplicarBloqueioCobranca(whatsapp) {
     const container = document.createElement("div");
     container.style = "position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(34,34,34,0.98); z-index:99999; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:20px; text-align:center; color:#fff; font-family:sans-serif;";
@@ -376,7 +311,6 @@ function aplicarBloqueioCobranca(whatsapp) {
     `;
     document.body.appendChild(container);
 
-    // Evento de Clique para Criar o Pix no Mercado Pago
     document.getElementById("btnGerarPixRaiz").addEventListener("click", async function() {
         this.innerText = "Gerando Pix...";
         this.disabled = true;
@@ -388,7 +322,7 @@ function aplicarBloqueioCobranca(whatsapp) {
             document.getElementById("blocoPixRaiz").style.display = "block";
             document.getElementById("txtPixCodigoRaiz").value = copiaCola;
 
-            // Inicia a checagem automática de pagamento de 7 em 7 segundos
+            // Roda a verificação de pagamento a cada 7 segundos
             setInterval(() => { verificarSeFoiPago(whatsapp); }, 7000);
         } else {
             alert("Erro ao conectar ao banco. Tente novamente.");
@@ -397,7 +331,6 @@ function aplicarBloqueioCobranca(whatsapp) {
         }
     });
 
-    // Evento de Copiar o Código
     document.getElementById("btnCopiarPixRaiz").addEventListener("click", function() {
         const txt = document.getElementById("txtPixCodigoRaiz");
         txt.select();
@@ -407,7 +340,7 @@ function aplicarBloqueioCobranca(whatsapp) {
     });
 }
 
-// 4. COMUNICAÇÃO DIRETA COM O MERCADO PAGO
+// 4. EMISSÃO DE SOLICITAÇÃO AO MERCADO PAGO
 async function criarPixMercadoPago(whatsapp) {
     const refExclusiva = `recarga_${whatsapp.replace(/\D/g, '')}`;
     try {
@@ -429,7 +362,7 @@ async function criarPixMercadoPago(whatsapp) {
     }
 }
 
-// 5. MONITOR DO MERCADO PAGO: Devolve o status "Disponível" se for pago
+// 5. CHECAGEM SÍNCRONA DE RECEBIMENTO
 async function verificarSeFoiPago(whatsapp) {
     const refExclusiva = `recarga_${whatsapp.replace(/\D/g, '')}`;
     try {
@@ -439,7 +372,6 @@ async function verificarSeFoiPago(whatsapp) {
         const data = await response.json();
 
         if (data.results?.[0]?.status === "approved") {
-            // Reativa o profissional na vitrine do Supabase
             await atualizarStatusNuvem(whatsapp, "Disponível");
             localStorage.setItem("autonomofacil_status", "ativo");
             alert("Pagamento Aprovado! Seu cadastro voltou para a vitrine de buscas.");
@@ -450,7 +382,7 @@ async function verificarSeFoiPago(whatsapp) {
     }
 }
 
-// 6. FUNÇÃO DE PRESERVAÇÃO DA NUVEM
+// 6. PERSISTÊNCIA DA ALTERAÇÃO NO SUPABASE
 async function atualizarStatusNuvem(whatsapp, novoStatus) {
     await fetch(`${SUPABASE_URL}/rest/v1/cadastro?whatsapp=eq.${encodeURIComponent(whatsapp)}`, {
         method: "PATCH",
