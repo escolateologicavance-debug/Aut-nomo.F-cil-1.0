@@ -176,7 +176,7 @@ color:var(--primary);
 </div>
 </div>
 
-<p class="subtitle">Fale. O sistema organiza.</p>
+<p class="subtitle">Clique no Microfone e depois Fale</p>
 </header>
 
 <div class="voice-container">
@@ -185,7 +185,7 @@ color:var(--primary);
 
 <div class="voice-text">
 Toque e diga:<br>
-"Cobrei 450 reais do João..." ou "Recebi 150 à vista"
+"Receibi Tal valor a Vista e Tal valor rceberei em tal data"
 </div>
 
 <div class="voice-result" id="voiceResult">
@@ -352,6 +352,20 @@ atualizarInterface();
 function iniciarGravacao(){
 voiceResult.innerHTML="🎙️ Ouvindo... Fale agora.";
 rec.start();
+}
+function tratarVoz(texto) {
+    // --- COMEÇO DO FILTRO (Cole isso no topo da função) ---
+    const textoMinusculo = texto.toLowerCase();
+    const temValor = textoMinusculo.includes("reais") || textoMinusculo.includes("r$");
+    
+    if (textoMinusculo.includes("dia") && !temValor) {
+        console.log("Detectado apenas agendamento, ignorando financeiro.");
+        return; // O código para aqui e não faz o cadastro no financeiro
+    }
+    // --- FIM DO FILTRO ---
+
+    // SEU CÓDIGO ATUAL QUE JÁ EXISTE CONTINUA DAQUI PARA BAIXO...
+    // (O resto do seu código permanece intocado!)
 }
 
 if(SpeechRecognition){
