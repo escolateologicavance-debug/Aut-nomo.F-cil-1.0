@@ -314,39 +314,47 @@ activityBox.innerHTML += `
 }
 
 function processarComandoVoz(texto){
-const match = texto.match(/([\d.,]+)/);
-if(!match){
-voiceResult.innerHTML = `⚠️ Não encontrei valor em: "${texto}"`;
-return;
-}
+function tratarVoz(texto) {
+    // --- COMEÇO DO FILTRO ---
+    const textoMinusculo = texto.toLowerCase();
+    const temValor = textoMinusculo.includes("reais") || textoMinusculo.includes("r$");
+    
+    if (textoMinusculo.includes("dia") && !temValor) {
+        voiceResult.innerHTML = "📅 Detectado agendamento. Não registrado no financeiro.";
+        console.log("Detectado apenas agendamento, ignorando financeiro.");
+        return; 
+    }
+    // --- FIM DO FILTRO ---
 
-let valorTexto = match[0];
-if (valorTexto.includes(",") && valorTexto.includes(".")) {
+    // AQUI O CÓDIGO QUE SALVA O FINANCEIRO (O que era o processarComandoVoz)
+    const match = texto.match(/([\d.,]+)/);
+    if(!match){
+        voiceResult.innerHTML = `⚠️ Não encontrei valor em: "${texto}"`;
+        return;
+    }
+
+    let valorTexto = match[0];
     valorTexto = valorTexto.replace(/\./g, "").replace(",", ".");
-} else if (valorTexto.includes(",")) {
-    valorTexto = valorTexto.replace(",", ".");
-}
-let valor = parseFloat(valorTexto);
+    let valor = parseFloat(valorTexto);
 
-if(isNaN(valor)){
-voiceResult.innerHTML = `⚠️ Erro ao processar o valor numérico.`;
-return;
-}
+    if(isNaN(valor)){
+        voiceResult.innerHTML = `⚠️ Erro ao processar o valor numérico.`;
+        return;
+    }
 
-let tipo = texto.toLowerCase().includes("recebi") ? "recebido" : "receber";
-let lista = JSON.parse(localStorage.getItem("lancamentosFinanceiros")) || [];
+    let tipo = texto.toLowerCase().includes("recebi") ? "recebido" : "receber";
+    let lista = JSON.parse(localStorage.getItem("lancamentosFinanceiros")) || [];
 
-lista.unshift({
-valor,
-tipo,
-textoOriginal:texto,
-data:new Date().toLocaleString("pt-BR")
-});
+    lista.unshift({
+        valor,
+        tipo,
+        textoOriginal: texto,
+        data: new Date().toLocaleString("pt-BR")
+    });
 
-localStorage.setItem("lancamentosFinanceiros",JSON.stringify(lista));
-
-voiceResult.innerHTML = `✅ Salvo: ${formatarMoeda(valor)}`;
-atualizarInterface();
+    localStorage.setItem("lancamentosFinanceiros", JSON.stringify(lista));
+    voiceResult.innerHTML = `✅ Salvo: ${formatarMoeda(valor)}`;
+    atualizarInterface();
 }
 
 function iniciarGravacao(){
@@ -381,10 +389,11 @@ rec.onresult=e=>{
 const resultadoTexto = e.results[0][0].transcript;
 processarComandoVoz(resultadoTexto);
 };
-
-rec.onerror=e=>{
-voiceResult.innerHTML="❌ Erro no reconhecimento: "+e.error;
+rec.onresult=e=>{
+    const resultadoTexto = e.results[0][0].transcript;
+    tratarVoz(resultadoTexto); // Agora ele passa pelo filtro primeiro!
 };
+
 } else {
 voiceResult.innerHTML="❌ Seu navegador não suporta comandos de voz.";
 }
