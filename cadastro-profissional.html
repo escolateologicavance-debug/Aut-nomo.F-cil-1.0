@@ -274,9 +274,12 @@ formCadastro.addEventListener("submit", async function(e) {
 
     const dataCadastro = new Date(dataCadastroStr);
     const hoje = new Date();
-    const diasCorridos = Math.ceil(Math.abs(hoje - dataCadastro) / (1000 * 60 * 60 * 24));
+    
+    // Calcula a diferença real em dias inteiros (evita bloqueio prematuro por arredondamento)
+    const diferencaMilissegundos = hoje.getTime() - dataCadastro.getTime();
+    const diasCorridos = Math.floor(diferencaMilissegundos / (1000 * 60 * 60 * 24));
 
-    // Bloqueia se estourar 12 dias (7 teste + 5 tolerância)
+    // Bloqueia se estourar 12 dias reais (7 teste + 5 tolerância)
     if (diasCorridos > 12) {
         await atualizarStatusNuvem(whatsappSalvo, "Inativo");
         localStorage.setItem("autonomofacil_status", "expirado");
