@@ -2,9 +2,6 @@
   "name": "autonomo-facil",
   "version": "1.0.0",
   "type": "module",
-  "scripts": {
-    "build": "mkdir -p .vercel/output/static && cp *.html .vercel/output/static/ 2>/dev/null || true && cp *.json .vercel/output/static/ 2>/dev/null || true && cp *.png .vercel/output/static/ 2>/dev/null || true && cp *.js .vercel/output/static/ 2>/dev/null || true"
-  },
   "dependencies": {
     "@supabase/supabase-js": "^2.48.0"
   }
