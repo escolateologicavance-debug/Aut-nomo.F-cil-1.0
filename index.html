@@ -362,95 +362,71 @@ window.onload = () => {
     carregarFotoPerfil();
 };
 </script>
-
-
-
+    
 <style>
-
 #container-assistente {
-
-position: fixed;
-
-bottom: 20px;
-
-right: 20px;
-
-width: 60px;
-
-height: 60px;
-
-cursor: pointer;
-
-z-index: 9999;
-
-overflow: hidden;
-
-transition: all 0.5s ease;
-
-border-radius: 50%;
-
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  z-index: 9999;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); /* Transição mais suave no mobile */
+  border-radius: 50%;
+  box-sizing: border-box;
 }
 
-
+/* Estado Expandido Otimizado para Telas Mobile */
 #container-assistente.expandido {
-
-width: 100vw;
-
-height: 100vh;
-
-bottom: 0;
-
-right: 0;
-
-border-radius: 0;
-
+  width: 100%;
+  height: 100%;
+  width: 100dvw; /* Usa a largura dinâmica real do celular */
+  height: 100dvh; /* Usa a altura dinâmica real do celular */
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  border-radius: 0;
 }
 
-
-/* Efeito de Reflexo */
-
-#container-assistente::after {
-
-content: '';
-
-position: absolute;
-
-top: -50%; left: -50%; width: 200%; height: 200%;
-
-background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%);
-
-animation: brilho 5s infinite;
-
+/* O brilho é desativado no mobile ao expandir para não gerar lag */
+#container-assistente:not(.expandido)::after {
+  content: '';
+  position: absolute;
+  top: -50%; 
+  left: -50%; 
+  width: 200%; 
+  height: 200%;
+  background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%);
+  animation: brilho 4s infinite linear;
 }
 
-@keyframes brilho { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-
+@keyframes brilho { 
+  0% { transform: translate3d(-100%, 0, 0); } /* Usa aceleração de hardware (GPU) */
+  100% { transform: translate3d(100%, 0, 0); } 
+}
 </style>
 
-
 <div id="container-assistente" onclick="expandirLogo()">
-
-<img src="autonomo-facil.png" style="width: 100%; height: 100%; object-fit: cover;">
-
+  <img src="autonomo-facil.png" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;">
 </div>
 
-
 <script>
-
 function expandirLogo() {
+  const el = document.getElementById('container-assistente');
+  
+  // Evita múltiplos cliques rápidos no mobile
+  if (el.classList.contains('expandido')) return; 
 
-const el = document.getElementById('container-assistente');
-
-el.classList.add('expandido');
-
-setTimeout(() => {
-
-el.classList.remove('expandido');
-
-}, 5000);
-
+  el.classList.add('expandido');
+  
+  setTimeout(() => {
+    el.classList.remove('expandido');
+  }, 5000);
 }
-
 </script>
+
 </body>
 </html>
