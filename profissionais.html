@@ -382,49 +382,7 @@ font-size: 8px;
 </div>
 
 <script>
-  // 1. CONFIGURAÇÃO OFICIAL
-const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
-const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
-
-let profissionaisCadastradosGlobal = [];
-
-// 2. SISTEMA DE BUSCA
-const inputBusca = document.getElementById("inputBusca");
-if (inputBusca) {
-    inputBusca.addEventListener("input", executarFiltrosCombinados);
-}
-
-// 3. MONITOR DO FILTRO DE CIDADES
-const filtroCidade = document.getElementById("filtroCidade");
-if (filtroCidade) {
-    filtroCidade.addEventListener("change", executarFiltrosCombinados);
-}
-
-// 4. BUSCA DE DADOS
-async function atualizarStatusProfissionais() {
-    try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=profissao,whatsapp,status,cidade`, { 
-            method: "GET", 
-            headers: { "apikey": SUPABASE_KEY }
-        });
-        if (!response.ok) return;
-        profissionaisCadastradosGlobal = await response.json();
-
-        if (filtroCidade) {
-            filtroCidade.innerHTML = '<option value="todos">🌍 Todas as Cidades</option>';
-            const cidades = [...new Set(profissionaisCadastradosGlobal.map(p => p.cidade ? p.cidade.trim() : "").filter(c => c !== ""))].sort();
-            cidades.forEach(cidade => {
-                const option = document.createElement("option");
-                option.value = cidade.toLowerCase().trim();
-                option.textContent = cidade;
-                filtroCidade.appendChild(option);
-            });
-        }
-        executarFiltrosCombinados();
-    } catch (err) { console.error("Erro:", err); }
-}
-
-// 5. FUNÇÃO DE FILTROS
+  // 5. FUNÇÃO DE FILTROS CORRIGIDA
 function executarFiltrosCombinados() {
     const termoBusca = inputBusca ? inputBusca.value.toLowerCase().trim() : "";
     const cidadeSelecionada = filtroCidade ? filtroCidade.value.toLowerCase().trim() : "todos";
@@ -453,13 +411,25 @@ function executarFiltrosCombinados() {
         if (lista && lista.length > 0) {
             badge.innerText = `${lista.length} Disponível(is)`;
             badge.className = "badge disponivel";
+            
+            // A CORREÇÃO ESTÁ AQUI:
             itemLink.onclick = (e) => {
                 e.preventDefault();
+                
+                // Se for apenas 1, abre direto
                 if (lista.length === 1) {
-                    const num = lista[0].whatsapp.toString().replace(/\D/g, "");
-                    window.open(`https://wa.me/${num.startsWith("55") ? num : "55" + num}`, '_blank');
+                    abrirWhatsApp(lista[0].whatsapp);
                 } else {
-                    alert(`Existem ${lista.length} profissionais nesta categoria.`);
+                    // Se houver mais de 1, criamos um menu de escolha simples
+                    let mensagem = "Escolha um profissional:\n";
+                    lista.forEach((p, index) => {
+                        mensagem += `${index + 1} - ${p.nome || "Profissional " + (index + 1)}\n`;
+                    });
+                    
+                    let escolha = prompt(mensagem + "\nDigite o número:");
+                    if (escolha && lista[escolha - 1]) {
+                        abrirWhatsApp(lista[escolha - 1].whatsapp);
+                    }
                 }
             };
         } else {
@@ -478,10 +448,15 @@ function executarFiltrosCombinados() {
     });
 }
 
+// Função auxiliar para padronizar a abertura do WhatsApp
+function abrirWhatsApp(numero) {
+    const num = numero.toString().replace(/\D/g, "");
+    window.open(`https://wa.me/${num.startsWith("55") ? num : "55" + num}`, '_blank');
+}
+
 window.addEventListener("DOMContentLoaded", atualizarStatusProfissionais);
-
+ 
     
-
 </script>
   
 </body>
