@@ -381,195 +381,178 @@ font-size: 8px;
 <li><a class="category-item"><span>Técnico em Informática</span><span class="badge" data-profissao="Técnico em Informática">Em breve</span></a></li>
 </ul>
 </div>
-
-
-
+  
 <script>
 
-// 1. CONFIGURAÇÃO OFICIAL DO SEU AUTÔNOMOFÁCIL (CORRIGIDA)
+// 1. CONFIGURAÇÃO DO SUPABASE
 
 const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co";
-
 const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
 
 
-// 2. SISTEMA DE BUSCA EM TEMPO REAL (MANTIDO SIMPLES E FUNCIONAL)
+// 2. BUSCA EM TEMPO REAL
 
 const inputBusca = document.getElementById("inputBusca");
 
 if (inputBusca) {
+    inputBusca.addEventListener("input", function () {
 
-inputBusca.addEventListener("input", function() {
+        const termo = this.value.toLowerCase().trim();
+        const grupos = document.querySelectorAll(".grupo-categoria");
 
-const termo = this.value.toLowerCase().trim();
+        grupos.forEach(grupo => {
 
-const grupos = document.querySelectorAll(".grupo-categoria");
+            const itensLista = grupo.querySelectorAll("li");
+            let algumItemVisivel = false;
 
+            itensLista.forEach(item => {
 
-grupos.forEach(grupo => {
+                const nomeProfissao = item.querySelector("span").innerText.toLowerCase();
 
-const itens = group => grupo.querySelectorAll("li");
+                if (nomeProfissao.includes(termo)) {
+                    item.style.display = "block";
+                    algumItemVisivel = true;
+                } else {
+                    item.style.display = "none";
+                }
 
-const itensLista = grupo.querySelectorAll("li");
+            });
 
-let algumItemVisivel = false;
+            grupo.style.display = algumItemVisivel ? "block" : "none";
 
+        });
 
-itensLista.forEach(item => {
-
-const nomeProfissao = item.querySelector("span").innerText.toLowerCase();
-
-if (nomeProfissao.includes(termo)) {
-
-item.style.display = "block";
-
-algumItemVisivel = true;
-
-} else {
-
-item.style.display = "none";
-
-}
-
-});
-
-
-grupo.style.display = algumItemVisivel ? "block" : "none";
-
-});
-
-});
-
+    });
 }
 
 
-// 3. BUSCA DINÂMICA DE STATUS NO SUPABASE (CORRIGIDA E SEM BEARER TOKEN ANÔNIMO)
+// 3. ATUALIZA STATUS DOS PROFISSIONAIS
 
 async function atualizarStatusProfissionais() {
 
-try {
+    try {
 
-const response = await fetch(${SUPABASE_URL}/rest/v1/cadastro?select=profissao,whatsapp,status`, {
+        const response = await fetch(
+            `${SUPABASE_URL}/rest/v1/cadastro?select=profissao,whatsapp,status`,
+            {
+                method: "GET",
+                headers: {
+                    "apikey": SUPABASE_KEY
+                }
+            }
+        );
 
-method: "GET",
+        if (!response.ok) {
+            console.error("Erro na requisição Supabase:", response.status);
+            return;
+        }
 
-headers: {
+        const profissionais = await response.json();
 
-"apikey": SUPABASE_KEY
+        const baseProfissionais = {};
 
-}
+        profissionais.forEach(p => {
 
-});
+            const statusTexto = p.status
+                ? p.status.toLowerCase().trim()
+                : "";
 
+            const statusValido =
+                !statusTexto ||
+                statusTexto === "disponivel" ||
+                statusTexto === "disponível";
 
-if (!response.ok) {
+            if (statusValido && p.profissao && p.whatsapp) {
 
-console.error("Erro na requisição Supabase:", response.status);
+                const chaveFormatada =
+                    p.profissao.toLowerCase().trim();
 
-return;
+                baseProfissionais[chaveFormatada] = p;
+            }
 
-}
+        });
 
+        const badges = document.querySelectorAll(".badge");
 
-const profissionais = await response.json();
+        badges.forEach(badge => {
 
+            let textoCategoria =
+                badge.getAttribute("data-profissao");
 
-// Mapeia profissionais utilizando chaves em letras minúsculas e sem espaços
+            if (!textoCategoria) {
 
-const baseProfissionais = {};
+                const spanIrmao =
+                    badge.previousElementSibling;
 
-profissionais.forEach(p => {
+                textoCategoria =
+                    spanIrmao ? spanIrmao.innerText : "";
+            }
 
-const statusTexto = p.status ? p.status.toLowerCase().trim() : "";
+            if (!textoCategoria) return;
 
-const statusValido = !statusTexto || statusTexto === "disponivel" || statusTexto === "disponível";
+            const chaveBadge =
+                textoCategoria.toLowerCase().trim();
 
+            const profissionalEncontrado =
+                baseProfissionais[chaveBadge];
 
-if (statusValido && p.profissao && p.whatsapp) {
+            if (!profissionalEncontrado) return;
 
-const chaveFormatada = p.profissao.toLowerCase().trim();
+            badge.innerText = "Disponível";
+            badge.classList.add("disponivel");
 
-baseProfissionais[chaveFormatada] = p;
+            const itemClicavel =
+                badge.closest(".category-item");
 
-}
+            if (itemClicavel) {
 
-});
+                itemClicavel.style.cursor = "pointer";
 
+                itemClicavel.onclick = (e) => {
 
-// Atualiza os badges na tela
+                    e.preventDefault();
 
-const badges = document.querySelectorAll(".badge");
+                    const numLimpo =
+                        profissionalEncontrado.whatsapp
+                            .toString()
+                            .replace(/\D/g, "");
 
-badges.forEach(badge => {
+                    const celularFinal =
+                        numLimpo.startsWith("55")
+                            ? numLimpo
+                            : "55" + numLimpo;
 
-let textoCategoria = badge.getAttribute("data-profissao");
+                    window.open(
+                        `https://wa.me/${celularFinal}`,
+                        "_blank"
+                    );
 
-if (!textoCategoria) {
+                };
 
-const spanIrmao = badge.previousElementSibling;
+            }
 
-textoCategoria = spanIrmao ? spanIrmao.innerText : "";
+        });
 
-}
+    } catch (err) {
 
+        console.error(
+            "Erro ao processar dados:",
+            err
+        );
 
-if (textoCategoria) {
-
-const chaveBadge = textoCategoria.toLowerCase().trim();
-
-const profissionalEncontrado = baseProfissionais[chaveBadge];
-
-
-if (profissionalEncontrado) {
-
-badge.innerText = "Disponível";
-
-badge.classList.add("disponivel");
-
-
-const itemClicavel = badge.closest(".category-item");
-
-if (itemClicavel) {
-
-itemClicavel.style.cursor = "pointer";
-
-itemClicavel.onclick = (e) => {
-
-e.preventDefault();
-
-const numLimpo = profissionalEncontrado.whatsapp.toString().replace(/\D/g, "");
-
-const celularFinal = numLimpo.startsWith("55") ? numLimpo : "55" + numLimpo;
-
-window.open(https://wa.me/${celularFinal}`, '_blank');
-
-};
-
-}
-
-}
-
-}
-
-});
-
-} catch (err) {
-
-console.error("Erro ao processar dados:", err);
-
-}
+    }
 
 }
 
 
 window.addEventListener("DOMContentLoaded", () => {
-
-atualizarStatusProfissionais();
-
+    atualizarStatusProfissionais();
 });
 
 </script>
 
+
+  
 
 </body>
 
