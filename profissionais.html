@@ -447,60 +447,69 @@ function executarFiltrosCombinados() {
     const termoBusca = inputBusca ? inputBusca.value.toLowerCase().trim() : "";
     const cidadeSelecionada = filtroCidade ? filtroCidade.value.toLowerCase().trim() : "todos";
 
-    // Mapeia os profissionais ativos que passam no filtro da cidade selecionada
+    // Mapeia os profissionais em um objeto que agrupa por profissão (Array de profissionais)
     const baseProfissionaisFiltrados = {};
+    
     profissionaisCadastradosGlobal.forEach(p => {
         const statusTexto = p.status ? p.status.toLowerCase().trim() : "";
         const statusValido = !statusTexto || statusTexto === "disponivel" || statusTexto === "disponível";
         
         const cidadeProfissional = p.cidade ? p.cidade.toLowerCase().trim() : "";
-        const bateCidade = cidadeSelecionada === "todos" || cidadeProfissional.includes(cidadeSelecionada);
+        const bateCidade = cidadeSelecionada === "todos" || cidadeProfissional === cidadeSelecionada;
 
         if (statusValido && p.profissao && p.whatsapp && bateCidade) {
             const chaveFormatada = p.profissao.toLowerCase().trim();
-            baseProfissionaisFiltrados[chaveFormatada] = p;
+            
+            // Se ainda não existe a categoria no objeto, cria um array vazio
+            if (!baseProfissionaisFiltrados[chaveFormatada]) {
+                baseProfissionaisFiltrados[chaveFormatada] = [];
+            }
+            // Adiciona o profissional ao array daquela profissão
+            baseProfissionaisFiltrados[chaveFormatada].push(p);
         }
     });
 
-    // Varre todas as linhas de profissão para atualizar textos, links e visibilidade
     const badges = document.querySelectorAll(".badge");
     badges.forEach(badge => {
-        let textoCategoria = badge.getAttribute("data-profissao");
-        if (!textoCategoria) {
-            const spanIrmao = badge.previousElementSibling;
-            textoCategoria = spanIrmao ? spanIrmao.innerText : "";
-        }
+        let textoCategoria = badge.getAttribute("data-profissao") || badge.previousElementSibling.innerText;
+        const chaveBadge = textoCategoria.toLowerCase().trim();
+        const listaProfissionais = baseProfissionaisFiltrados[chaveBadge]; // Agora é um array
 
         const itemLista = badge.closest("li");
         const itemClicavel = badge.closest(".category-item");
 
-        if (textoCategoria) {
-            const chaveBadge = textoCategoria.toLowerCase().trim();
-            const profissionalEncontrado = baseProfissionaisFiltrados[chaveBadge];
+        if (listaProfissionais && listaProfissionais.length > 0) {
+            badge.innerText = `${listaProfissionais.length} Disponível(is)`; // Mostra a quantidade
+            badge.className = "badge disponivel";
 
-            // Se encontrar um profissional ativo para essa profissão e nessa cidade:
-            if (profissionalEncontrado) {
-                badge.innerText = "Disponível";
-                badge.className = "badge disponivel";
-
-                if (itemClicavel) {
-                    itemClicavel.style.cursor = "pointer";
-                    itemClicavel.onclick = (e) => {
-                        e.preventDefault();
-                        const numLimpo = profissionalEncontrado.whatsapp.toString().replace(/\D/g, "");
-                        const celularFinal = numLimpo.startsWith("55") ? numLimpo : "55" + numLimpo;
-                        window.open(`https://wa.me/${celularFinal}`, '_blank');
-                    };
-                }
-            } else {
-                // Caso não encontre profissionais disponíveis na cidade
-                badge.innerText = "Em breve";
-                badge.className = "badge";
-                if (itemClicavel) {
-                    itemClicavel.style.cursor = "default";
-                    itemClicavel.onclick = null;
-                }
+            if (itemClicavel) {
+                itemClicavel.onclick = (e) => {
+                    e.preventDefault();
+                    // Se tiver apenas 1, abre direto. Se tiver mais, você pode criar uma lógica de modal/alerta
+                    if (listaProfissionais.length === 1) {
+                        const p = listaProfissionais[0];
+                        const numLimpo = p.whatsapp.toString().replace(/\D/g, "");
+                        window.open(`https://wa.me/${numLimpo.startsWith("55") ? numLimpo : "55" + numLimpo}`, '_blank');
+                    } else {
+                        alert("Existem " + listaProfissionais.length + " profissionais nesta categoria nesta cidade!");
+                        // Aqui você pode expandir para mostrar os nomes ou abrir um menu de escolha
+                    }
+                };
             }
+        } else {
+            badge.innerText = "Em breve";
+            badge.className = "badge";
+            if (itemClicavel) itemClicavel.onclick = null;
+        }
+
+        const bateTextoBusca = textoCategoria.toLowerCase().includes(termoBusca);
+        const deveExibirLinha = bateTextoBusca && (listaProfissionais || cidadeSelecionada === "todos");
+        if (itemLista) itemLista.style.display = deveExibirLinha ? "block" : "none";
+    });
+
+    // ... (o restante da lógica dos grupos permanece igual)
+}
+
 
             // Regra de Ouro da Ocultação Visual (Barra de busca + Filtro de Cidade)
             const nomeProfissaoParaBusca = textoCategoria.toLowerCase();
