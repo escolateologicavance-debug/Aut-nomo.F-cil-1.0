@@ -380,106 +380,76 @@ font-size: 8px;
 <li><a class="category-item"><span>Técnico em Informática</span><span class="badge" data-profissao="Técnico em Informática">Em breve</span></a></li>
 </ul>
 </div>
-  
+
 <script>
-// CONFIGURAÇÃO
 const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
 
 let profissionaisCadastradosGlobal = [];
 
-// Elementos
-const inputBusca = document.getElementById("inputBusca");
-const filtroCidade = document.getElementById("filtroCidade");
-
-// 1. CARREGAR DADOS DO SUPABASE
-async function atualizarStatusProfissionais() {
+async function carregarDados() {
     try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/profissionais?select=profissao,whatsapp,status,cidade,nome`, { 
-            method: "GET", 
-            headers: { 
-                "apikey": SUPABASE_KEY,
-                "Authorization": `Bearer ${SUPABASE_KEY}`,
-                "Content-Type": "application/json"
-            }
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/profissionais?select=nome,profissao,whatsapp,status,cidade`, { 
+            headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
         });
-        
-        if (!response.ok) throw new Error("Erro na API");
-        
         profissionaisCadastradosGlobal = await response.json();
+        
+        // Preencher cidades no filtro
+        const filtro = document.getElementById("filtroCidade");
+        const cidades = [...new Set(profissionaisCadastradosGlobal.map(p => p.cidade).filter(Boolean))];
+        
+        cidades.sort().forEach(cidade => {
+            let opt = document.createElement("option");
+            opt.value = cidade;
+            opt.textContent = cidade;
+            filtro.appendChild(opt);
+        });
 
-        // Popular Cidades
-        if (filtroCidade) {
-            const cidadesAtuais = Array.from(filtroCidade.options).map(o => o.value);
-            const novasCidades = [...new Set(profissionaisCadastradosGlobal.map(p => p.cidade?.trim()).filter(Boolean))].sort();
-            
-            novasCidades.forEach(cidade => {
-                if (!cidadesAtuais.includes(cidade.toLowerCase())) {
-                    const option = document.createElement("option");
-                    option.value = cidade.toLowerCase();
-                    option.textContent = cidade;
-                    filtroCidade.appendChild(option);
-                }
-            });
-        }
-        executarFiltrosCombinados();
-    } catch (err) { console.error("Erro ao carregar:", err); }
+        atualizarInterface();
+    } catch (e) { console.error("Erro ao carregar:", e); }
 }
 
-// 2. FILTRO INTELIGENTE
-function executarFiltrosCombinados() {
-    const termoBusca = inputBusca?.value.toLowerCase().trim() || "";
-    const cidadeSel = filtroCidade?.value.toLowerCase().trim() || "todos";
+function atualizarInterface() {
+    const cidadeSel = document.getElementById("filtroCidade").value;
+    const termo = document.getElementById("inputBusca").value.toLowerCase();
 
-    // Mapear profissionais por profissão
-    const base = {};
-    profissionaisCadastradosGlobal.forEach(p => {
-        const cP = p.cidade?.toLowerCase().trim();
-        if (cidadeSel === "todos" || cP === cidadeSel) {
-            const prof = p.profissao?.toLowerCase().trim();
-            if (!base[prof]) base[prof] = [];
-            base[prof].push(p);
-        }
-    });
-
-    // Atualizar visual da lista
     document.querySelectorAll(".category-item").forEach(item => {
-        const spanTexto = item.querySelector("span").innerText.toLowerCase().trim();
+        const nomeProfissao = item.querySelector("span").textContent.toLowerCase();
         const badge = item.querySelector(".badge");
-        const lista = base[spanTexto];
+        
+        // Filtra profissionais por profissão e cidade
+        const encontrados = profissionaisCadastradosGlobal.filter(p => 
+            p.profissao?.toLowerCase() === nomeProfissao && 
+            (cidadeSel === "todos" || p.cidade === cidadeSel)
+        );
 
-        if (lista && lista.length > 0) {
-            badge.innerText = `${lista.length} Disponível(is)`;
+        if (encontrados.length > 0) {
+            badge.textContent = `${encontrados.length} Disponível(is)`;
             badge.className = "badge disponivel";
-            item.style.display = "flex";
-            item.onclick = (e) => {
-                e.preventDefault();
-                if (lista.length === 1) abrirWhatsApp(lista[0].whatsapp);
-                else {
-                    let msg = "Escolha um profissional:\n" + lista.map((p, i) => `${i + 1} - ${p.nome}`).join("\n");
-                    let escolha = prompt(msg + "\n\nDigite o número:");
-                    if (escolha && lista[escolha - 1]) abrirWhatsApp(lista[escolha - 1].whatsapp);
-                }
+            item.onclick = () => {
+                if(encontrados.length === 1) abrirWhatsApp(encontrados[0].whatsapp);
+                else alert("Escolha um: " + encontrados.map(p => p.nome).join(", "));
             };
         } else {
-            // Se a busca estiver filtrada, esconde o que não tem. Se for busca geral, mantém "Em breve"
-            badge.innerText = "Em breve";
+            badge.textContent = "Em breve";
             badge.className = "badge";
             item.onclick = null;
-            item.style.display = (termoBusca || cidadeSel !== "todos") ? "none" : "flex";
         }
+
+        // Exibir ou esconder baseado na busca
+        item.parentElement.style.display = (nomeProfissao.includes(termo)) ? "block" : "none";
     });
 }
 
-function abrirWhatsApp(numero) {
-    const num = numero.toString().replace(/\D/g, "");
-    window.open(`https://wa.me/${num.startsWith("55") ? num : "55" + num}`, '_blank');
+function abrirWhatsApp(num) {
+    window.open(`https://wa.me/55${num.replace(/\D/g, "")}`, '_blank');
 }
 
-inputBusca.addEventListener("input", executarFiltrosCombinados);
-filtroCidade.addEventListener("change", executarFiltrosCombinados);
-window.addEventListener("DOMContentLoaded", atualizarStatusProfissionais);
+document.getElementById("inputBusca").addEventListener("input", atualizarInterface);
+document.getElementById("filtroCidade").addEventListener("change", atualizarInterface);
+carregarDados();
 </script>
+  
     
 </body>
 </html>
