@@ -368,6 +368,7 @@ font-size: 8px;
 <li><a class="category-item"><span>Tapeceiro</span><span class="badge" data-profissao="Tapeceiro">Em breve</span></a></li>
 </ul>
 </div>
+  
 
 <div class="grupo-categoria">
 <h2 class="section-title">🚜 Outros Serviços Técnicos, Digitais e Especializados</h2>
@@ -380,97 +381,202 @@ font-size: 8px;
 <li><a class="category-item"><span>Técnico em Informática</span><span class="badge" data-profissao="Técnico em Informática">Em breve</span></a></li>
 </ul>
 </div>
-  
+
+
+
 <script>
-// CONFIGURAÇÃO DO SUPABASE
-const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
+
+// 1. CONFIGURAÇÃO OFICIAL DO SEU AUTÔNOMOFÁCIL (CORRIGIDA)
+
+const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co";
+
 const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
 
-let profissionaisCadastradosGlobal = [];
 
-// 1. CARREGAR DADOS DO BANCO
-async function carregarDados() {
-    try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/profissionais?select=nome,profissao,whatsapp,status,cidade`, { 
-            headers: { 
-                "apikey": SUPABASE_KEY, 
-                "Authorization": `Bearer ${SUPABASE_KEY}`, 
-                "Content-Type": "application/json" 
-            }
-        });
-        profissionaisCadastradosGlobal = await response.json();
-        
-        // Preencher cidades automaticamente no filtro
-        const filtro = document.getElementById("filtroCidade");
-        const cidades = [...new Set(profissionaisCadastradosGlobal.map(p => p.cidade).filter(Boolean))];
-        cidades.sort().forEach(cidade => {
-            let opt = document.createElement("option");
-            opt.value = cidade;
-            opt.textContent = cidade;
-            filtro.appendChild(opt);
-        });
+// 2. SISTEMA DE BUSCA EM TEMPO REAL (MANTIDO SIMPLES E FUNCIONAL)
 
-        atualizarInterface();
-    } catch (e) { console.error("Erro ao conectar:", e); }
+const inputBusca = document.getElementById("inputBusca");
+
+if (inputBusca) {
+
+inputBusca.addEventListener("input", function() {
+
+const termo = this.value.toLowerCase().trim();
+
+const grupos = document.querySelectorAll(".grupo-categoria");
+
+
+grupos.forEach(grupo => {
+
+const itens = group => grupo.querySelectorAll("li");
+
+const itensLista = grupo.querySelectorAll("li");
+
+let algumItemVisivel = false;
+
+
+itensLista.forEach(item => {
+
+const nomeProfissao = item.querySelector("span").innerText.toLowerCase();
+
+if (nomeProfissao.includes(termo)) {
+
+item.style.display = "block";
+
+algumItemVisivel = true;
+
+} else {
+
+item.style.display = "none";
+
 }
 
-// 2. LÓGICA DE EXIBIÇÃO E CLIQUE
-function atualizarInterface() {
-    const cidadeSel = document.getElementById("filtroCidade").value;
-    const termoBusca = document.getElementById("inputBusca").value.toLowerCase();
+});
 
-    document.querySelectorAll(".category-item").forEach(item => {
-        const span = item.querySelector("span");
-        const badge = item.querySelector(".badge");
-        const nomeProfissao = span.textContent.toLowerCase().trim();
-        
-        // Filtra lista de profissionais para esta categoria e cidade
-        const listaFiltrada = profissionaisCadastradosGlobal.filter(p => 
-            p.profissao?.toLowerCase().trim() === nomeProfissao && 
-            (cidadeSel === "todos" || p.cidade?.trim() === cidadeSel)
-        );
 
-        // Atualiza visual
-        if (listaFiltrada.length > 0) {
-            badge.textContent = `${listaFiltrada.length} Disponível(is)`;
-            badge.className = "badge disponivel";
-            
-            // Lógica do clique
-            item.onclick = (e) => {
-                e.preventDefault();
-                if (listaFiltrada.length === 1) {
-                    abrirWhatsApp(listaFiltrada[0].whatsapp);
-                } else {
-                    let msg = "Escolha um profissional:\n";
-                    listaFiltrada.forEach((p, i) => { msg += `${i + 1} - ${p.nome}\n`; });
-                    let escolha = prompt(msg + "\nDigite o número:");
-                    if (escolha && listaFiltrada[escolha - 1]) {
-                        abrirWhatsApp(listaFiltrada[escolha - 1].whatsapp);
-                    }
-                }
-            };
-        } else {
-            badge.textContent = "Em breve";
-            badge.className = "badge";
-            item.onclick = null;
-        }
+grupo.style.display = algumItemVisivel ? "block" : "none";
 
-        // Exibe ou esconde o item baseado na pesquisa
-        item.parentElement.style.display = nomeProfissao.includes(termoBusca) ? "block" : "none";
-    });
+});
+
+});
+
 }
 
-function abrirWhatsApp(num) {
-    const numeroLimpo = num.toString().replace(/\D/g, "");
-    window.open(`https://wa.me/55${numeroLimpo}`, '_blank');
+
+// 3. BUSCA DINÂMICA DE STATUS NO SUPABASE (CORRIGIDA E SEM BEARER TOKEN ANÔNIMO)
+
+async function atualizarStatusProfissionais() {
+
+try {
+
+const response = await fetch(${SUPABASE_URL}/rest/v1/cadastro?select=profissao,whatsapp,status`, {
+
+method: "GET",
+
+headers: {
+
+"apikey": SUPABASE_KEY
+
 }
 
-// Inicialização
-document.getElementById("inputBusca").addEventListener("input", atualizarInterface);
-document.getElementById("filtroCidade").addEventListener("change", atualizarInterface);
-window.addEventListener("DOMContentLoaded", carregarDados);
+});
+
+
+if (!response.ok) {
+
+console.error("Erro na requisição Supabase:", response.status);
+
+return;
+
+}
+
+
+const profissionais = await response.json();
+
+
+// Mapeia profissionais utilizando chaves em letras minúsculas e sem espaços
+
+const baseProfissionais = {};
+
+profissionais.forEach(p => {
+
+const statusTexto = p.status ? p.status.toLowerCase().trim() : "";
+
+const statusValido = !statusTexto || statusTexto === "disponivel" || statusTexto === "disponível";
+
+
+if (statusValido && p.profissao && p.whatsapp) {
+
+const chaveFormatada = p.profissao.toLowerCase().trim();
+
+baseProfissionais[chaveFormatada] = p;
+
+}
+
+});
+
+
+// Atualiza os badges na tela
+
+const badges = document.querySelectorAll(".badge");
+
+badges.forEach(badge => {
+
+let textoCategoria = badge.getAttribute("data-profissao");
+
+if (!textoCategoria) {
+
+const spanIrmao = badge.previousElementSibling;
+
+textoCategoria = spanIrmao ? spanIrmao.innerText : "";
+
+}
+
+
+if (textoCategoria) {
+
+const chaveBadge = textoCategoria.toLowerCase().trim();
+
+const profissionalEncontrado = baseProfissionais[chaveBadge];
+
+
+if (profissionalEncontrado) {
+
+badge.innerText = "Disponível";
+
+badge.classList.add("disponivel");
+
+
+const itemClicavel = badge.closest(".category-item");
+
+if (itemClicavel) {
+
+itemClicavel.style.cursor = "pointer";
+
+itemClicavel.onclick = (e) => {
+
+e.preventDefault();
+
+const numLimpo = profissionalEncontrado.whatsapp.toString().replace(/\D/g, "");
+
+const celularFinal = numLimpo.startsWith("55") ? numLimpo : "55" + numLimpo;
+
+window.open(https://wa.me/${celularFinal}`, '_blank');
+
+};
+
+}
+
+}
+
+}
+
+});
+
+} catch (err) {
+
+console.error("Erro ao processar dados:", err);
+
+}
+
+}
+
+
+window.addEventListener("DOMContentLoaded", () => {
+
+atualizarStatusProfissionais();
+
+});
+
 </script>
-  
-    
+
+
 </body>
+
 </html>
+
+
+
+
+
+
