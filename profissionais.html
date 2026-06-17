@@ -382,7 +382,7 @@ font-size: 8px;
 </div>
 
 <script>
-  // 1. CONFIGURAÇÃO OFICIAL
+// 1. CONFIGURAÇÃO OFICIAL
 const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
 
@@ -397,13 +397,18 @@ if (inputBusca) {
 // 3. MONITOR DO FILTRO DE CIDADES
 const filtroCidade = document.getElementById("filtroCidade");
 if (filtroCidade) {
-    filtroCidade.addEventListener("change", executarFiltrosCombinados);
+    filtroCidade.addEventListener("change", executingFiltrosCombinados);
+}
+
+function executarFiltrosCombinados() {
+    // Redireciona para a função principal com nome correto
+    atualizarFiltrosEListagem();
 }
 
 // 4. BUSCA DE DADOS
 async function atualizarStatusProfissionais() {
     try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=profissao,whatsapp,status,cidade`, { 
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=nome,profissao,whatsapp,status,cidade`, { 
             method: "GET", 
             headers: { "apikey": SUPABASE_KEY }
         });
@@ -420,12 +425,12 @@ async function atualizarStatusProfissionais() {
                 filtroCidade.appendChild(option);
             });
         }
-        executarFiltrosCombinados();
+        atualizarFiltrosEListagem();
     } catch (err) { console.error("Erro:", err); }
 }
 
-// 5. FUNÇÃO DE FILTROS
-function executarFiltrosCombinados() {
+// 5. FUNÇÃO DE FILTROS E RENDERIZAÇÃO DINÂMICA
+function atualizarFiltrosEListagem() {
     const termoBusca = inputBusca ? inputBusca.value.toLowerCase().trim() : "";
     const cidadeSelecionada = filtroCidade ? filtroCidade.value.toLowerCase().trim() : "todos";
 
@@ -444,8 +449,23 @@ function executarFiltrosCombinados() {
     });
 
     document.querySelectorAll(".badge").forEach(badge => {
-        let texto = badge.getAttribute("data-profissao") || badge.previousElementSibling.innerText;
-        const chave = texto.toLowerCase().trim();
+        let textoProfissaoOriginal = badge.getAttribute("data-profissao") || badge.previousElementSibling.innerText;
+        const chave = textoProfissaoOriginal.toLowerCase().trim();
+        const lista = base[chave];
+        const itemLi = badge.closest("li");
+        const itemLink = badge.closest(".category-item");
+
+        // Limpa eventos anteriores para evitar duplicações
+        if (itemLink) {
+            const novoLink = itemLink.cloneNode(true);
+            itemLink.parentNode.replaceChild(novoLink, itemLink);
+        }
+    });
+
+    // Re-seleciona após a limpeza de nós para aplicar a nova listagem
+    document.querySelectorAll(".badge").forEach(badge => {
+        let textoProfissaoOriginal = badge.getAttribute("data-profissao") || badge.previousElementSibling.innerText;
+        const chave = textoProfissaoOriginal.toLowerCase().trim();
         const lista = base[chave];
         const itemLi = badge.closest("li");
         const itemLink = badge.closest(".category-item");
@@ -453,23 +473,59 @@ function executarFiltrosCombinados() {
         if (lista && lista.length > 0) {
             badge.innerText = `${lista.length} Disponível(is)`;
             badge.className = "badge disponivel";
+            
             itemLink.onclick = (e) => {
                 e.preventDefault();
+                
+                // Se houver apenas 1, abre direto o WhatsApp
                 if (lista.length === 1) {
                     const num = lista[0].whatsapp.toString().replace(/\D/g, "");
                     window.open(`https://wa.me/${num.startsWith("55") ? num : "55" + num}`, '_blank');
                 } else {
-                    alert(`Existem ${lista.length} profissionais nesta categoria.`);
+                    // Se houver mais de 1, transforma a lista exibindo todos os nomes e seus respectivos links
+                    const containerPai = itemLi.parentNode;
+                    
+                    lista.forEach(autonomo => {
+                        const novoLi = document.createElement("li");
+                        novoLi.className = itemLi.className;
+                        novoLi.style.display = "block";
+                        
+                        const novoLink = document.createElement("a");
+                        novoLink.className = "category-item";
+                        
+                        const num = autonomo.whatsapp.toString().replace(/\D/g, "");
+                        novoLink.href = `https://wa.me/${num.startsWith("55") ? num : "55" + num}`;
+                        novoLink.target = "_blank";
+                        
+                        const textoNome = document.createElement("span");
+                        textoNome.innerText = `${autonomo.profissao}; ${autonomo.nome} `;
+                        
+                        const novoBadge = document.createElement("span");
+                        novoBadge.className = "badge disponivel";
+                        novoBadge.innerText = "🟢 Disponível";
+                        
+                        novoLink.appendChild(textoNome);
+                        novoLink.appendChild(novoBadge);
+                        novoLi.appendChild(novoLink);
+                        
+                        // Insere os novos itens logo abaixo do item clicado
+                        containerPai.insertBefore(novoLi, itemLi.nextSibling);
+                    });
+                    
+                    // Esconde a linha mãe que mostrava a contagem genérica
+                    itemLi.style.display = "none";
                 }
             };
         } else {
             badge.innerText = "Em breve";
             badge.className = "badge";
-            itemLink.onclick = null;5
+            if (itemLink) itemLink.onclick = null;
         }
 
-        const exibe = texto.toLowerCase().includes(termoBusca) && (lista || cidadeSelecionada === "todos");
-        itemLi.style.display = exibe ? "block" : "none";
+        const exibe = textoProfissaoOriginal.toLowerCase().includes(termoBusca) && (lista || cidadeSelecionada === "todos");
+        if (itemLi.style.display !== "none") {
+            itemLi.style.display = exibe ? "block" : "none";
+        }
     });
 
     document.querySelectorAll(".grupo-categoria").forEach(grupo => {
@@ -478,10 +534,10 @@ function executarFiltrosCombinados() {
     });
 }
 
-// O 'w' deve ser minúsculo
 window.addEventListener("DOMContentLoaded", atualizarStatusProfissionais);
+</script>  
 
-</script>
+
 </body>
 </html>
 
