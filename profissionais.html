@@ -380,9 +380,10 @@ font-size: 8px;
 <li><a class="category-item"><span>Técnico em Informática</span><span class="badge" data-profissao="Técnico em Informática">Em breve</span></a></li>
 </ul>
 </div>
-
-<script>
-// 1. CONFIGURAÇÃO OFICIAL
+  
+  <script>
+    
+  // 1. CONFIGURAÇÃO OFICIAL
 const SUPABASE_URL = "https://supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
 
@@ -403,7 +404,7 @@ if (filtroCidade) {
 // 4. BUSCA DE DADOS
 async function atualizarStatusProfissionais() {
     try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=nome,profissao,whatsapp,status,cidade`, { 
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=profissao,whatsapp,status,cidade`, { 
             method: "GET", 
             headers: { "apikey": SUPABASE_KEY }
         });
@@ -459,37 +460,13 @@ function executarFiltrosCombinados() {
                     const num = lista[0].whatsapp.toString().replace(/\D/g, "");
                     window.open(`https://wa.me{num.startsWith("55") ? num : "55" + num}`, '_blank');
                 } else {
-                    const containerPai = itemLi.parentNode;
-                    lista.forEach(autonomo => {
-                        const novoLi = document.createElement("li");
-                        novoLi.className = itemLi.className;
-                        novoLi.style.display = "block";
-                        
-                        const novoLink = document.createElement("a");
-                        novoLink.className = "category-item";
-                        const num = autonomo.whatsapp.toString().replace(/\D/g, "");
-                        novoLink.href = `https://wa.me{num.startsWith("55") ? num : "55" + num}`;
-                        novoLink.target = "_blank";
-                        
-                        const textoNome = document.createElement("span");
-                        textoNome.innerText = `${autonomo.profissao}; ${autonomo.nome} `;
-                        
-                        const novoBadge = document.createElement("span");
-                        novoBadge.className = "badge disponivel";
-                        novoBadge.innerText = "🟢 Disponível";
-                        
-                        novoLink.appendChild(textoNome);
-                        novoLink.appendChild(novoBadge);
-                        novoLi.appendChild(novoLink);
-                        containerPai.insertBefore(novoLi, itemLi.nextSibling);
-                    });
-                    itemLi.style.display = "none";
+                    alert(`Existem ${lista.length} profissionais nesta categoria.`);
                 }
             };
         } else {
             badge.innerText = "Em breve";
             badge.className = "badge";
-            itemLink.onclick = null;
+            itemLink.onclick = null;5
         }
 
         const exibe = texto.toLowerCase().includes(termoBusca) && (lista || cidadeSelecionada === "todos");
@@ -502,8 +479,12 @@ function executarFiltrosCombinados() {
     });
 }
 
+// O 'w' deve ser minúsculo
 window.addEventListener("DOMContentLoaded", atualizarStatusProfissionais);
-</script>
+
+    
+  </script>  
+                    
   </body>
 </html>
   
