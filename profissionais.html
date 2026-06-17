@@ -465,7 +465,7 @@ function executarFiltrosCombinados() {
         } else {
             badge.innerText = "Em breve";
             badge.className = "badge";
-            itemLink.onclick = null;
+            itemLink.onclick = null;5
         }
 
         const exibe = texto.toLowerCase().includes(termoBusca) && (lista || cidadeSelecionada === "todos");
@@ -477,9 +477,12 @@ function executarFiltrosCombinados() {
         grupo.style.display = visivel ? "block" : "none";
     });
 }
-   
+
+// O 'w' deve ser minúsculo
+window.addEventListener("DOMContentLoaded", atualizarStatusProfissionais);
 
 </script>
-  
 </body>
-  </html>
+</html>
+
+                                                          
