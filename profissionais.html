@@ -381,6 +381,7 @@ font-size: 8px;
 <li><a class="category-item"><span>Técnico em Informática</span><span class="badge" data-profissao="Técnico em Informática">Em breve</span></a></li>
 </ul>
 </div>
+  
 <script>
 // 1. CONFIGURAÇÃO OFICIAL DO SEU AUTÔNOMOFÁCIL
 const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co";
@@ -412,7 +413,7 @@ if (inputBusca) {
     });
 }
 
-// 3. BUSCA DINÂMICA DE STATUS NO SUPABASE (SINTAXE CORRIGIDA)
+// 3. BUSCA DINÂMICA DE STATUS NO SUPABASE
 async function atualizarStatusProfissionais() {
     try {
         const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=profissao,whatsapp,status`, {
@@ -475,8 +476,36 @@ async function atualizarStatusProfissionais() {
     }
 }
 
+// 4. FUNÇÃO PARA POPULAR O FILTRO DE CIDADES AUTOMATICAMENTE
+async function carregarCidades() {
+    try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=cidade`, {
+            method: "GET",
+            headers: { 
+                "apikey": SUPABASE_KEY,
+                "Content-Type": "application/json"
+            }
+        });
+        const dados = await response.json();
+        
+        const select = document.getElementById("filtroCidade");
+        const cidades = [...new Set(dados.map(p => p.cidade).filter(c => c))];
+        
+        cidades.sort().forEach(cidade => {
+            const opt = document.createElement("option");
+            opt.value = cidade;
+            opt.innerHTML = cidade;
+            select.appendChild(opt);
+        });
+    } catch (err) {
+        console.error("Erro ao carregar cidades:", err);
+    }
+}
+
+// 5. INICIALIZAÇÃO
 window.addEventListener("DOMContentLoaded", () => {
     atualizarStatusProfissionais();
+    carregarCidades();
 });
 </script>
 
