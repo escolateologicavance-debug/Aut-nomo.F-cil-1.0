@@ -368,110 +368,104 @@ font-size: 8px;
 <li><a class="category-item"><span>Tapeceiro</span><span class="badge" data-profissao="Tapeceiro">Em breve</span></a></li>
 </ul>
 </div>
-
+<div id="modalProfissionais" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2 id="tituloModal">Profissionais</h2>
+    <div id="listaProfissionais"></div>
+  </div>
+</div>
+  
 <script>
-// 1. CONFIGURAÇÃO OFICIAL DO SEU AUTÔNOMOFÁCIL
 const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co";
 const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V"; 
+let dadosCadastrados = []; 
 
-// 2. SISTEMA DE BUSCA EM TEMPO REAL
+// 1. CARREGAMENTO DOS DADOS
+async function carregarDados() {
+    try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=*`, {
+            headers: { "apikey": SUPABASE_KEY, "Content-Type": "application/json" }
+        });
+        dadosCadastrados = await response.json();
+    } catch (err) {
+        console.error("Erro ao carregar dados:", err);
+    }
+}
+
+// 2. BUSCA COM SCROLL E FILTRO
 const inputBusca = document.getElementById("inputBusca");
 if (inputBusca) {
     inputBusca.addEventListener("input", function() {
         const termo = this.value.toLowerCase().trim();
-        const grupos = document.querySelectorAll(".grupo-categoria"); 
-
-        grupos.forEach(grupo => {
-            const itensLista = grupo.querySelectorAll("li");
-            let algumItemVisivel = false; 
-
-            itensLista.forEach(item => {
-                const nomeProfissao = item.querySelector("span").innerText.toLowerCase();
-                if (nomeProfissao.includes(termo)) {
-                    item.style.display = "block";
-                    algumItemVisivel = true;
-                } else {
-                    item.style.display = "none";
-                }
-            }); 
-
-            grupo.style.display = algumItemVisivel ? "block" : "none";
+        const itens = document.querySelectorAll(".category-item");
+        
+        itens.forEach(item => {
+            const nome = item.innerText.toLowerCase();
+            if (nome.includes(termo)) {
+                item.style.display = "block";
+                item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                item.style.display = "none";
+            }
         });
     });
-} 
+}
 
-// 3. BUSCA DINÂMICA DE STATUS NO SUPABASE
-async function atualizarStatusProfissionais() {
-    try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=profissao,whatsapp,status`, {
-            method: "GET",
-            headers: {
-                "apikey": SUPABASE_KEY,
-                "Content-Type": "application/json"
-            }
-        }); 
+// 3. LÓGICA DO MODAL
+function abrirModal(profissao) {
+    const modal = document.getElementById("modalProfissionais");
+    const listaDiv = document.getElementById("listaProfissionais");
+    const titulo = document.getElementById("tituloModal");
+    const cidadeSelect = document.getElementById("filtroCidade"); // ID do seu select de cidades
+    const cidadeEscolhida = cidadeSelect ? cidadeSelect.value : "Todas";
 
-        if (!response.ok) {
-            console.error("Erro na requisição Supabase:", response.status);
-            return;
-        } 
+    const encontrados = dadosCadastrados.filter(p => 
+        p.profissao.toLowerCase() === profissao.toLowerCase() && 
+        (cidadeEscolhida === "Todas as Cidades" || p.cidade === cidadeEscolhida)
+    );
 
-        const profissionais = await response.json(); 
+    titulo.innerText = profissao;
+    listaDiv.innerHTML = "";
 
-        const baseProfissionais = {};
-        profissionais.forEach(p => {
-            const statusTexto = p.status ? p.status.toLowerCase().trim() : "";
-            const statusValido = !statusTexto || statusTexto === "disponivel" || statusTexto === "disponível"; 
-
-            if (statusValido && p.profissao && p.whatsapp) {
-                const chaveFormatada = p.profissao.toLowerCase().trim();
-                baseProfissionais[chaveFormatada] = p;
-            }
-        }); 
-
-        const badges = document.querySelectorAll(".badge");
-        badges.forEach(badge => {
-            let textoCategoria = badge.getAttribute("data-profissao");
-            if (!textoCategoria) {
-                const spanIrmao = badge.previousElementSibling;
-                textoCategoria = spanIrmao ? spanIrmao.innerText : "";
-            } 
-
-            if (textoCategoria) {
-                const chaveBadge = textoCategoria.toLowerCase().trim();
-                const profissionalEncontrado = baseProfissionais[chaveBadge]; 
-
-                if (profissionalEncontrado) {
-                    badge.innerText = "Disponível";
-                    badge.classList.add("disponivel"); 
-
-                    const itemClicavel = badge.closest(".category-item");
-                    if (itemClicavel) {
-                        itemClicavel.style.cursor = "pointer";
-                        itemClicavel.onclick = (e) => {
-                            e.preventDefault();
-                            const numLimpo = profissionalEncontrado.whatsapp.toString().replace(/\D/g, "");
-                            const celularFinal = numLimpo.startsWith("55") ? numLimpo : "55" + numLimpo;
-                            window.open(`https://wa.me/${celularFinal}`, '_blank');
-                        };
-                    }
-                }
-            }
+    if (encontrados.length > 0) {
+        encontrados.forEach(p => {
+            const item = document.createElement("div");
+            item.style.marginBottom = "15px";
+            item.style.padding = "10px";
+            item.style.borderBottom = "1px solid #ccc";
+            item.innerHTML = `
+                <p><strong>${p.nome}</strong><br>${p.cidade}</p>
+                <button onclick="window.open('https://wa.me/${p.whatsapp.replace(/\D/g, "")}', '_blank')" 
+                        style="background:green; color:white; border:none; padding:5px 10px; border-radius:5px;">
+                    Disponível (WhatsApp)
+                </button>
+            `;
+            listaDiv.appendChild(item);
         });
-    } catch (err) {
-        console.error("Erro ao processar dados:", err);
+    } else {
+        listaDiv.innerHTML = "<p>Nenhum profissional encontrado nesta cidade.</p>";
     }
-} 
 
-window.addEventListener("DOMContentLoaded", () => {
-    atualizarStatusProfissionais();
-});
+    modal.style.display = "block";
+}
+
+// Fechar modal
+document.querySelector(".close").onclick = () => {
+    document.getElementById("modalProfissionais").style.display = "none";
+};
+
+// Inicialização
+carregarDados();
 </script>
+
   
+
 
 </body>
-
 </html>
-
   
+  
+
+
 
