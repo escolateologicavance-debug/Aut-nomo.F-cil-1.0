@@ -62,7 +62,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
 
 <body>
 
-
 <div class="header-box">
 
 <a href="index.html" class="btn-home"><i class="fa-solid fa-house"></i></a>
@@ -81,13 +80,11 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
 
 </div>
 
-
 <div class="search-container">
 
 <input type="text" id="inputBusca" class="search-input" placeholder="O que você está procurando?">
 
 </div>
-
 
 <div style="margin: 15px; text-align: center;">
 
@@ -98,8 +95,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
 </select>
 
 </div>
-
-
 
 <div id="modalProfissionais" class="modal">
 
@@ -133,7 +128,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
 
 </ul>
 
-
 <h2 class="section-title">🛠️ Reformas e Construção Civil</h2>
 
 <ul class="category-list">
@@ -164,7 +158,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
 
 </ul>
 
-
 <h2 class="section-title">🧹 Limpeza, Manutenção e Serviços Domésticos</h2>
 
 <ul class="category-list">
@@ -190,7 +183,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
 <li><a class="category-item"><span>Piscineiro (Limpeza de Piscinas)</span><span class="badge">Em breve</span></a></li>
 
 </ul>
-
 
 <h2 class="section-title">🏡 Serviços Residenciais e Instalações</h2>
 
@@ -220,7 +212,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
 
 </ul>
 
-
 <h2 class="section-title">💇 Beleza, Estética e Bem-Estar</h2>
 
 <ul class="category-list">
@@ -245,7 +236,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
 
 </ul>
 
-
 <h2 class="section-title">👶 Caregivers (Cuidados com Pessoas e Pets)</h2>
 
 <ul class="category-list">
@@ -263,7 +253,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
 <li><a class="category-item"><span>Tosador / Banho e Tosa em Domicílio</span><span class="badge">Em breve</span></a></li>
 
 </ul>
-
 
 <h2 class="section-title">🚗 Automotivo e Logística</h2>
 
@@ -287,7 +276,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
 
 </ul>
 
-
 <h2 class="section-title">🎂 Eventos e Alimentação</h2>
 
 <ul class="category-list">
@@ -301,7 +289,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
 <li><a class="category-item"><span>Cozinheiro Pessoal (Personal Chef)</span><span class="badge">Em breve</span></a></li>
 
 </ul>
-
 
 <h2 class="section-title">🛋️ Estofados, Tecidos e Comunicação Visual</h2>
 
@@ -325,13 +312,11 @@ const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
 
 let dados = [];
 
-
 async function init() {
 
 const res = await fetch(${SUPABASE_URL}/rest/v1/cadastro?select=*`, {headers: {"apikey": SUPABASE_KEY}});
 
 dados = await res.json();
-
 
 // 1. Preencher cidades
 
@@ -352,11 +337,9 @@ const nomeProfissao = item.querySelector('span').innerText.trim();
 
 const badge = item.querySelector('.badge');
 
-
 // Verifica se há alguém nesta profissão
 
 const temProfissional = dados.some(p => p.profissao.trim().toLowerCase() === nomeProfissao.toLowerCase());
-
 
 if (temProfissional) {
 
@@ -366,13 +349,11 @@ badge.classList.add('disponivel'); // Aplica o estilo verde que você já tem no
 
 }
 
-
 item.onclick = () => abrirModal(nomeProfissao);
 
 });
 
 }
-
 
 function abrirModal(profissao) {
 
@@ -380,13 +361,11 @@ const cidade = document.getElementById("filtroCidade").value;
 
 const encontrados = dados.filter(p => p.profissao.trim().toLowerCase() === profissao.toLowerCase() && (cidade === "todos" || p.cidade === cidade));
 
-
 document.getElementById("tituloModal").innerText = profissao;
 
 const listaDiv = document.getElementById("listaProfissionais");
 
 listaDiv.innerHTML = encontrados.length > 0 ? "" : "<p>Nenhum profissional encontrado.</p>";
-
 
 encontrados.forEach(p => {
 
@@ -402,9 +381,7 @@ document.getElementById("modalProfissionais").style.display = "block";
 
 }
 
-
 document.querySelector(".close").onclick = () => document.getElementById("modalProfissionais").style.display = "none";
-
 
 // Busca corrigida: Esconde o <li>, não o container inteiro
 
@@ -422,14 +399,9 @@ li.style.display = texto.includes(termo) ? "block" : "none";
 
 });
 
-
 init();
 
 </script>
-
-
-
 </body>
-
 </html>
 
