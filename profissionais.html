@@ -27,6 +27,8 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
 .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
 .modal-content { background: white; margin: 15% auto; padding: 20px; width: 90%; max-width: 400px; border-radius: 12px; position: relative; }
 .close { position: absolute; right: 15px; top: 10px; font-size: 24px; cursor: pointer; }
+.badge.disponivel { background-color: #e8f5e9; color: #2e7d32; }
+.badge.disponivel::before { content: "🟢"; margin-right: 5px; }   
 </style>
 </head>
 <body>
@@ -156,24 +158,37 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
     <h2 id="tituloModal">Profissionais</h2>
     <div id="listaProfissionais"></div>
   </div>
+    
 </div>
-  
 <script>
 const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co";
 const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V"; 
 let dados = [];
+
 async function init() {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=*`, {headers: {"apikey": SUPABASE_KEY}});
     dados = await res.json();
+    
+    // Preencher cidades
     const select = document.getElementById("filtroCidade");
     [...new Set(dados.map(p => p.cidade).filter(Boolean))].sort().forEach(c => {
         select.innerHTML += `<option value="${c}">${c}</option>`;
     });
+
+    // Atualizar badges automaticamente
     document.querySelectorAll('.category-item').forEach(item => {
         const nome = item.querySelector('span').innerText.trim();
+        const badge = item.querySelector('.badge');
+        const temCadastro = dados.some(p => p.profissao.trim().toLowerCase() === nome.toLowerCase());
+        
+        if (temCadastro) {
+            badge.innerText = "Disponível";
+            badge.className = "badge disponivel";
+        }
         item.onclick = () => abrirModal(nome);
     });
 }
+
 function abrirModal(profissao) {
     const cidade = document.getElementById("filtroCidade").value;
     const encontrados = dados.filter(p => p.profissao.trim().toLowerCase() === profissao.toLowerCase() && (cidade === "todos" || p.cidade === cidade));
@@ -189,12 +204,22 @@ function abrirModal(profissao) {
     });
     document.getElementById("modalProfissionais").style.display = "block";
 }
+
 document.querySelector(".close").onclick = () => document.getElementById("modalProfissionais").style.display = "none";
-init();
+
+// Busca Inteligente: esconde a linha (li) correspondente
 document.getElementById("inputBusca").addEventListener("input", (e) => {
-    document.querySelectorAll(".category-item").forEach(i => i.parentElement.style.display = i.innerText.toLowerCase().includes(e.target.value.toLowerCase()) ? "block" : "none");
+    const busca = e.target.value.toLowerCase();
+    document.querySelectorAll(".category-list li").forEach(li => {
+        li.style.display = li.innerText.toLowerCase().includes(busca) ? "block" : "none";
+    });
 });
+
+init();
 </script>
+    
+  
+
 </body>
 </html>
 
