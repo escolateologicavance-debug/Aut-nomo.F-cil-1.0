@@ -160,63 +160,86 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
   </div>
     
 </div>
-<script>
+    <script>
 const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co";
 const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V"; 
 let dados = [];
 
 async function init() {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=*`, {headers: {"apikey": SUPABASE_KEY}});
-    dados = await res.json();
-    
-    // Preencher cidades
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=*`, {headers: {"apikey": SUPABASE_KEY}});
+        dados = await res.json();
+        processarListaCompleta();
+    } catch (e) {
+        console.error("Erro ao carregar dados:", e);
+    }
+}
+
+function processarListaCompleta() {
+    // 1. Preencher seletor de cidades
     const select = document.getElementById("filtroCidade");
-    [...new Set(dados.map(p => p.cidade).filter(Boolean))].sort().forEach(c => {
+    const cidades = [...new Set(dados.map(p => p.cidade).filter(Boolean))].sort();
+    cidades.forEach(c => {
         select.innerHTML += `<option value="${c}">${c}</option>`;
     });
 
-    // Atualizar badges automaticamente
+    // 2. Atualizar STATUS (Disponível/Em breve) de TODOS os itens da página
     document.querySelectorAll('.category-item').forEach(item => {
-        const nome = item.querySelector('span').innerText.trim();
+        const spanNome = item.querySelector('span');
         const badge = item.querySelector('.badge');
-        const temCadastro = dados.some(p => p.profissao.trim().toLowerCase() === nome.toLowerCase());
+        const nomeProfissao = spanNome.innerText.trim();
         
-        if (temCadastro) {
+        // Verifica se há pelo menos um profissional para esta profissão
+        const temProfissional = dados.some(p => p.profissao.trim().toLowerCase() === nomeProfissao.toLowerCase());
+        
+        if (temProfissional) {
             badge.innerText = "Disponível";
-            badge.className = "badge disponivel";
+            badge.className = "badge disponivel"; // Aplica a classe que gera a bolinha verde
         }
-        item.onclick = () => abrirModal(nome);
+        
+        // Garante o clique no modal
+        item.onclick = () => abrirModal(nomeProfissao);
     });
 }
 
 function abrirModal(profissao) {
-    const cidade = document.getElementById("filtroCidade").value;
-    const encontrados = dados.filter(p => p.profissao.trim().toLowerCase() === profissao.toLowerCase() && (cidade === "todos" || p.cidade === cidade));
+    const cidadeSelecionada = document.getElementById("filtroCidade").value;
+    const encontrados = dados.filter(p => 
+        p.profissao.trim().toLowerCase() === profissao.toLowerCase() && 
+        (cidadeSelecionada === "todos" || p.cidade === cidadeSelecionada)
+    );
+    
     document.getElementById("tituloModal").innerText = profissao;
     const listaDiv = document.getElementById("listaProfissionais");
-    listaDiv.innerHTML = encontrados.length > 0 ? "" : "<p>Nenhum profissional encontrado.</p>";
-    encontrados.forEach(p => {
-        listaDiv.innerHTML += `
+    
+    if (encontrados.length > 0) {
+        listaDiv.innerHTML = encontrados.map(p => `
             <div style="border-bottom:1px solid #ccc; padding:10px 0;">
                 <p><strong>${p.nome}</strong><br>${p.cidade}</p>
-                <button onclick="window.open('https://wa.me/${p.whatsapp.replace(/\D/g, "")}')" style="background:green; color:white; border:none; padding:5px; border-radius:5px; cursor:pointer;">Chamar no WhatsApp</button>
-            </div>`;
-    });
+                <button onclick="window.open('https://wa.me/${p.whatsapp.replace(/\D/g, "")}')" style="background:green; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Chamar no WhatsApp</button>
+            </div>`).join('');
+    } else {
+        listaDiv.innerHTML = "<p>Nenhum profissional nesta cidade.</p>";
+    }
     document.getElementById("modalProfissionais").style.display = "block";
 }
 
+// Fechar modal
 document.querySelector(".close").onclick = () => document.getElementById("modalProfissionais").style.display = "none";
 
-// Busca Inteligente: esconde a linha (li) correspondente
+// BUSCA UNIVERSAL: Esconde o item da lista se não contiver o texto
 document.getElementById("inputBusca").addEventListener("input", (e) => {
-    const busca = e.target.value.toLowerCase();
-    document.querySelectorAll(".category-list li").forEach(li => {
-        li.style.display = li.innerText.toLowerCase().includes(busca) ? "block" : "none";
+    const termo = e.target.value.toLowerCase();
+    document.querySelectorAll("ul.category-list li").forEach(li => {
+        const textoDaLinha = li.innerText.toLowerCase();
+        li.style.display = textoDaLinha.includes(termo) ? "block" : "none";
     });
 });
 
 init();
 </script>
+
+        
     
   
 
