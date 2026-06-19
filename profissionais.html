@@ -1,223 +1,435 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>AutônomoFácil - Encontre ou Cadastre-se</title>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
 <style>
+
 :root { --primary: #0b53b7; --primary-dark: #083d87; --dark: #2c3e50; --light: #f9f9f9; --white: #ffffff; --gray: #7f8c8d; --green: #2e7d32; }
-* { margin: 0; padding: 0; box-sizing: border-box; }
+
+• { margin: 0; padding: 0; box-sizing: border-box; }
+
 body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-color: var(--light); color: #333; max-width: 800px; margin: 0 auto; padding: 20px 20px 40px 20px; }
+
 .header-box { position: relative; background-color: var(--primary); color: var(--white); padding: 30px 20px; border-radius: 16px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+
 .header-box h1 { margin: 0 0 10px 0; font-size: 2.2rem; font-weight: 700; }
+
 .header-box p { margin: 0 0 20px 0; font-size: 1.1rem; opacity: 0.9; padding: 0 10px; }
+
 .btn-home { position: absolute; top: 15px; right: 20px; color: var(--white); font-size: 22px; text-decoration: none; }
+
 .cta-container { display: flex; flex-direction: column; gap: 12px; max-width: 400px; margin: 0 auto; }
+
 .btn { display: block; padding: 14px 20px; border-radius: 25px; text-decoration: none; font-weight: bold; text-align: center; border: none; cursor: pointer; }
+
 .btn-primary { background-color: #ffffff; color: var(--primary); }
+
 .btn-secondary { background-color: transparent; color: #f1c40f; border: 2px solid #f1c40f; }
+
 .search-container { position: relative; margin-bottom: 25px; }
+
 .search-input { width: 100%; padding: 14px 14px 14px 45px; border-radius: 12px; border: 2px solid #ddd; }
+
 .section-title { color: var(--dark); border-bottom: 2px solid #ecf0f1; padding-bottom: 8px; margin-top: 35px; }
+
 .category-list { list-style-type: none; padding-left: 0; display: grid; gap: 10px; }
+
 .category-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; background-color: var(--white); border-left: 4px solid var(--primary); border-radius: 0 12px 12px 0; cursor: pointer; text-decoration: none; color: #333; }
+
 .badge { font-size: 0.75rem; background-color: #ecf0f1; color: var(--gray); padding: 4px 10px; border-radius: 12px; font-weight: 600; }
+
 /* Modal */
+
 .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
+
 .modal-content { background: white; margin: 15% auto; padding: 20px; width: 90%; max-width: 400px; border-radius: 12px; position: relative; }
+
 .close { position: absolute; right: 15px; top: 10px; font-size: 24px; cursor: pointer; }
+
 </style>
+
 </head>
+
 <body>
 
+
 <div class="header-box">
-    <a href="index.html" class="btn-home"><i class="fa-solid fa-house"></i></a>
-    <h1>AutônomoFácil</h1>
-    <p>Encontre os melhores profissionais da sua região!</p>
-    <div class="cta-container">
-        <a href="cadastro-profissional.html" class="btn btn-primary">🚀 Quero me Cadastrar</a>
-        <a href="cadastro-profissional.html" class="btn btn-secondary">🤔 Quem pode Cadastrar?</a>
-    </div>
+
+<a href="index.html" class="btn-home"><i class="fa-solid fa-house"></i></a>
+
+<h1>AutônomoFácil</h1>
+
+<p>Encontre os melhores profissionais da sua região!</p>
+
+<div class="cta-container">
+
+<a href="cadastro-profissional.html" class="btn btn-primary">🚀 Quero me Cadastrar</a>
+
+<a href="cadastro-profissional.html" class="btn btn-secondary">🤔 Quem pode Cadastrar?</a>
+
 </div>
+
+</div>
+
 
 <div class="search-container">
-    <input type="text" id="inputBusca" class="search-input" placeholder="O que você está procurando?">
+
+<input type="text" id="inputBusca" class="search-input" placeholder="O que você está procurando?">
+
 </div>
 
+
 <div style="margin: 15px; text-align: center;">
-  <select id="filtroCidade" style="padding: 10px; width: 90%; max-width: 400px; border-radius: 8px;">
-    <option value="todos">🌍 Todas as Cidades</option>
-  </select>
+
+<select id="filtroCidade" style="padding: 10px; width: 90%; max-width: 400px; border-radius: 8px;">
+
+<option value="todos">🌍 Todas as Cidades</option>
+
+</select>
+
 </div>
+
 
 
 <div id="modalProfissionais" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <h2 id="tituloModal">Profissionais</h2>
-    <div id="listaProfissionais"></div>
-  </div>
+
+<div class="modal-content">
+
+<span class="close">×</span>
+
+<h2 id="tituloModal">Profissionais</h2>
+
+<div id="listaProfissionais"></div>
+
 </div>
+
+</div>
+
 <h2 class="section-title">⚖️ Serviços Jurídicos e Advocacia</h2>
+
 <ul class="category-list">
-    <li><a class="category-item"><span>Advogado Cível</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Advogado Criminalista</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Advogado Trabalhista</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Advogado Previdenciário</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Advogado de Família</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Consultor Jurídico</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Advogado Cível</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Advogado Criminalista</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Advogado Trabalhista</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Advogado Previdenciário</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Advogado de Família</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Consultor Jurídico</span><span class="badge">Em breve</span></a></li>
+
 </ul>
+
 
 <h2 class="section-title">🛠️ Reformas e Construção Civil</h2>
+
 <ul class="category-list">
-    <li><a class="category-item"><span>Azulejista</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Calheiro / Instalador de Calhas</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Carpinteiro</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Eletricista Comercial e Residencial</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Encanador (Bombeiro Hidráulico)</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Gesseiro</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Marceneiro</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Pedreiro</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Pintor de Casas</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Serralheiro</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Soldador</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Vidraceiro</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Azulejista</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Calheiro / Instalador de Calhas</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Carpinteiro</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Eletricista Comercial e Residencial</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Encanador (Bombeiro Hidráulico)</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Gesseiro</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Marceneiro</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Pedreiro</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Pintor de Casas</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Serralheiro</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Soldador</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Vidraceiro</span><span class="badge">Em breve</span></a></li>
+
 </ul>
+
 
 <h2 class="section-title">🧹 Limpeza, Manutenção e Serviços Domésticos</h2>
+
 <ul class="category-list">
-    <li><a class="category-item"><span>Assistência Técnica de Eletrodomésticos</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Cata-Entulhos / Limpeza de Terrenos</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Diarista / Faxineira</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Dedetizador</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Higienizador de Ar-Condicionado</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Jardineiro</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Lavador de Estofados e Tapetes</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Limpa-Estofados a Seco</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Limpa-Fossas</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Piscineiro (Limpeza de Piscinas)</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Assistência Técnica de Eletrodomésticos</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Cata-Entulhos / Limpeza de Terrenos</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Diarista / Faxineira</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Dedetizador</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Higienizador de Ar-Condicionado</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Jardineiro</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Lavador de Estofados e Tapetes</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Limpa-Estofados a Seco</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Limpa-Fossas</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Piscineiro (Limpeza de Piscinas)</span><span class="badge">Em breve</span></a></li>
+
 </ul>
+
 
 <h2 class="section-title">🏡 Serviços Residenciais e Instalações</h2>
+
 <ul class="category-list">
-    <li><a class="category-item"><span>Chaveiro</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Caseiro Autônomo / Cuidador de Chácaras</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Freteiro / Caminhão de Mudança</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Marido de Aluguel / Faz-Tudo</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Instalador de Ar-Condicionado</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Instalador de Câmeras e Alarmes</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Instalador de Cerca Elétrica e Portões</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Instalador de Papel de Parede</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Instalador de Redes de Proteção</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Montador de Móveis</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Organizador de Mudanças</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Chaveiro</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Caseiro Autônomo / Cuidador de Chácaras</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Freteiro / Caminhão de Mudança</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Marido de Aluguel / Faz-Tudo</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Instalador de Ar-Condicionado</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Instalador de Câmeras e Alarmes</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Instalador de Cerca Elétrica e Portões</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Instalador de Papel de Parede</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Instalador de Redes de Proteção</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Montador de Móveis</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Organizador de Mudanças</span><span class="badge">Em breve</span></a></li>
+
 </ul>
+
 
 <h2 class="section-title">💇 Beleza, Estética e Bem-Estar</h2>
+
 <ul class="category-list">
-    <li><a class="category-item"><span>Barbeiro</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Cabeleireiro</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Designer de Sobrancelhas</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Esteticista</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Manicure / Pedicure</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Maquiadora</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Massoterapeuta</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Podólogo</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Terapeuta</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Barbeiro</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Cabeleireiro</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Designer de Sobrancelhas</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Esteticista</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Manicure / Pedicure</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Maquiadora</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Massoterapeuta</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Podólogo</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Terapeuta</span><span class="badge">Em breve</span></a></li>
+
 </ul>
+
 
 <h2 class="section-title">👶 Caregivers (Cuidados com Pessoas e Pets)</h2>
+
 <ul class="category-list">
-    <li><a class="category-item"><span>Babá / Cuidador Infantil</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Cuidador de Idosos</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Dog Walker / Pet Sitter</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Hospedagem Familiar de Pets</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Recreador Infantil / Animador de Festas</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Tosador / Banho e Tosa em Domicílio</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Babá / Cuidador Infantil</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Cuidador de Idosos</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Dog Walker / Pet Sitter</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Hospedagem Familiar de Pets</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Recreador Infantil / Animador de Festas</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Tosador / Banho e Tosa em Domicílio</span><span class="badge">Em breve</span></a></li>
+
 </ul>
+
 
 <h2 class="section-title">🚗 Automotivo e Logística</h2>
+
 <ul class="category-list">
-    <li><a class="category-item"><span>Chapa (Diarista de Caminhão)</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Detalhador Automotivo</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Guincheiro / Guinchista</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Lavador de Carros (Lava Jato)</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Mecânico (Carros / Motos)</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Motoboy / Mensageiro</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Motorista de Aplicativo Particular</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Polidor de Faróis e Carros</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Chapa (Diarista de Caminhão)</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Detalhador Automotivo</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Guincheiro / Guinchista</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Lavador de Carros (Lava Jato)</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Mecânico (Carros / Motos)</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Motoboy / Mensageiro</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Motorista de Aplicativo Particular</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Polidor de Faróis e Carros</span><span class="badge">Em breve</span></a></li>
+
 </ul>
+
 
 <h2 class="section-title">🎂 Eventos e Alimentação</h2>
+
 <ul class="category-list">
-    <li><a class="category-item"><span>Bartender / Barman para Eventos</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Churrasqueiro a Domicílio</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Confeiteiro / Salgadeiro</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Cozinheiro Pessoal (Personal Chef)</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Bartender / Barman para Eventos</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Churrasqueiro a Domicílio</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Confeiteiro / Salgadeiro</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Cozinheiro Pessoal (Personal Chef)</span><span class="badge">Em breve</span></a></li>
+
 </ul>
 
+
 <h2 class="section-title">🛋️ Estofados, Tecidos e Comunicação Visual</h2>
+
 <ul class="category-list">
-    <li><a class="category-item"><span>Costureira / Alfaiate</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Estofador (Reforma de Sofás)</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Letrista</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Tapeceiro</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Costureira / Alfaiate</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Estofador (Reforma de Sofás)</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Letrista</span><span class="badge">Em breve</span></a></li>
+
+<li><a class="category-item"><span>Tapeceiro</span><span class="badge">Em breve</span></a></li>
+
 </ul>
 
 <script>
-// ... (mantenha suas constantes SUPABASE_URL e SUPABASE_KEY iguais)
+
+const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co";
+
+const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
+
+let dados = [];
+
 
 async function init() {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=*`, {headers: {"apikey": SUPABASE_KEY}});
-    dados = await res.json();
-    
-    // 1. Preencher cidades
-    const select = document.getElementById("filtroCidade");
-    [...new Set(dados.map(p => p.cidade).filter(Boolean))].sort().forEach(c => {
-        select.innerHTML += `<option value="${c}">${c}</option>`;
-    });
 
-    // 2. Atualizar Badges e vincular cliques
-    document.querySelectorAll('.category-item').forEach(item => {
-        const nomeProfissao = item.querySelector('span').innerText.trim();
-        const badge = item.querySelector('.badge');
-        
-        const temProfissional = dados.some(p => p.profissao.trim().toLowerCase() === nomeProfissao.toLowerCase());
-        
-        if (temProfissional) {
-            badge.innerText = "Disponível";
-            badge.className = "badge disponivel"; // Força a classe correta para a bolinha
-        } else {
-            badge.innerText = "Em breve";
-            badge.className = "badge"; // Reseta para o padrão
-        }
-        
-        item.onclick = () => abrirModal(nomeProfissao);
-    });
-}
+const res = await fetch(${SUPABASE_URL}/rest/v1/cadastro?select=*`, {headers: {"apikey": SUPABASE_KEY}});
 
-// ... (mantenha sua função abrirModal exatamente como está)
+dados = await res.json();
 
-// Busca Inteligente: Filtra mantendo os itens que correspondem
-document.getElementById("inputBusca").addEventListener("input", (e) => {
-    const termo = e.target.value.toLowerCase();
-    document.querySelectorAll(".category-item").forEach(item => {
-        const li = item.closest('li'); // Pega o <li> pai
-        const texto = item.innerText.toLowerCase();
-        
-        if (texto.includes(termo)) {
-            li.style.display = "block"; // Mostra
-        } else {
-            li.style.display = "none";  // Esconde apenas o item
-        }
-    });
+
+// 1. Preencher cidades
+
+const select = document.getElementById("filtroCidade");
+
+[...new Set(dados.map(p => p.cidade).filter(Boolean))].sort().forEach(c => {
+
+select.innerHTML += <option value="${c}">${c}&lt;/option>;
+
 });
 
+
+// 2. Atualizar Badges e vincular cliques
+
+document.querySelectorAll('.category-item').forEach(item => {
+
+const nomeProfissao = item.querySelector('span').innerText.trim();
+
+const badge = item.querySelector('.badge');
+
+
+// Verifica se há alguém nesta profissão
+
+const temProfissional = dados.some(p => p.profissao.trim().toLowerCase() === nomeProfissao.toLowerCase());
+
+
+if (temProfissional) {
+
+badge.innerText = "Disponível";
+
+badge.classList.add('disponivel'); // Aplica o estilo verde que você já tem no CSS
+
+}
+
+
+item.onclick = () => abrirModal(nomeProfissao);
+
+});
+
+}
+
+
+function abrirModal(profissao) {
+
+const cidade = document.getElementById("filtroCidade").value;
+
+const encontrados = dados.filter(p => p.profissao.trim().toLowerCase() === profissao.toLowerCase() && (cidade === "todos" || p.cidade === cidade));
+
+
+document.getElementById("tituloModal").innerText = profissao;
+
+const listaDiv = document.getElementById("listaProfissionais");
+
+listaDiv.innerHTML = encontrados.length > 0 ? "" : "<p>Nenhum profissional encontrado.</p>";
+
+
+encontrados.forEach(p => {
+
+listaDiv.innerHTML += &lt;div style="border-bottom:1px solid #ccc; padding:10px 0;"&gt; &lt;p&gt;&lt;strong&gt;${p.nome}</strong><br>📍 
+
+{p.whatsapp.replace(/\D/g, "")}')" style="background:green; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Chamar no WhatsApp</button>
+
+</div>`;
+
+});
+
+document.getElementById("modalProfissionais").style.display = "block";
+
+}
+
+
+document.querySelector(".close").onclick = () => document.getElementById("modalProfissionais").style.display = "none";
+
+
+// Busca corrigida: Esconde o <li>, não o container inteiro
+
+document.getElementById("inputBusca").addEventListener("input", (e) => {
+
+const termo = e.target.value.toLowerCase();
+
+document.querySelectorAll("ul.category-list li").forEach(li => {
+
+const texto = li.innerText.toLowerCase();
+
+li.style.display = texto.includes(termo) ? "block" : "none";
+
+});
+
+});
+
+
 init();
+
 </script>
-    
-    
-    
+
+
+
 </body>
+
 </html>
+
