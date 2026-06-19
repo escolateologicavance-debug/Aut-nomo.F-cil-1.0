@@ -164,10 +164,9 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
     <li><a class="category-item"><span>Letrista</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Tapeceiro</span><span class="badge">Em breve</span></a></li>
 </ul>
+
 <script>
-const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co";
-const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V"; 
-let dados = [];
+// ... (mantenha suas constantes SUPABASE_URL e SUPABASE_KEY iguais)
 
 async function init() {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=*`, {headers: {"apikey": SUPABASE_KEY}});
@@ -184,49 +183,40 @@ async function init() {
         const nomeProfissao = item.querySelector('span').innerText.trim();
         const badge = item.querySelector('.badge');
         
-        // Verifica se há alguém nesta profissão
         const temProfissional = dados.some(p => p.profissao.trim().toLowerCase() === nomeProfissao.toLowerCase());
         
         if (temProfissional) {
             badge.innerText = "Disponível";
-            badge.classList.add('disponivel'); // Aplica o estilo verde que você já tem no CSS
+            badge.className = "badge disponivel"; // Força a classe correta para a bolinha
+        } else {
+            badge.innerText = "Em breve";
+            badge.className = "badge"; // Reseta para o padrão
         }
         
         item.onclick = () => abrirModal(nomeProfissao);
     });
 }
 
-function abrirModal(profissao) {
-    const cidade = document.getElementById("filtroCidade").value;
-    const encontrados = dados.filter(p => p.profissao.trim().toLowerCase() === profissao.toLowerCase() && (cidade === "todos" || p.cidade === cidade));
-    
-    document.getElementById("tituloModal").innerText = profissao;
-    const listaDiv = document.getElementById("listaProfissionais");
-    listaDiv.innerHTML = encontrados.length > 0 ? "" : "<p>Nenhum profissional encontrado.</p>";
-    
-    encontrados.forEach(p => {
-        listaDiv.innerHTML += `
-            <div style="border-bottom:1px solid #ccc; padding:10px 0;">
-                <p><strong>${p.nome}</strong><br>📍 ${p.cidade}</p>
-                <button onclick="window.open('https://wa.me/${p.whatsapp.replace(/\D/g, "")}')" style="background:green; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Chamar no WhatsApp</button>
-            </div>`;
-    });
-    document.getElementById("modalProfissionais").style.display = "block";
-}
+// ... (mantenha sua função abrirModal exatamente como está)
 
-document.querySelector(".close").onclick = () => document.getElementById("modalProfissionais").style.display = "none";
-
-// Busca corrigida: Esconde o <li>, não o container inteiro
+// Busca Inteligente: Filtra mantendo os itens que correspondem
 document.getElementById("inputBusca").addEventListener("input", (e) => {
     const termo = e.target.value.toLowerCase();
-    document.querySelectorAll("ul.category-list li").forEach(li => {
-        const texto = li.innerText.toLowerCase();
-        li.style.display = texto.includes(termo) ? "block" : "none";
+    document.querySelectorAll(".category-item").forEach(item => {
+        const li = item.closest('li'); // Pega o <li> pai
+        const texto = item.innerText.toLowerCase();
+        
+        if (texto.includes(termo)) {
+            li.style.display = "block"; // Mostra
+        } else {
+            li.style.display = "none";  // Esconde apenas o item
+        }
     });
 });
 
 init();
 </script>
+    
     
     
 </body>
