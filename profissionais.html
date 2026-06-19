@@ -226,15 +226,40 @@ function abrirModal(profissao) {
 
 // Fechar modal
 document.querySelector(".close").onclick = () => document.getElementById("modalProfissionais").style.display = "none";
-
-// BUSCA UNIVERSAL: Esconde o item da lista se não contiver o texto
+// BUSCA UNIVERSAL
 document.getElementById("inputBusca").addEventListener("input", (e) => {
-    const termo = e.target.value.toLowerCase();
+    const termo = e.target.value.trim().toLowerCase();
+
+    // Filtra os itens
     document.querySelectorAll("ul.category-list li").forEach(li => {
-        const textoDaLinha = li.innerText.toLowerCase();
-        li.style.display = textoDaLinha.includes(termo) ? "block" : "none";
+        const texto = li.querySelector(".category-item span")
+            .innerText
+            .toLowerCase();
+
+        li.style.display =
+            termo === "" || texto.includes(termo)
+            ? ""
+            : "none";
     });
-});
+
+    // Mostra ou esconde categorias inteiras
+    document.querySelectorAll(".category-list").forEach(lista => {
+
+        const itensVisiveis =
+            [...lista.querySelectorAll("li")]
+            .some(li => li.style.display !== "none");
+
+        lista.style.display = itensVisiveis ? "" : "none";
+
+        const titulo = lista.previousElementSibling;
+
+        if (titulo && titulo.classList.contains("section-title")) {
+            titulo.style.display = itensVisiveis ? "" : "none";
+        }
+    });
+});        
+
+
 
 init();
 </script>
