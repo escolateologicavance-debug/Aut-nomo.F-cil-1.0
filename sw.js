@@ -15,9 +15,10 @@ const urlsToCache = [
   "/contratos.html",
   "/feedbacks.html",
   "/conversas.html",
+  "/recibos.html",
   "/veiculos.html",
   "/arquivos.html",
-  
+
   // Arquivos base de configuração do PWA
   "/manifest.json",
   "/icon-192.png",
