@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutônomoFácil - Recibo</title>
+<style>
+:root {
+--primary: #1565c0;
+--primary-dark: #0d47a1;
+--bg: #f4f6f9;
+--white: #ffffff;
+--green: #2e7d32;
+--text: #222;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+body {
+background: var(--bg);
+color: var(--text);
+padding: 20px;
+}
+
+.container {
+max-width: 600px;
+margin: 0 auto;
+background: var(--white);
+padding: 25px;
+border-radius: 18px;
+box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+h2 {
+color: var(--primary);
+font-size: 20px;
+margin-bottom: 5px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.subtitle {
+font-size: 13px;
+color: #666;
+margin-bottom: 20px;
+}
+
+.form-group {
+margin-bottom: 15px;
+}
+
+label {
+display: block;
+font-weight: 600;
+margin-bottom: 6px;
+font-size: 14px;
+}
+
+input, textarea {
+width: 100%;
+padding: 12px;
+border: 1px solid #ddd;
+border-radius: 10px;
+font-size: 14px;
+outline: none;
+transition: border-color 0.2s;
+}
+
+input:focus, textarea:focus {
+border-color: var(--primary);
+}
+
+.btn-gerar {
+background: var(--green);
+color: white;
+border: none;
+width: 100%;
+padding: 14px;
+font-size: 15px;
+font-weight: bold;
+border-radius: 10px;
+cursor: pointer;
+margin-top: 10px;
+transition: opacity 0.2s;
+}
+
+.btn-gerar:hover {
+opacity: 0.9;
+}
+
+/* Modal do Recibo Digitável */
+.modal-overlay {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0,0,0,0.6);
+justify-content: center;
+align-items: center;
+padding: 15px;
+z-index: 1000;
+}
+
+.modal-content {
+background: #fff;
+padding: 25px;
+border-radius: 18px;
+max-width: 500px;
+width: 100%;
+box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.recibo-papel {
+border: 2px dashed #bbb;
+padding: 20px;
+background: #fffdf9;
+border-radius: 10px;
+margin-bottom: 20px;
+}
+
+.recibo-cabecalho-livre {
+text-align: center;
+border-bottom: 1px solid #ddd;
+padding-bottom: 10px;
+margin-bottom: 15px;
+}
+
+.recibo-cabecalho-livre input {
+text-align: center;
+font-weight: bold;
+font-size: 16px;
+border: none;
+background: transparent;
+}
+
+.recibo-corpo p {
+font-size: 14px;
+margin-bottom: 8px;
+line-height: 1.5;
+}
+
+.recibo-footer {
+margin-top: 20px;
+text-align: right;
+font-size: 13px;
+}
+
+.acoes-modal {
+display: flex;
+gap: 10px;
+}
+
+.btn-imprimir {
+background: var(--primary);
+color: white;
+border: none;
+flex: 1;
+padding: 12px;
+border-radius: 8px;
+font-weight: bold;
+cursor: pointer;
+}
+
+.btn-voltar {
+background: #777;
+color: white;
+border: none;
+flex: 1;
+padding: 12px;
+border-radius: 8px;
+font-weight: bold;
+cursor: pointer;
+}
+
+@media print {
+body * {
+visibility: hidden;
+}
+.modal-content, .modal-content * {
+visibility: visible;
+}
+.modal-content {
+position: absolute;
+left: 0;
+top: 0;
+width: 100%;
+box-shadow: none;
+border: none;
+}
+.acoes-modal {
+display: none;
+}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h2>📄 Emissão de Recibo</h2>
+<p class="subtitle">Preencha os campos abaixo para gerar o recibo digitável formatado.</p>
+
+<div class="form-group">
+<label>Nome / Título do Profissional ou Empresa</label>
+<input type="text" id="inputProfissional" placeholder="Ex: João da Silva / JS Soluções">
+</div>
+
+<div class="form-group">
+<label>Nome do Cliente (Pagador)</label>
+<input type="text" id="inputCliente" placeholder="Ex: Maria Oliveira">
+</div>
+
+<div class="form-group">
+<label>Valor (R$`)</label>
+<input type="number" id="inputValor" step="0.01" placeholder="0,00">
+</div>
+
+<div class="form-group">
+<label>Descrição Neutra do Serviço / Atendimento</label>
+<input type="text" id="inputDescricao" placeholder="Ex: Referente a prestação de serviço profissional autônomo">
+</div>
+
+<div class="form-group">
+<label>Data da Emissão</label>
+<input type="date" id="inputData">
+</div>
+
+<button class="btn-gerar" onclick="gerarRecibo()">Gerar Recibo Digitável</button>
+</div>
+
+<!-- Modal do Recibo -->
+<div class="modal-overlay" id="modalRecibo">
+<div class="modal-content">
+<div class="recibo-papel">
+<div class="recibo-cabecalho-livre">
+<input type="text" id="viewCabecalho" value="RECIBO DE PRESTAÇÃO DE SERVIÇO">
+</div>
+<div class="recibo-corpo">
+<p><strong>Valor:</strong> <span id="viewValor">R`$ 0,00</span></p>
+<p><strong>Recebemos de:</strong> <span id="viewCliente">-</span></p>
+<p><strong>Referente a:</strong> <span id="viewDescricao">-</span></p>
+<p><strong>Emitido por:</strong> <span id="viewProfissional">-</span></p>
+<p><strong>Data:</strong> <span id="viewData">-</span></p>
+</div>
+<div class="recibo-footer">
+<p>_________________________________________</p>
+<p>Assinatura do Profissional</p>
+</div>
+</div>
+
+<div class="acoes-modal">
+<button class="btn-imprimir" onclick="window.print()">🖨️ Imprimir</button>
+<button class="btn-voltar" onclick="fecharModal()">Concluir / Voltar</button>
+</div>
+</div>
+</div>
+
+<script>
+// Define a data atual automaticamente ao abrir a página
+document.getElementById('inputData').valueAsDate = new Date();
+
+function gerarRecibo() {
+const profissional = document.getElementById('inputProfissional').value || 'Profissional Autônomo';
+const cliente = document.getElementById('inputCliente').value;
+const valor = document.getElementById('inputValor').value;
+const descricao = document.getElementById('inputDescricao').value;
+const data = document.getElementById('inputData').value;
+
+if (!cliente || !valor || !descricao || !data) {
+alert('Por favor, preencha todos os campos obrigatórios.');
+return;
+}
+
+// Formata o valor para o padrão monetário brasileiro
+const valorFormatado = Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const dataFormatada = data.split('-').reverse().join('/');
+
+// Popula o modal
+document.getElementById('viewCabecalho').value = profissional.toUpperCase();
+document.getElementById('viewValor').innerText = valorFormatado;
+document.getElementById('viewCliente').innerText = cliente;
+document.getElementById('viewDescricao').innerText = descricao;
+document.getElementById('viewProfissional').innerText = profissional;
+document.getElementById('viewData').innerText = dataFormatada;
+
+// Exibe o modal
+document.getElementById('modalRecibo').style.display = 'flex';
+}
+
+function fecharModal() {
+document.getElementById('modalRecibo').style.display = 'none';
+window.location.href = 'index.html';
+}
+</script>
+
+</body>
+</html>
