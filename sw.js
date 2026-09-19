@@ -1,4 +1,4 @@
-const CACHE_NAME = "autonomofacil-v5";
+const CACHE_NAME = "autonomofacil-v6";
 
 const urlsToCache = [
   "/",
