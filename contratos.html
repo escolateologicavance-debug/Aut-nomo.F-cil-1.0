@@ -128,6 +128,11 @@ small{
 color:#666;
 }
 
+.filiado-azul {
+color: #1565c0;
+font-weight: bold;
+}
+
 </style>
 </head>
 
@@ -144,9 +149,45 @@ color:#666;
 </div>
 
 <div class="card">
+<h3>💼 Dados do Prestador (Profissional)</h3>
 
-<label>Cliente</label>
+<label>Nome / Razão Social</label>
+<input type="text" id="prestador_nome" placeholder="Seu nome ou nome da empresa">
+
+<label>CPF ou CNPJ</label>
+<input type="text" id="prestador_doc" placeholder="000.000.000-00 ou 00.000.000/0001-00">
+
+<label>Endereço</label>
+<input type="text" id="prestador_endereco" placeholder="Rua, Número, Bairro, Cidade - UF">
+
+<label>Contato (Telefone/WhatsApp)</label>
+<input type="text" id="prestador_contato" placeholder="(00) 00000-0000">
+
+<label>E-mail</label>
+<input type="email" id="prestador_email" placeholder="seu@email.com">
+</div>
+
+<div class="card">
+<h3>👤 Dados do Cliente</h3>
+
+<label>Nome Completo / Razão Social</label>
 <input type="text" id="cliente" placeholder="Nome do cliente">
+
+<label>CPF ou CNPJ</label>
+<input type="text" id="cliente_doc" placeholder="CPF ou CNPJ do cliente">
+
+<label>Endereço</label>
+<input type="text" id="cliente_endereco" placeholder="Endereço completo do cliente">
+
+<label>Contato (Telefone/WhatsApp)</label>
+<input type="text" id="cliente_contato" placeholder="Telefone do cliente">
+
+<label>E-mail</label>
+<input type="email" id="cliente_email" placeholder="E-mail do cliente">
+</div>
+
+<div class="card">
+<h3>🛠️ Detalhes do Serviço</h3>
 
 <label>Serviço</label>
 <input type="text" id="servico" placeholder="Ex: Instalação elétrica">
@@ -161,8 +202,7 @@ color:#666;
 <input type="date" id="prazo">
 
 <label>Condições de Pagamento</label>
-<input type="text" id="pagamento"
-placeholder="Ex: 50% entrada e 50% entrega">
+<input type="text" id="pagamento" placeholder="Ex: 50% entrada e 50% entrega">
 
 <label>Observações</label>
 <textarea id="obs"></textarea>
@@ -205,15 +245,18 @@ Nenhum contrato gerado.
 
 <script>
 
-let contratos =
-JSON.parse(localStorage.getItem("contratos")) || [];
-
+let contratos = JSON.parse(localStorage.getItem("contratos")) || [];
 let editando = null;
 
-// Lógica para salvar as informações digitadas em tempo real (antes de gerar)
+const camposForm = [
+"prestador_nome", "prestador_doc", "prestador_endereco", "prestador_contato", "prestador_email",
+"cliente", "cliente_doc", "cliente_endereco", "cliente_contato", "cliente_email",
+"servico", "valor", "inicio", "prazo", "pagamento", "obs"
+];
+
+// Lógica para salvar as informações digitadas em tempo real
 window.addEventListener("DOMContentLoaded", () => {
-    const campos = ["cliente", "servico", "valor", "inicio", "prazo", "pagamento", "obs"];
-    campos.forEach(id => {
+    camposForm.forEach(id => {
         const elemento = document.getElementById(id);
         const valorSalvo = localStorage.getItem("temp_form_" + id);
         if (valorSalvo) elemento.value = valorSalvo;
@@ -226,58 +269,59 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 function limparRascunho() {
-    const campos = ["cliente", "servico", "valor", "inicio", "prazo", "pagamento", "obs"];
-    campos.forEach(id => {
+    camposForm.forEach(id => {
         localStorage.removeItem("temp_form_" + id);
     });
 }
 
 function gerarContrato(){
 
-const cliente =
-document.getElementById("cliente").value;
+const pNome = document.getElementById("prestador_nome").value;
+const pDoc = document.getElementById("prestador_doc").value;
+const pEnd = document.getElementById("prestador_endereco").value;
+const pCont = document.getElementById("prestador_contato").value;
+const pEmail = document.getElementById("prestador_email").value;
 
-const servico =
-document.getElementById("servico").value;
+const cliente = document.getElementById("cliente").value;
+const cDoc = document.getElementById("cliente_doc").value;
+const cEnd = document.getElementById("cliente_endereco").value;
+const cCont = document.getElementById("cliente_contato").value;
+const cEmail = document.getElementById("cliente_email").value;
 
-const valor =
-document.getElementById("valor").value;
+const servico = document.getElementById("servico").value;
+const valor = document.getElementById("valor").value;
+const inicio = document.getElementById("inicio").value;
+const prazo = document.getElementById("prazo").value;
+const pagamento = document.getElementById("pagamento").value;
+const obs = document.getElementById("obs").value;
 
-const inicio =
-document.getElementById("inicio").value;
-
-const prazo =
-document.getElementById("prazo").value;
-
-const pagamento =
-document.getElementById("pagamento").value;
-
-const obs =
-document.getElementById("obs").value;
-
-if(
-!cliente ||
-!servico ||
-!valor
-){
-alert("Preencha Cliente, Serviço e Valor.");
+if(!pNome || !cliente || !servico || !valor){
+alert("Preencha pelo menos o Nome do Prestador, Cliente, Serviço e Valor.");
 return;
 }
 
-const texto =
-
+const texto = 
 `CONTRATO DE PRESTAÇÃO DE SERVIÇOS
 
-CONTRATANTE:
-${cliente}
+DADOS DO CONTRATADO (PRESTADOR):
+Nome: ${pNome}
+CPF/CNPJ: ${pDoc}
+Endereço: ${pEnd}
+Contato: ${pCont}
+E-mail: ${pEmail}
+Filiado ao AutônomoFácil
 
-CONTRATADO:
-AUTÔNOMOFÁCIL
+DADOS DO CONTRATANTE (CLIENTE):
+Nome: ${cliente}
+CPF/CNPJ: ${cDoc}
+Endereço: ${cEnd}
+Contato: ${cCont}
+E-mail: ${cEmail}
 
-SERVIÇO:
+DESCRIÇÃO DO SERVIÇO:
 ${servico}
 
-VALOR:
+VALOR TOTAL:
 R$ ${valor}
 
 DATA DE INÍCIO:
@@ -286,90 +330,50 @@ ${inicio}
 PRAZO DE ENTREGA:
 ${prazo}
 
-CONDIÇÕES DE PAGAMENTO:
+CONDIÇÕES E FORMA DE PAGAMENTO:
 ${pagamento}
 
 OBSERVAÇÕES:
 ${obs}
 
-As partes concordam com os termos acima.
+As partes concordam integralmente com os termos e condições descritos neste instrumento.
 
-_________________________________
-ASSINATURA DO CLIENTE
+__________________________________________________
+ASSINATURA DO CONTRATANTE (CLIENTE)
+CPF: ${cDoc}
 
-_________________________________
-ASSINATURA DO PRESTADOR
+__________________________________________________
+ASSINATURA DO CONTRATADO (PRESTADOR)
+CPF/CNPJ: ${pDoc}
 
 Data de emissão:
 ${new Date().toLocaleDateString("pt-BR")}
 `;
 
-document.getElementById("contrato").innerText =
-texto;
+document.getElementById("contrato").innerText = texto;
 
-if(editando){
-
-contratos = contratos.map(c=>{
-
-if(c.id===editando){
-
-return{
-...c,
-cliente,
-servico,
-valor,
-inicio,
-prazo,
-pagamento,
-obs,
-texto
+const dadosContrato = {
+pNome, pDoc, pEnd, pCont, pEmail,
+cliente, cDoc, cEnd, cCont, cEmail,
+servico, valor, inicio, prazo, pagamento, obs, texto
 };
 
-}
-
-return c;
-
-});
-
+if(editando){
+contratos = contratos.map(c => c.id === editando ? { ...c, ...dadosContrato } : c);
 editando = null;
-
 }else{
-
-contratos.unshift({
-
-id:Date.now(),
-cliente,
-servico,
-valor,
-inicio,
-prazo,
-pagamento,
-obs,
-texto
-
-});
-
+contratos.unshift({ id: Date.now(), ...dadosContrato });
 }
 
-localStorage.setItem(
-"contratos",
-JSON.stringify(contratos)
-);
-
+localStorage.setItem("contratos", JSON.stringify(contratos));
 limparRascunho();
 renderizar();
-
 }
 
 function copiarContrato(){
-
-const texto =
-document.getElementById("contrato").innerText;
-
+const texto = document.getElementById("contrato").innerText;
 navigator.clipboard.writeText(texto);
-
 alert("Contrato copiado.");
-
 }
 
 function baixarPDF(){
@@ -381,7 +385,7 @@ return;
 const { jsPDF } = window.jspdf;
 const doc = new jsPDF();
 doc.setFont("Helvetica", "normal");
-doc.setFontSize(12);
+doc.setFontSize(11);
 const splitTexto = doc.splitTextToSize(texto, 170);
 doc.text(splitTexto, 20, 20);
 const nomeCliente = document.getElementById("cliente").value || "Contrato";
@@ -389,118 +393,66 @@ doc.save(`${nomeCliente}_contrato.pdf`);
 }
 
 function excluir(id){
-
 if(!confirm("Excluir contrato?")) return;
-
-contratos =
-contratos.filter(c=>c.id!==id);
-
-localStorage.setItem(
-"contratos",
-JSON.stringify(contratos)
-);
-
+contratos = contratos.filter(c => c.id !== id);
+localStorage.setItem("contratos", JSON.stringify(contratos));
 renderizar();
-
 }
 
 function editar(id){
+const c = contratos.find(x => x.id === id);
 
-const c =
-contratos.find(x=>x.id===id);
+document.getElementById("prestador_nome").value = c.pNome || "";
+document.getElementById("prestador_doc").value = c.pDoc || "";
+document.getElementById("prestador_endereco").value = c.pEnd || "";
+document.getElementById("prestador_contato").value = c.pCont || "";
+document.getElementById("prestador_email").value = c.pEmail || "";
 
-document.getElementById("cliente").value =
-c.cliente;
+document.getElementById("cliente").value = c.cliente || "";
+document.getElementById("cliente_doc").value = c.cDoc || "";
+document.getElementById("cliente_endereco").value = c.cEnd || "";
+document.getElementById("cliente_contato").value = c.cCont || "";
+document.getElementById("cliente_email").value = c.cEmail || "";
 
-document.getElementById("servico").value =
-c.servico;
+document.getElementById("servico").value = c.servico || "";
+document.getElementById("valor").value = c.valor || "";
+document.getElementById("inicio").value = c.inicio || "";
+document.getElementById("prazo").value = c.prazo || "";
+document.getElementById("pagamento").value = c.pagamento || "";
+document.getElementById("obs").value = c.obs || "";
 
-document.getElementById("valor").value =
-c.valor;
-
-document.getElementById("inicio").value =
-c.inicio;
-
-document.getElementById("prazo").value =
-c.prazo;
-
-document.getElementById("pagamento").value =
-c.pagamento;
-
-document.getElementById("obs").value =
-c.obs;
-
-document.getElementById("contrato").innerText =
-c.texto;
-
+document.getElementById("contrato").innerText = c.texto;
 editando = id;
 
-window.scrollTo({
-top:0,
-behavior:"smooth"
-});
-
+window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function renderizar(){
+const lista = document.getElementById("lista");
+lista.innerHTML = "";
 
-const lista =
-document.getElementById("lista");
-
-lista.innerHTML="";
-
-if(contratos.length===0){
-
-lista.innerHTML =
-"<p>Nenhum contrato cadastrado.</p>";
-
+if(contratos.length === 0){
+lista.innerHTML = "<p>Nenhum contrato cadastrado.</p>";
 return;
-
 }
 
-contratos.forEach(c=>{
-
+contratos.forEach(c => {
 lista.innerHTML += `
-
 <div class="card">
-
 <b>${c.cliente}</b>
-
 <br>
-
 <small>${c.servico}</small>
-
 <br><br>
-
 💰 R$ ${c.valor}
-
 <br>
-
-📅 Prazo:
-${c.prazo || "-"}
-
+📅 Prazo: ${c.prazo || "-"}
 <div class="actions">
-
-<button
-class="edit"
-onclick="editar(${c.id})">
-✏ Editar
-</button>
-
-<button
-class="delete"
-onclick="excluir(${c.id})">
-🗑 Excluir
-</button>
-
+<button class="edit" onclick="editar(${c.id})">✏ Editar</button>
+<button class="delete" onclick="excluir(${c.id})">🗑 Excluir</button>
 </div>
-
 </div>
-
 `;
-
 });
-
 }
 
 renderizar();
