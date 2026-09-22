@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cadastro de Profissional - AutônomoFácil</title>
-<link rel="stylesheet" href="https://cloudflare.com">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
 :root {
@@ -196,10 +196,8 @@ const btnCadastrar = document.getElementById("btnCadastrar");
 const formCadastro = document.getElementById("formCadastro");
 
 // Credenciais Oficiais e Imutáveis do Sistema
-
 const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
-const VALOR_LICENCA = 59.00;
 
 function gerenciarBotao() {
     if (chkTermos.checked) {
@@ -214,7 +212,7 @@ function gerenciarBotao() {
 chkTermos.addEventListener("change", gerenciarBotao);
 chkTermos.addEventListener("click", gerenciarBotao);
 
-// 1. PROCESSO DE CADASTRO ORIGINAL ATUALIZADO
+// 1. PROCESSO DE CADASTRO
 formCadastro.addEventListener("submit", async function(e) {
     e.preventDefault();
 
@@ -281,12 +279,12 @@ formCadastro.addEventListener("submit", async function(e) {
         gerenciarBotao();
     }
 });
-// 2. FISCAL DA RAIZ ATUALIZADO (Olhando a data de expiração)
+
+// 2. FISCAL DA RAIZ (Verifica os 7 dias de teste)
 (async function fiscalizarFluxoCompleto() {
     const whatsappSalvo = localStorage.getItem("autonomofacil_whatsapp");
     if (!whatsappSalvo) return;
 
-    // Busca o status atual no banco para saber a data de expiração
     const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?whatsapp=eq.${encodeURIComponent(whatsappSalvo)}`, {
         method: "GET",
         headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
@@ -299,139 +297,50 @@ formCadastro.addEventListener("submit", async function(e) {
     const hoje = new Date();
     const dataExpiracao = usuario.data_expiracao ? new Date(usuario.data_expiracao) : new Date(usuario.criado_em);
     
-    // Se for novo cadastro, soma 7 dias de teste
     if (!usuario.data_expiracao) {
         dataExpiracao.setDate(dataExpiracao.getDate() + 7);
     }
 
-    // Lógica de Bloqueio e Avisos
     if (hoje > dataExpiracao) {
-        // Bloqueia e mostra tela de pagamento
         aplicarBloqueioCobranca(whatsappSalvo);
     } else {
-        // Se faltam menos de 15 dias, mostra aviso de renovação
         const diasRestantes = Math.ceil((dataExpiracao - hoje) / (1000 * 60 * 60 * 24));
         if (diasRestantes <= 15) {
-            alert("Atenção: Sua licença vence em " + diasRestantes + " dias. Renove para não perder a visibilidade.");
+            alert("Atenção: Sua licença vence em " + diasRestantes + " dias. Realize a renovação para não perder a visibilidade.");
         }
     }
 })();
 
-
-// 3. RETENÇÃO VISUAL E GERADOR DE INTERFACE DO PIX
+// 3. TELA DE BLOQUEIO COM A CHAVE PIX DIRETA
 function aplicarBloqueioCobranca(whatsapp) {
     const container = document.createElement("div");
     container.style = "position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(34,34,34,0.98); z-index:99999; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:20px; text-align:center; color:#fff; font-family:sans-serif;";
     
     container.innerHTML = `
-        <div style="background:#fff; color:#222; padding:30px; border-radius:20px; max-width:400px; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
-            <h2 style="color:#c62828; margin-bottom:15px;">⏳ Licença Expirada</h2>
-            <p style="font-size:14px; line-height:1.6; margin-bottom:20px;">
-                Seu período de teste terminou. Para restabelecer seu cadastro e voltar a ficar <strong>visível nas buscas</strong> de Itanhangá, realize o pagamento da taxa anual.
+        <div style="background:#fff; color:#222; padding:25px; border-radius:20px; max-width:420px; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+            <h2 style="color:#c62828; margin-bottom:12px;">⏳ Período de Teste Encerrado</h2>
+            <p style="font-size:13px; line-height:1.5; margin-bottom:15px;">
+                Seu prazo gratuito terminou. Para manter seu perfil ativo e visível nas buscas, efetue o pagamento da anuidade.
             </p>
-            <div style="background:#fff9e6; border:1px solid #f57c00; padding:12px; border-radius:10px; font-weight:bold; margin-bottom:25px; color:#e65100;">
-                Taxa Anual: R$ 59,00
+            
+            <div style="background:#fff9e6; border:1px solid #f57c00; padding:12px; border-radius:10px; margin-bottom:15px; text-align:left;">
+                <p style="font-size:13px; color:#e65100; font-weight:bold; margin-bottom:6px;">Pague por essa chave Pix à Gilberto Moreira - PicPay:</p>
+                <div style="background:#fff; padding:8px; border:1px dashed #f57c00; border-radius:6px; font-family:monospace; font-size:14px; font-weight:bold; color:#111; text-align:center; user-select:all;">
+                    gilinbrazil@gmail.com
+                </div>
             </div>
-            <button id="btnGerarPixRaiz" style="width:100%; background:#1565c0; color:white; border:none; padding:15px; border-radius:12px; font-size:16px; font-weight:bold; cursor:pointer;">
-                Gerar Pix Copia e Cola
+
+            <p style="font-size:11px; color:#666; line-height:1.4; margin-bottom:20px; font-style:italic;">
+                Caso o pagamento não seja registrado com sete dias, você perderá o acesso.<br>
+                <strong>Agradecemos por fazer parte do AutônomoFácil!</strong>
+            </p>
+
+            <button onclick="window.location.reload()" style="width:100%; background:#2e7d32; color:white; border:none; padding:12px; border-radius:10px; font-size:15px; font-weight:bold; cursor:pointer;">
+                Já realizei o pagamento / Atualizar
             </button>
-            <div id="blocoPixRaiz" style="margin-top:20px; display:none;">
-                <textarea id="txtPixCodigoRaiz" readonly style="width:100%; height:80px; padding:10px; border:1px solid #ccc; border-radius:8px; font-size:12px; resize:none; background:#f4f6f9; color:#333;"></textarea>
-                <button id="btnCopiarPixRaiz" style="width:100%; background:#2e7d32; color:white; border:none; padding:10px; border-radius:8px; font-size:14px; font-weight:bold; margin-top:10px; cursor:pointer;">
-                    Copiar Código
-                </button>
-            </div>
         </div>
     `;
     document.body.appendChild(container);
-
-    document.getElementById("btnGerarPixRaiz").addEventListener("click", async function() {
-        this.innerText = "Gerando Pix...";
-        this.disabled = true;
-
-        const copiaCola = await criarPixMercadoPago(whatsapp);
-
-        if (copiaCola) {
-            this.style.display = "none";
-            document.getElementById("blocoPixRaiz").style.display = "block";
-            document.getElementById("txtPixCodigoRaiz").value = copiaCola;
-
-            // Roda a verificação de pagamento a cada 7 segundos
-            setInterval(() => { verificarSeFoiPago(whatsapp); }, 7000);
-        } else {
-            alert("Erro ao conectar ao banco. Tente novamente.");
-            this.innerText = "Gerar Pix Copia e Cola";
-            this.disabled = false;
-        }
-    });
-
-    document.getElementById("btnCopiarPixRaiz").addEventListener("click", function() {
-        const txt = document.getElementById("txtPixCodigoRaiz");
-        txt.select();
-        navigator.clipboard.writeText(txt.value);
-        this.innerText = "✓ Copiado!";
-        this.style.background = "#1b5e20";
-    });
-}
-
-// 4. EMISSÃO DE SOLICITAÇÃO AO MERCADO PAGO
-async function criarPixMercadoPago(whatsapp) {
-    try {
-        const response = await fetch("/api/gerar-pix", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ whatsapp: whatsapp })
-        });
-        const data = await response.json();
-        return data.point_of_interaction?.transaction_data?.qr_code || null;
-    } catch (e) {
-        console.error("Erro na API:", e);
-        return null;
-    }
-}
-
-
-// 5. CHECAGEM SÍNCRONA DE RECEBIMENTO
-async function verificarSeFoiPago(whatsapp) {
-    const refExclusiva = `recarga_${whatsapp.replace(/\D/g, '')}`;
-    try {
-        const response = await fetch(`https://api.mercadopago.com/v1/payments/search?external_reference=${refExclusiva}`, {
-            method: "GET", headers: { "Authorization": `Bearer ${MP_ACCESS_TOKEN}` }
-        });
-        const data = await response.json();
-
-     if (data.results?.[0]?.status === "approved") {
-    // Calcula 1 ano a partir de hoje
-    const novaData = new Date();
-    novaData.setFullYear(novaData.getFullYear() + 1);
-
-    // Atualiza o banco com a nova data de expiração
-    await fetch(`${SUPABASE_URL}/rest/v1/cadastro?whatsapp=eq.${encodeURIComponent(whatsapp)}`, {
-        method: "PATCH",
-        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-            status: "Disponível",
-            data_expiracao: novaData.toISOString()
-        })
-    });
-
-    localStorage.setItem("autonomofacil_status", "ativo");
-    alert("Pagamento Aprovado! Sua licença foi renovada por mais 1 ano.");
-    window.location.reload();
-}
-
-    } catch (e) {
-        console.error(e);
-    }
-}
-
-// 6. PERSISTÊNCIA DA ALTERAÇÃO NO SUPABASE
-async function atualizarStatusNuvem(whatsapp, novoStatus) {
-    await fetch(`${SUPABASE_URL}/rest/v1/cadastro?whatsapp=eq.${encodeURIComponent(whatsapp)}`, {
-        method: "PATCH",
-        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ status: novoStatus })
-    });
 }
 </script>
 </body>
