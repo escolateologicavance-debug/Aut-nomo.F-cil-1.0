@@ -37,7 +37,6 @@
     color: #444;
     line-height: 1.5;
 }
-/* Efeito de piscar discreto para o gatilho de centavos */
 .piscar-alerta {
     color: var(--red);
     font-weight: bold;
@@ -64,7 +63,6 @@ box-shadow: 0 4px 12px rgba(0,0,0,.1);
 }
 
 .logo-area { font-size: 20px; font-weight: bold; }
-.home-btn { color: white; text-decoration: none; font-size: 22px; }
 
 .container { padding: 20px; }
 
@@ -83,12 +81,10 @@ width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; font-si
 }
 .form-group input:focus { border-color: var(--primary); }
 
-/* Alerta do WhatsApp solicitado */
 .alert-whats {
 display: block; font-size: 12px; color: #b78103; font-weight: 600; margin-top: 4px;
 }
 
-/* Caixa dos Termos de Ética e Responsabilidade */
 .terms-box {
 background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-top: 20px;
 }
@@ -103,7 +99,6 @@ transition: background 0.2s;
 }
 .btn-submit:disabled { background: #b0bec5; cursor: not-allowed; }
 
-/* Rodapé de Isenção em Vermelho */
 footer {
 margin-top: 30px; padding: 0 20px; text-align: center; font-size: 11px;
 color: var(--red); font-weight: 600; line-height: 1.4;
@@ -112,8 +107,8 @@ color: var(--red); font-weight: 600; line-height: 1.4;
 </head>
 <body>
 
-<header style="display: flex; justify-content: space-between; align-items: center; padding: 25px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border-radius: 0 0 30px 30px;">
-<div class="logo-area" style="font-size: 24px; font-weight: bold;">Novo Profissional</div>
+<header>
+<div class="logo-area">Novo Profissional</div>
 <a href="index.html" style="color: white; text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: bold;">
 <i class="fa-solid fa-house"></i> Início
 </a>
@@ -121,12 +116,12 @@ color: var(--red); font-weight: 600; line-height: 1.4;
 
 <div class="licenca-box">
     <div class="licenca-titulo">
-        <i class="fa-solid fa-clock"></i> Período de Avaliação Profissional
+        <i class="fa-solid fa-clock"></i> Ativação de Cadastro Profissional
     </div>
     <p class="licenca-texto">
-        O <strong>AutônomoFácil</strong> disponibiliza <strong>7 dias de licença gratuita</strong> com acesso integral às ferramentas de gestão e visibilidade na busca regional.<br><br>
-        <strong>Sem mensalidades:</strong> Após o prazo de 7 dias, a taxa de manutenção para permanência na vitrine ativa é de apenas <strong>R$ 79,00 por ANO</strong>.<br>
-        <span class="piscar-alerta">🔴 Isso representa menos de 22 centavos por dia para manter seu negócio ativo!</span>
+        O <strong>AutônomoFácil</strong> é uma ferramenta de busca exclusiva para profissionais liberais.<br><br>
+        <strong>Taxa Anual:</strong> A permanência na vitrine ativa é de apenas <strong>R$ 79,00 por ANO</strong>.<br>
+        <span class="piscar-alerta">🔴 Menos de 22 centavos por dia para manter seu negócio visível!</span>
     </p>
 </div>
 
@@ -151,7 +146,13 @@ color: var(--red); font-weight: 600; line-height: 1.4;
 <div class="form-group">
 <label>Número do WhatsApp</label>
 <input type="tel" id="whatsapp" required placeholder="(00) 00000-0000">
-<span class="alert-whats"><i class="fa-solid fa-triangle-exclamation"></i> Confira! Pois é esse número que vai aparecer para pesquisa.</span>
+<span class="alert-whats"><i class="fa-solid fa-triangle-exclamation"></i> Confira! É por este número que os clientes entrarão em contato.</span>
+</div>
+
+<div class="form-group">
+<label>WhatsApp do Indicador (Opcional)</label>
+<input type="tel" id="indicador" placeholder="(00) 00000-0000 - Deixe em branco se não houver">
+<span class="alert-whats">Se alguém indicou o app para você, digite o WhatsApp dele aqui.</span>
 </div>
 
 <div class="terms-box">
@@ -181,7 +182,7 @@ color: var(--red); font-weight: 600; line-height: 1.4;
 </label>
 </div>
 
-<button type="submit" class="btn-submit" id="btnCadastrar" disabled>Concluir Cadastro</button>
+<button type="submit" class="btn-submit" id="btnCadastrar" disabled>Concluir Cadastro e Pagar Pix</button>
 </form>
 </div>
 </div>
@@ -195,14 +196,14 @@ const chkTermos = document.getElementById("chkTermos");
 const btnCadastrar = document.getElementById("btnCadastrar");
 const formCadastro = document.getElementById("formCadastro");
 
-// Credenciais Oficiais e Imutáveis do Sistema
 const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
 
 function gerenciarBotao() {
     if (chkTermos.checked) {
         btnCadastrar.disabled = false;
-        btnCadastrar.style.background = "var(--primary)";
+        btnCadastrar.style.background = "var::primary";
+        btnCadastrar.style.background = "#1565c0";
     } else {
         btnCadastrar.disabled = true;
         btnCadastrar.style.background = "#b0bec5";
@@ -212,7 +213,6 @@ function gerenciarBotao() {
 chkTermos.addEventListener("change", gerenciarBotao);
 chkTermos.addEventListener("click", gerenciarBotao);
 
-// 1. PROCESSO DE CADASTRO
 formCadastro.addEventListener("submit", async function(e) {
     e.preventDefault();
 
@@ -222,9 +222,12 @@ formCadastro.addEventListener("submit", async function(e) {
     btnCadastrar.disabled = true;
 
     const whatsappDigitado = document.getElementById("whatsapp").value.trim();
+    const indicadorDigitado = document.getElementById("indicador").value.trim();
+    const nomeDigitado = document.getElementById("nome").value.trim();
+    const profissaoDigitada = document.getElementById("profissao").value.trim();
+    const cidadeDigitada = document.getElementById("cidade").value.trim();
     
     try {
-        // 🛡️ Fiscalização Antiduplicidade
         const checarResposta = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?whatsapp=eq.${encodeURIComponent(whatsappDigitado)}`, {
             method: "GET",
             headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
@@ -233,8 +236,8 @@ formCadastro.addEventListener("submit", async function(e) {
         if (checarResposta.ok) {
             const profissionaisEncontrados = await checarResposta.json();
             if (profissionaisEncontrados.length > 0) {
-                alert("Este número de WhatsApp já possui um período de testes ou cadastro registrado.");
-                btnCadastrar.innerText = "Concluir Cadastro";
+                alert("Este número de WhatsApp já possui um cadastro registrado no sistema.");
+                btnCadastrar.innerText = "Concluir Cadastro e Pagar Pix";
                 gerenciarBotao();
                 return;
             }
@@ -243,11 +246,12 @@ formCadastro.addEventListener("submit", async function(e) {
         btnCadastrar.innerText = "Salvando na Nuvem...";
         
         const dados = {
-            nome: document.getElementById("nome").value,
-            profissao: document.getElementById("profissao").value,
-            cidade: document.getElementById("cidade").value,
+            nome: nomeDigitado,
+            profissao: profissaoDigitada,
+            cidade: cidadeDigitada,
             whatsapp: whatsappDigitado,
-            status: "Disponível",
+            indicador: indicadorDigitado || null,
+            status: "Pendente Pagamento",
             criado_em: new Date().toISOString()
         };
     
@@ -263,84 +267,90 @@ formCadastro.addEventListener("submit", async function(e) {
         });
 
         if (response.ok) {
-            // 📱 Carimbo Digital completo no aparelho do usuário
             localStorage.setItem("autonomofacil_whatsapp", whatsappDigitado);
-            localStorage.setItem("autonomofacil_data_cadastro", new Date().toISOString());
-            localStorage.setItem("autonomofacil_status", "teste");
-
-            alert("Cadastro realizado com sucesso na nuvem! Seu período de 7 dias de teste começou.");
-            window.location.href = "profissionais.html"; 
+            
+            // Abre a tela de pagamento via Chave Pix e envio de comprovante
+            mostrarTelaPixComprovante(nomeDigitado, whatsappDigitado, indicadorDigitado);
         } else {
             throw new Error("O servidor do banco de dados recusou a gravação.");
         }
     } catch (error) {
         alert("Erro no cadastro: " + error.message);
-        btnCadastrar.innerText = "Concluir Cadastro";
+        btnCadastrar.innerText = "Concluir Cadastro e Pagar Pix";
         gerenciarBotao();
     }
 });
 
-// 2. FISCAL DA RAIZ (Verifica os 7 dias de teste)
-(async function fiscalizarFluxoCompleto() {
-    const whatsappSalvo = localStorage.getItem("autonomofacil_whatsapp");
-    if (!whatsappSalvo) return;
-
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?whatsapp=eq.${encodeURIComponent(whatsappSalvo)}`, {
-        method: "GET",
-        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
-    });
-    
-    const dados = await response.json();
-    if (dados.length === 0) return;
-
-    const usuario = dados[0];
-    const hoje = new Date();
-    const dataExpiracao = usuario.data_expiracao ? new Date(usuario.data_expiracao) : new Date(usuario.criado_em);
-    
-    if (!usuario.data_expiracao) {
-        dataExpiracao.setDate(dataExpiracao.getDate() + 7);
-    }
-
-    if (hoje > dataExpiracao) {
-        aplicarBloqueioCobranca(whatsappSalvo);
-    } else {
-        const diasRestantes = Math.ceil((dataExpiracao - hoje) / (1000 * 60 * 60 * 24));
-        if (diasRestantes <= 15) {
-            alert("Atenção: Sua licença vence em " + diasRestantes + " dias. Realize a renovação para não perder a visibilidade.");
-        }
-    }
-})();
-
-// 3. TELA DE BLOQUEIO COM A CHAVE PIX DIRETA
-function aplicarBloqueioCobranca(whatsapp) {
+function mostrarTelaPixComprovante(nome, whatsapp, indicador) {
     const container = document.createElement("div");
     container.style = "position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(34,34,34,0.98); z-index:99999; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:20px; text-align:center; color:#fff; font-family:sans-serif;";
     
     container.innerHTML = `
-        <div style="background:#fff; color:#222; padding:25px; border-radius:20px; max-width:420px; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
-            <h2 style="color:#c62828; margin-bottom:12px;">⏳ Período de Teste Encerrado</h2>
+        <div style="background:#fff; color:#222; padding:25px; border-radius:20px; max-width:440px; box-shadow:0 4px 15px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;">
+            <h2 style="color:#2e7d32; margin-bottom:12px;">✅ Cadastro Realizado!</h2>
             <p style="font-size:13px; line-height:1.5; margin-bottom:15px;">
-                Seu prazo gratuito terminou. Para manter seu perfil ativo e visível nas buscas, efetue o pagamento da anuidade.
+                Falta apenas realizar o pagamento da anuidade para ativar sua visibilidade no aplicativo.
             </p>
             
             <div style="background:#fff9e6; border:1px solid #f57c00; padding:12px; border-radius:10px; margin-bottom:15px; text-align:left;">
                 <p style="font-size:13px; color:#e65100; font-weight:bold; margin-bottom:6px;">Pague por essa chave Pix à Gilberto Moreira - PicPay:</p>
-                <div style="background:#fff; padding:8px; border:1px dashed #f57c00; border-radius:6px; font-family:monospace; font-size:14px; font-weight:bold; color:#111; text-align:center; user-select:all;">
+                <div id="chavePixTexto" style="background:#fff; padding:8px; border:1px dashed #f57c00; border-radius:6px; font-family:monospace; font-size:14px; font-weight:bold; color:#111; text-align:center; user-select:all; cursor:pointer;" title="Clique para copiar">
                     gilinbrazil@gmail.com
                 </div>
+                <button id="btnCopiarChave" style="width:100%; margin-top:8px; background:#f57c00; color:white; border:none; padding:8px; border-radius:6px; font-size:12px; font-weight:bold; cursor:pointer;">Copiar Chave Pix</button>
             </div>
 
-            <p style="font-size:11px; color:#666; line-height:1.4; margin-bottom:20px; font-style:italic;">
+            <p style="font-size:11px; color:#666; line-height:1.4; margin-bottom:15px; font-style:italic;">
                 Caso o pagamento não seja registrado com sete dias, você perderá o acesso.<br>
                 <strong>Agradecemos por fazer parte do AutônomoFácil!</strong>
             </p>
 
-            <button onclick="window.location.reload()" style="width:100%; background:#2e7d32; color:white; border:none; padding:12px; border-radius:10px; font-size:15px; font-weight:bold; cursor:pointer;">
-                Já realizei o pagamento / Atualizar
+            <hr style="border:0; border-top:1px solid #ddd; margin: 15px 0;">
+
+            <p style="font-size:12px; font-weight:bold; color:#333; margin-bottom:10px;">
+                📲 Enviar Comprovante de Pagamento:
+            </p>
+            
+            <button id="btnZapGilberto" style="width:100%; background:#25d366; color:white; border:none; padding:12px; border-radius:10px; font-size:14px; font-weight:bold; cursor:pointer; margin-bottom:8px;">
+                <i class="fa-brands fa-whatsapp"></i> Enviar para o Gilberto (Seu WhatsApp)
+            </button>
+
+            ${indicador ? `
+            <button id="btnZapIndicador" style="width:100%; background:#0288d1; color:white; border:none; padding:12px; border-radius:10px; font-size:14px; font-weight:bold; cursor:pointer; margin-bottom:8px;">
+                <i class="fa-brands fa-whatsapp"></i> Enviar para o Indicador
+            </button>
+            ` : ''}
+
+            <button onclick="window.location.href='profissionais.html'" style="width:100%; background:#757575; color:white; border:none; padding:10px; border-radius:10px; font-size:13px; font-weight:bold; cursor:pointer; margin-top:10px;">
+                Ir para a Lista de Profissionais
             </button>
         </div>
     `;
     document.body.appendChild(container);
+
+    // Ação do botão copiar chave
+    document.getElementById("btnCopiarChave").addEventListener("click", function() {
+        navigator.clipboard.writeText("gilinbrazil@gmail.com");
+        this.innerText = "✓ Chave Copiada!";
+        setTimeout(() => { this.innerText = "Copiar Chave Pix"; }, 2500);
+    });
+
+    // Mensagem pronta para o WhatsApp
+    const mensagemTexto = `Olá! Segue o meu comprovante de pagamento da anuidade do AutônomoFácil.\n\n*Nome:* ${nome}\n*WhatsApp:* ${whatsapp}`;
+    const linkEncoded = encodeURIComponent(mensagemTexto);
+
+    // Botão para o seu WhatsApp (66 98466-6186 -> formato 5566984666186)
+    document.getElementById("btnZapGilberto").addEventListener("click", function() {
+        window.open(`https://api.whatsapp.com/send?phone=5566984666186&text=${linkEncoded}`, "_blank");
+    });
+
+    // Botão para o Indicador (caso preenchido)
+    if(indicador) {
+        const zapIndicadorLimpo = indicador.replace(/\D/g, '');
+        document.getElementById("btnZapIndicador").addEventListener("click", function() {
+            window.open(`https://api.whatsapp.com/send?phone=55${zapIndicadorLimpo}&text=${linkEncoded}`, "_blank");
+        });
+    }
 }
 </script>
 </body>
