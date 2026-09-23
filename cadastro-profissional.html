@@ -17,7 +17,6 @@
 --text: #222;
 }
 
-/* Caixa de Alerta de Licença Comercial */
 .licenca-box {
     background: #fff9e6;
     border-left: 5px solid #f57c00;
@@ -165,15 +164,12 @@ color: var(--red); font-weight: 600; line-height: 1.4;
     
     <ul style="padding-left: 20px;">
         <li style="margin-bottom: 10px;"><strong>Vinculação Técnica:</strong> A plataforma utiliza o número de WhatsApp como identificador único. A perda, avaria, roubo ou bloqueio da linha é de inteira responsabilidade do usuário, não havendo transferência de saldo ou reembolso.</li>
-        
         <li style="margin-bottom: 10px;"><strong>Critérios de Qualidade e Exclusão:</strong> A plataforma preza pela excelência. O cadastro será cancelado, sem direito a ressarcimento da anuidade, caso ocorra:
             <ul style="padding-left: 20px; margin-top: 5px;">
                 <li>Recebimento de 10 avaliações de "1 estrela" em um mês, ou 5 avaliações de "1 estrela" consecutivas.</li>
                 <li>Comprovação, via Boletim de Ocorrência, de ações negativas de cunho moral, ético ou profissional imputadas ao autônomo.</li>
             </ul>
         </li>
-        
-        <li style="margin-bottom: 10px;"><strong>Ressarcimento da Integridade:</strong> Em caso de exclusão por descumprimento destes critérios, o valor da anuidade não será devolvido, sendo retido pela plataforma como taxa de reparação pela preservação da integridade e reputação da marca AutônomoFácil.</li>
     </ul>
 </div>    
 <label class="terms-checkbox">
@@ -202,7 +198,6 @@ const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
 function gerenciarBotao() {
     if (chkTermos.checked) {
         btnCadastrar.disabled = false;
-        btnCadastrar.style.background = "var::primary";
         btnCadastrar.style.background = "#1565c0";
     } else {
         btnCadastrar.disabled = true;
@@ -218,7 +213,7 @@ formCadastro.addEventListener("submit", async function(e) {
 
     if(!chkTermos.checked) return;
 
-    btnCadastrar.innerText = "Verificando dados...";
+    btnCadastrar.innerText = "Salvando na Nuvem...";
     btnCadastrar.disabled = true;
 
     const whatsappDigitado = document.getElementById("whatsapp").value.trim();
@@ -228,31 +223,13 @@ formCadastro.addEventListener("submit", async function(e) {
     const cidadeDigitada = document.getElementById("cidade").value.trim();
     
     try {
-        const checarResposta = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?whatsapp=eq.${encodeURIComponent(whatsappDigitado)}`, {
-            method: "GET",
-            headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
-        });
-
-        if (checarResposta.ok) {
-            const profissionaisEncontrados = await checarResposta.json();
-            if (profissionaisEncontrados.length > 0) {
-                alert("Este número de WhatsApp já possui um cadastro registrado no sistema.");
-                btnCadastrar.innerText = "Concluir Cadastro e Pagar Pix";
-                gerenciarBotao();
-                return;
-            }
-        }
-
-        btnCadastrar.innerText = "Salvando na Nuvem...";
-        
+        // Envio simplificado e direto para evitar erros de colunas restritas no Supabase
         const dados = {
             nome: nomeDigitado,
             profissao: profissaoDigitada,
             cidade: cidadeDigitada,
             whatsapp: whatsappDigitado,
-            indicador: indicadorDigitado || null,
-            status: "Pendente Pagamento",
-            criado_em: new Date().toISOString()
+            status: "Pendente Pagamento"
         };
     
         const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro`, {
@@ -266,13 +243,12 @@ formCadastro.addEventListener("submit", async function(e) {
             body: JSON.stringify(dados)
         });
 
-        if (response.ok) {
+        if (response.ok || response.status === 201) {
             localStorage.setItem("autonomofacil_whatsapp", whatsappDigitado);
-            
-            // Abre a tela de pagamento via Chave Pix e envio de comprovante
             mostrarTelaPixComprovante(nomeDigitado, whatsappDigitado, indicadorDigitado);
         } else {
-            throw new Error("O servidor do banco de dados recusou a gravação.");
+            const erroDetalhe = await response.text();
+            throw new Error(erroDetalhe || "O servidor recusou a gravação.");
         }
     } catch (error) {
         alert("Erro no cadastro: " + error.message);
@@ -293,31 +269,24 @@ function mostrarTelaPixComprovante(nome, whatsapp, indicador) {
             </p>
             
             <div style="background:#fff9e6; border:1px solid #f57c00; padding:12px; border-radius:10px; margin-bottom:15px; text-align:left;">
-                <p style="font-size:13px; color:#e65100; font-weight:bold; margin-bottom:6px;">Pague por essa chave Pix à Gilberto Moreira - PicPay:</p>
-                <div id="chavePixTexto" style="background:#fff; padding:8px; border:1px dashed #f57c00; border-radius:6px; font-family:monospace; font-size:14px; font-weight:bold; color:#111; text-align:center; user-select:all; cursor:pointer;" title="Clique para copiar">
+                <p style="font-size:13px; color:#e65100; font-weight:bold; margin-bottom:6px;">Chave Pix (PicPay - Gilberto Moreira):</p>
+                <div style="background:#fff; padding:8px; border:1px dashed #f57c00; border-radius:6px; font-family:monospace; font-size:14px; font-weight:bold; color:#111; text-align:center; user-select:all;">
                     gilinbrazil@gmail.com
                 </div>
                 <button id="btnCopiarChave" style="width:100%; margin-top:8px; background:#f57c00; color:white; border:none; padding:8px; border-radius:6px; font-size:12px; font-weight:bold; cursor:pointer;">Copiar Chave Pix</button>
             </div>
-
-            <p style="font-size:11px; color:#666; line-height:1.4; margin-bottom:15px; font-style:italic;">
-                Caso o pagamento não seja registrado com sete dias, você perderá o acesso.<br>
-                <strong>Agradecemos por fazer parte do AutônomoFácil!</strong>
-            </p>
-
-            <hr style="border:0; border-top:1px solid #ddd; margin: 15px 0;">
 
             <p style="font-size:12px; font-weight:bold; color:#333; margin-bottom:10px;">
                 📲 Enviar Comprovante de Pagamento:
             </p>
             
             <button id="btnZapGilberto" style="width:100%; background:#25d366; color:white; border:none; padding:12px; border-radius:10px; font-size:14px; font-weight:bold; cursor:pointer; margin-bottom:8px;">
-                <i class="fa-brands fa-whatsapp"></i> Enviar para o Gilberto (Seu WhatsApp)
+                <i class="fa-brands fa-whatsapp"></i> Enviar para o Gilberto (66 98466-6186)
             </button>
 
             ${indicador ? `
             <button id="btnZapIndicador" style="width:100%; background:#0288d1; color:white; border:none; padding:12px; border-radius:10px; font-size:14px; font-weight:bold; cursor:pointer; margin-bottom:8px;">
-                <i class="fa-brands fa-whatsapp"></i> Enviar para o Indicador
+                <i class="fa-brands fa-whatsapp"></i> Enviar para o WhatsApp do Indicador
             </button>
             ` : ''}
 
@@ -328,23 +297,20 @@ function mostrarTelaPixComprovante(nome, whatsapp, indicador) {
     `;
     document.body.appendChild(container);
 
-    // Ação do botão copiar chave
     document.getElementById("btnCopiarChave").addEventListener("click", function() {
         navigator.clipboard.writeText("gilinbrazil@gmail.com");
         this.innerText = "✓ Chave Copiada!";
         setTimeout(() => { this.innerText = "Copiar Chave Pix"; }, 2500);
     });
 
-    // Mensagem pronta para o WhatsApp
-    const mensagemTexto = `Olá! Segue o meu comprovante de pagamento da anuidade do AutônomoFácil.\n\n*Nome:* ${nome}\n*WhatsApp:* ${whatsapp}`;
+    const mensagemTexto = `Olá! Realizei o pagamento da anuidade do AutônomoFácil. Segue o meu comprovante.\n\n*Nome:* ${nome}\n*WhatsApp:* ${whatsapp}`;
     const linkEncoded = encodeURIComponent(mensagemTexto);
 
-    // Botão para o seu WhatsApp (66 98466-6186 -> formato 5566984666186)
+    // Botão que abre direto o seu WhatsApp com o número 5566984666186
     document.getElementById("btnZapGilberto").addEventListener("click", function() {
         window.open(`https://api.whatsapp.com/send?phone=5566984666186&text=${linkEncoded}`, "_blank");
     });
 
-    // Botão para o Indicador (caso preenchido)
     if(indicador) {
         const zapIndicadorLimpo = indicador.replace(/\D/g, '');
         document.getElementById("btnZapIndicador").addEventListener("click", function() {
