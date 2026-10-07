@@ -208,7 +208,7 @@ function gerenciarBotao() {
 chkTermos.addEventListener("change", gerenciarBotao);
 chkTermos.addEventListener("click", gerenciarBotao);
 
-// 1. VERIFICAÇÃO AUTOMÁTICA DOS 7 DIAS AO ABRIR A PÁGINA
+// VERIFICAÇÃO AUTOMÁTICA DOS 7 DIAS BASEADA NA DATA DE CRIAÇÃO DO SUPABASE
 async function verificarValidadeCadastroNoCarregamento() {
     const whatsappSalvo = localStorage.getItem("autonomofacil_whatsapp");
     if (!whatsappSalvo) return; 
@@ -227,15 +227,12 @@ async function verificarValidadeCadastroNoCarregamento() {
         if (dados && dados.length > 0) {
             const usuario = dados[0];
             
-            // Se já pagou, libera o acesso normal
-            if (usuario.pagamento_status === 'pago') return;
-
-            // Calcula os dias desde que foi criado com base na coluna criado_em do Supabase
+            // Calcula os dias desde que foi criado usando a coluna criado_em do Supabase
             const dataCriacao = new Date(usuario.criado_em);
             const dataAtual = new Date();
             const diferencaDias = (dataAtual - dataCriacao) / (1000 * 60 * 60 * 24);
 
-            // Se passou de 7 dias e não pagou, bloqueia e exibe a mensagem exata
+            // Se passou de 7 dias, exibe o bloqueio com a mensagem correta
             if (diferencaDias > 7) {
                 exibirTelaBloqueioImediata(usuario.nome, usuario.whatsapp);
             }
@@ -249,14 +246,14 @@ function exibirTelaBloqueioImediata(nome, whatsapp) {
     const telaBloqueio = document.createElement("div");
     telaBloqueio.style = "position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.96); z-index:999999; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:20px; text-align:center; color:#fff; font-family:sans-serif;";
     
-    const mensagemPix = `Olá! Preciso regularizar a anuidade do AutônomoFácil para continuar usufrutuando dos recursos do app.\n\n*Nome:* ${nome}\n*WhatsApp:* ${whatsapp}`;
+    const mensagemPix = `Olá! Pague AGORA sua Anuidade e continue usufruindo dos Recursos do App.\n\n*Nome:* ${nome}\n*WhatsApp:* ${whatsapp}`;
     const linkZap = `https://api.whatsapp.com/send?phone=5566984666186&text=${encodeURIComponent(mensagemPix)}`;
 
     telaBloqueio.innerHTML = `
         <div style="background:#fff; color:#222; padding:25px; border-radius:20px; max-width:400px; box-shadow:0 4px 20px rgba(0,0,0,0.4);">
             <h2 style="color:#c62828; margin-bottom:12px;">⚠️ Prazo de 7 Dias Expirado</h2>
             <p style="font-size:14px; line-height:1.5; color:#444; margin-bottom:20px; font-weight:600;">
-                "Pague AGORA sua Anuidade e continue usufrutuando dos Recursos do App"
+                "Pague AGORA sua Anuidade e continue usufruindo dos Recursos do App"
             </p>
             <div style="background:#fff9e6; border:1px solid #f57c00; padding:10px; border-radius:8px; font-size:13px; color:#e65100; margin-bottom:15px; font-weight:bold;">
                 Chave Pix (PicPay): gilinbrazil@gmail.com
@@ -269,10 +266,10 @@ function exibirTelaBloqueioImediata(nome, whatsapp) {
     document.body.appendChild(telaBloqueio);
 }
 
-// Dispara a verificação logo que a página de cadastro é carregada
+// Dispara a verificação logo que a página é carregada
 window.addEventListener("DOMContentLoaded", verificarValidadeCadastroNoCarregamento);
 
-// 2. ENVIO DO FORMULÁRIO DE CADASTRO
+// ENVIO DO FORMULÁRIO DE CADASTRO
 formCadastro.addEventListener("submit", async function(e) {
     e.preventDefault();
 
@@ -293,8 +290,7 @@ formCadastro.addEventListener("submit", async function(e) {
             profissao: profissaoDigitada,
             cidade: cidadeDigitada,
             whatsapp: whatsappDigitado,
-            status: "Pendente Pagamento",
-            pagamento_status: "pendente" // Essencial para a validação dos 7 dias
+            status: "Pendente Pagamento"
         };
     
         const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro`, {
