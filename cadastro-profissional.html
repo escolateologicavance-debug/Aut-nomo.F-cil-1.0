@@ -195,6 +195,9 @@ const formCadastro = document.getElementById("formCadastro");
 const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
 
+// Credenciais do Mercado Pago configuradas no sistema
+const MP_ACCESS_TOKEN = "APP_USR-5566486977720830-111319-2a921774301cae014946b495bf439bc9-436233346";
+
 function gerenciarBotao() {
     if (chkTermos.checked) {
         btnCadastrar.disabled = false;
@@ -232,8 +235,8 @@ async function verificarValidadeCadastroNoCarregamento() {
             const dataAtual = new Date();
             const diferencaDias = (dataAtual - dataCriacao) / (1000 * 60 * 60 * 24);
 
-            // Se passou de 7 dias, exibe o bloqueio com a mensagem correta
-            if (diferencaDias > 7) {
+            // Se passou de 7 dias e o status não está explicitamente ativo por pagamento, bloqueia
+            if (diferencaDias > 7 && usuario.status !== "Ativo - Pago") {
                 exibirTelaBloqueioImediata(usuario.nome, usuario.whatsapp);
             }
         }
@@ -246,14 +249,14 @@ function exibirTelaBloqueioImediata(nome, whatsapp) {
     const telaBloqueio = document.createElement("div");
     telaBloqueio.style = "position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.96); z-index:999999; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:20px; text-align:center; color:#fff; font-family:sans-serif;";
     
-    const mensagemPix = `Olá! Pague AGORA sua Anuidade e continue usufruindo dos Recursos do App.\n\n*Nome:* ${nome}\n*WhatsApp:* ${whatsapp}`;
+    const mensagemPix = `Olá! Para continuar Utilizando o App AutônomoFácil faça agora o pagamento da ANUIDADE e mantenha-se ATIVO na Plataforma.\n\n*Nome:* ${nome}\n*WhatsApp:* ${whatsapp}`;
     const linkZap = `https://api.whatsapp.com/send?phone=5566984666186&text=${encodeURIComponent(mensagemPix)}`;
 
     telaBloqueio.innerHTML = `
         <div style="background:#fff; color:#222; padding:25px; border-radius:20px; max-width:400px; box-shadow:0 4px 20px rgba(0,0,0,0.4);">
             <h2 style="color:#c62828; margin-bottom:12px;">⚠️ Prazo de 7 Dias Expirado</h2>
             <p style="font-size:14px; line-height:1.5; color:#444; margin-bottom:20px; font-weight:600;">
-                "Pague AGORA sua Anuidade e continue usufruindo dos Recursos do App"
+                "Para continuar Utilizando o App AutônomoFácil faça agora o pagamento da ANUIDADE e mantenha-se ATIVO na Plataforma"
             </p>
             <div style="background:#fff9e6; border:1px solid #f57c00; padding:10px; border-radius:8px; font-size:13px; color:#e65100; margin-bottom:15px; font-weight:bold;">
                 Chave Pix (PicPay): gilinbrazil@gmail.com
@@ -290,7 +293,7 @@ formCadastro.addEventListener("submit", async function(e) {
             profissao: profissaoDigitada,
             cidade: cidadeDigitada,
             whatsapp: whatsappDigitado,
-            status: "Pendente Pagamento"
+            status: "Ativo" // <--- Alterado para 'Ativo' para garantir visibilidade imediata com os 7 dias de carência
         };
     
         const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro`, {
@@ -326,7 +329,7 @@ function mostrarTelaPixComprovante(nome, whatsapp, indicador) {
         <div style="background:#fff; color:#222; padding:25px; border-radius:20px; max-width:440px; box-shadow:0 4px 15px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;">
             <h2 style="color:#2e7d32; margin-bottom:12px;">✅ Cadastro Realizado!</h2>
             <p style="font-size:13px; line-height:1.5; margin-bottom:15px;">
-                Falta apenas realizar o pagamento da anuidade para ativar sua visibilidade no aplicativo.
+                Parabéns! Seu cadastro já está ativo com 7 dias de cortesia para você testar e aparecer nas buscas.
             </p>
             
             <div style="background:#fff9e6; border:1px solid #f57c00; padding:12px; border-radius:10px; margin-bottom:15px; text-align:left;">
