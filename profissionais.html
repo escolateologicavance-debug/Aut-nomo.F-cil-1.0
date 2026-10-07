@@ -48,7 +48,8 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
     <option value="todos">🌍 Todas as Cidades</option>
   </select>
 </div>
-  <h2 class="section-title">⚖️ Serviços Jurídicos e Advocacia</h2>
+
+<h2 class="section-title">⚖️ Serviços Jurídicos e Advocacia</h2>
 <ul class="category-list">
     <li><a class="category-item"><span>Advogado Cível</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Advogado Criminalista</span><span class="badge">Em breve</span></a></li>
@@ -154,7 +155,7 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
     <li><a class="category-item"><span>Letrista</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Tapeceiro</span><span class="badge">Em breve</span></a></li>
 </ul>
-    
+
 <h2 class="section-title">🚜 Máquinas Pesadas e Equipamentos</h2>
 <ul class="category-list">
     <li><a class="category-item"><span>Operador de Retroescavadeira</span><span class="badge">Em breve</span></a></li>
@@ -164,14 +165,14 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
     <li><a class="category-item"><span>Operador de Caminhão Munck</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Operador de Empilhadeira</span><span class="badge">Em breve</span></a></li>
 </ul>
-    
-    <h2 class="section-title">🌾 Agronegócio e Serviços Rurais</h2>
+
+<h2 class="section-title">🌾 Agronegócio e Serviços Rurais</h2>
 <ul class="category-list">
-<li><a class="category-item"><span>Agrônomo</span><span class="badge">Em breve</span></a></li>
-  <li><a class="category-item"><span>Engenheiro Agrônomo</span><span class="badge">Em breve</span></a></li>
-<li><a class="category-item"><span>Engenheiro Civil</span><span class="badge">Em breve</span></a></li>
-      <li><a class="category-item"><span>Arquiteto</span><span class="badge">Em breve</span></a></li>
-<li><a class="category-item"><span>Classificador de Grãos</span><span class="badge">Em breve</span></a></li>
+    <li><a class="category-item"><span>Agrônomo</span><span class="badge">Em breve</span></a></li>
+    <li><a class="category-item"><span>Engenheiro Agrônomo</span><span class="badge">Em breve</span></a></li>
+    <li><a class="category-item"><span>Engenheiro Civil</span><span class="badge">Em breve</span></a></li>
+    <li><a class="category-item"><span>Arquiteto</span><span class="badge">Em breve</span></a></li>
+    <li><a class="category-item"><span>Classificador de Grãos</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Piloto de Drone Agrícola Credenciado</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Técnico em Aplicação de Defensivos Agrícolas</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Operador de Colheitadeira</span><span class="badge">Em breve</span></a></li>
@@ -180,13 +181,13 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
     <li><a class="category-item"><span>Operador de Distribuidor de Calcário</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Operador de Grade Agrícola</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Abastecedor de Máquinas Agrícolas</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Operador de Trator Agrícola</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Mecânico de Máquinas Agrícolas</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Borracheiro</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Topógrafo Rural</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Técnico em Irrigação</span><span class="badge">Em breve</span></a></li>
 </ul>
-    <h2 class="section-title">💼 Comércio, Vendas e Representação</h2>
+
+<h2 class="section-title">💼 Comércio, Vendas e Representação</h2>
 <ul class="category-list">
     <li><a class="category-item"><span>Vendedor</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Representante Comercial</span><span class="badge">Em breve</span></a></li>
@@ -200,15 +201,18 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
         <div id="listaProfissionais"></div>
     </div>
 </div>    
-    
-    <script>
+
+<script>
 const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co";
 const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V"; 
 let dados = [];
 
 async function init() {
     try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=*`, {headers: {"apikey": SUPABASE_KEY}});
+        // Puxa do Supabase apenas os cadastros que estão com status "Ativo"
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?status=eq.Ativo&select=*`, {
+            headers: { "apikey": SUPABASE_KEY }
+        });
         dados = await res.json();
         processarListaCompleta();
     } catch (e) {
@@ -219,6 +223,7 @@ async function init() {
 function processarListaCompleta() {
     // 1. Preencher seletor de cidades
     const select = document.getElementById("filtroCidade");
+    select.innerHTML = '<option value="todos">🌍 Todas as Cidades</option>';
     const cidades = [...new Set(dados.map(p => p.cidade).filter(Boolean))].sort();
     cidades.forEach(c => {
         select.innerHTML += `<option value="${c}">${c}</option>`;
@@ -230,12 +235,15 @@ function processarListaCompleta() {
         const badge = item.querySelector('.badge');
         const nomeProfissao = spanNome.innerText.trim();
         
-        // Verifica se há pelo menos um profissional para esta profissão
-        const temProfissional = dados.some(p => p.profissao.trim().toLowerCase() === nomeProfissao.toLowerCase());
+        // Verifica se há pelo menos um profissional ATIVO para esta profissão
+        const temProfissional = dados.some(p => p.profissao && p.profissao.trim().toLowerCase() === nomeProfissao.toLowerCase());
         
         if (temProfissional) {
             badge.innerText = "Disponível";
-            badge.className = "badge disponivel"; // Aplica a classe que gera a bolinha verde
+            badge.className = "badge disponivel";
+        } else {
+            badge.innerText = "Em breve";
+            badge.className = "badge";
         }
         
         // Garante o clique no modal
@@ -246,6 +254,7 @@ function processarListaCompleta() {
 function abrirModal(profissao) {
     const cidadeSelecionada = document.getElementById("filtroCidade").value;
     const encontrados = dados.filter(p => 
+        p.profissao && 
         p.profissao.trim().toLowerCase() === profissao.toLowerCase() && 
         (cidadeSelecionada === "todos" || p.cidade === cidadeSelecionada)
     );
@@ -257,16 +266,21 @@ function abrirModal(profissao) {
         listaDiv.innerHTML = encontrados.map(p => `
             <div style="border-bottom:1px solid #ccc; padding:10px 0;">
                 <p><strong>${p.nome}</strong><br>${p.cidade}</p>
-                <button onclick="window.open('https://wa.me/${p.whatsapp.replace(/\D/g, "")}')" style="background:green; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Chamar no WhatsApp</button>
+                <button onclick="window.open('https://wa.me/${p.whatsapp.replace(/\D/g, "")}')" style="background:green; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; margin-top:5px;">Chamar no WhatsApp</button>
             </div>`).join('');
     } else {
-        listaDiv.innerHTML = "<p>Nenhum profissional nesta cidade.</p>";
+        listaDiv.innerHTML = "<p>Nenhum profissional ativo nesta cidade.</p>";
     }
     document.getElementById("modalProfissionais").style.display = "block";
 }
 
 // Fechar modal
 document.querySelector(".close").onclick = () => document.getElementById("modalProfissionais").style.display = "none";
+window.onclick = (event) => {
+    const modal = document.getElementById("modalProfissionais");
+    if (event.target === modal) modal.style.display = "none";
+};
+
 // BUSCA UNIVERSAL
 document.getElementById("inputBusca").addEventListener("input", (e) => {
     const termo = e.target.value.trim().toLowerCase();
@@ -285,15 +299,12 @@ document.getElementById("inputBusca").addEventListener("input", (e) => {
 
     // Mostra ou esconde categorias inteiras
     document.querySelectorAll(".category-list").forEach(lista => {
-
-        const itensVisiveis =
-            [...lista.querySelectorAll("li")]
+        const itensVisiveis = [...lista.querySelectorAll("li")]
             .some(li => li.style.display !== "none");
 
         lista.style.display = itensVisiveis ? "" : "none";
 
         const titulo = lista.previousElementSibling;
-
         if (titulo && titulo.classList.contains("section-title")) {
             titulo.style.display = itensVisiveis ? "" : "none";
         }
@@ -301,9 +312,6 @@ document.getElementById("inputBusca").addEventListener("input", (e) => {
 });        
 
 init();
-       
 </script>        
-
 </body>
 </html>
-
