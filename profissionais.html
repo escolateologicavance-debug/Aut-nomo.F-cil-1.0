@@ -68,7 +68,7 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
     <li><a class="category-item"><span>Gesseiro</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Marceneiro</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Pedreiro</span><span class="badge">Em breve</span></a></li>
-    <li><a class="category-item"><span>Pintor de Casas</span><span class="badge">Em breve</span></a></li>
+    <li><a class="category-item"><span>Pintor</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Serralheiro</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Soldador</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Vidraceiro</span><span class="badge">Em breve</span></a></li>
@@ -154,7 +154,7 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
     <li><a class="category-item"><span>Letrista</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Tapeceiro</span><span class="badge">Em breve</span></a></li>
 </ul>
-
+    
 <h2 class="section-title">🚜 Máquinas Pesadas e Equipamentos</h2>
 <ul class="category-list">
     <li><a class="category-item"><span>Operador de Retroescavadeira</span><span class="badge">Em breve</span></a></li>
@@ -164,7 +164,7 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
     <li><a class="category-item"><span>Operador de Caminhão Munck</span><span class="badge">Em breve</span></a></li>
     <li><a class="category-item"><span>Operador de Empilhadeira</span><span class="badge">Em breve</span></a></li>
 </ul>
-
+    
 <h2 class="section-title">🌾 Agronegócio e Serviços Rurais</h2>
 <ul class="category-list">
     <li><a class="category-item"><span>Agrônomo</span><span class="badge">Em breve</span></a></li>
@@ -229,9 +229,9 @@ function processarListaCompleta() {
     document.querySelectorAll('.category-item').forEach(item => {
         const spanNome = item.querySelector('span');
         const badge = item.querySelector('.badge');
-        const nomeProfissao = spanNome.innerText.trim();
+        const nomeProfissao = spanNome.innerText.trim().toLowerCase();
         
-        const temProfissional = dados.some(p => p.profissao && p.profissao.trim().toLowerCase() === nomeProfissao.toLowerCase());
+        const temProfissional = dados.some(p => p.profissao && p.profissao.trim().toLowerCase() === nomeProfissao);
         
         if (temProfissional) {
             badge.innerText = "Disponível";
@@ -241,7 +241,7 @@ function processarListaCompleta() {
             badge.className = "badge";
         }
         
-        item.onclick = () => abrirModal(nomeProfissao);
+        item.onclick = () => abrirModal(spanNome.innerText.trim());
     });
 }
 
@@ -259,8 +259,8 @@ function abrirModal(profissao) {
     if (encontrados.length > 0) {
         listaDiv.innerHTML = encontrados.map(p => `
             <div style="border-bottom:1px solid #ccc; padding:10px 0;">
-                <p><strong>${p.nome}</strong><br>${p.cidade}</p>
-                <button onclick="window.open('https://wa.me/${p.whatsapp.replace(/\D/g, "")}')" style="background:green; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; margin-top:5px;">Chamar no WhatsApp</button>
+                <p><strong>${p.nome}</strong><br>Cidade: ${p.cidade || 'Não informada'}</p>
+                <button onclick="window.open('https://wa.me/${p.whatsapp ? p.whatsapp.replace(/\D/g, "") : ''}')" style="background:green; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; margin-top:5px;">Chamar no WhatsApp</button>
             </div>`).join('');
     } else {
         listaDiv.innerHTML = "<p>Nenhum profissional cadastrado nesta cidade.</p>";
