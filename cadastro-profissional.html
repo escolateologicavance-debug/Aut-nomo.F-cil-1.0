@@ -195,9 +195,6 @@ const formCadastro = document.getElementById("formCadastro");
 const SUPABASE_URL = "https://xzhcujtqrfesfcfbpmsi.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_j-rMLNlkBhsi2nK6EVO8cg_fJJnI8-V";
 
-// Credenciais do Mercado Pago configuradas no sistema
-const MP_ACCESS_TOKEN = "APP_USR-5566486977720830-111319-2a921774301cae014946b495bf439bc9-436233346";
-
 function gerenciarBotao() {
     if (chkTermos.checked) {
         btnCadastrar.disabled = false;
@@ -211,7 +208,7 @@ function gerenciarBotao() {
 chkTermos.addEventListener("change", gerenciarBotao);
 chkTermos.addEventListener("click", gerenciarBotao);
 
-// VERIFICAÇÃO AUTOMÁTICA DOS 7 DIAS BASEADA NA DATA DE CRIAÇÃO DO SUPABASE
+// Verificação de validade de 7 dias ao carregar
 async function verificarValidadeCadastroNoCarregamento() {
     const whatsappSalvo = localStorage.getItem("autonomofacil_whatsapp");
     if (!whatsappSalvo) return; 
@@ -229,13 +226,10 @@ async function verificarValidadeCadastroNoCarregamento() {
         
         if (dados && dados.length > 0) {
             const usuario = dados[0];
-            
-            // Calcula os dias desde que foi criado usando a coluna criado_em do Supabase
             const dataCriacao = new Date(usuario.criado_em);
             const dataAtual = new Date();
             const diferencaDias = (dataAtual - dataCriacao) / (1000 * 60 * 60 * 24);
 
-            // Se passou de 7 dias e o status não está explicitamente ativo por pagamento, bloqueia
             if (diferencaDias > 7 && usuario.status !== "Ativo - Pago") {
                 exibirTelaBloqueioImediata(usuario.nome, usuario.whatsapp);
             }
@@ -269,10 +263,9 @@ function exibirTelaBloqueioImediata(nome, whatsapp) {
     document.body.appendChild(telaBloqueio);
 }
 
-// Dispara a verificação logo que a página é carregada
 window.addEventListener("DOMContentLoaded", verificarValidadeCadastroNoCarregamento);
 
-// ENVIO DO FORMULÁRIO DE CADASTRO
+// ENVIO DO FORMULÁRIO DE CADASTRO PARA O SUPABASE
 formCadastro.addEventListener("submit", async function(e) {
     e.preventDefault();
 
@@ -293,7 +286,7 @@ formCadastro.addEventListener("submit", async function(e) {
             profissao: profissaoDigitada,
             cidade: cidadeDigitada,
             whatsapp: whatsappDigitado,
-            status: "Ativo" // <--- Alterado para 'Ativo' para garantir visibilidade imediata com os 7 dias de carência
+            status: "Ativo"
         };
     
         const response = await fetch(`${SUPABASE_URL}/rest/v1/cadastro`, {
@@ -312,6 +305,7 @@ formCadastro.addEventListener("submit", async function(e) {
             mostrarTelaPixComprovante(nomeDigitado, whatsappDigitado, indicadorDigitado);
         } else {
             const erroDetalhe = await response.text();
+            console.error("Erro retornado pelo Supabase:", erroDetalhe);
             throw new Error(erroDetalhe || "O servidor recusou a gravação.");
         }
     } catch (error) {
@@ -349,7 +343,7 @@ function mostrarTelaPixComprovante(nome, whatsapp, indicador) {
             </button>
 
             ${indicador ? `
-            <button id="btnZapIndicador" style="width:100%; background:#0288d1; color:white; border:none; padding:12px; border-radius:10px; font-size:14px; font-weight:bold; cursor:pointer; margin-bottom:8px;">
+            <button id="btnZapIndicador" style="width:100%; background:var(--primary); color:white; border:none; padding:12px; border-radius:10px; font-size:14px; font-weight:bold; cursor:pointer; margin-bottom:8px;">
                 <i class="fa-brands fa-whatsapp"></i> Enviar para o WhatsApp do Indicador
             </button>
             ` : ''}
