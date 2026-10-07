@@ -16,7 +16,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-
 .cta-container { display: flex; flex-direction: column; gap: 12px; max-width: 400px; margin: 0 auto; }
 .btn { display: block; padding: 14px 20px; border-radius: 25px; text-decoration: none; font-weight: bold; text-align: center; border: none; cursor: pointer; }
 .btn-primary { background-color: #ffffff; color: var(--primary); }
-.btn-secondary { background-color: transparent; color: #f1c40f; border: 2px solid #f1c40f; }
 .search-container { position: relative; margin-bottom: 25px; }
 .search-input { width: 100%; padding: 14px 14px 14px 45px; border-radius: 12px; border: 2px solid #ddd; }
 .section-title { color: var(--dark); border-bottom: 2px solid #ecf0f1; padding-bottom: 8px; margin-top: 35px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
@@ -209,8 +208,7 @@ let dados = [];
 
 async function init() {
     try {
-        // Puxa do Supabase apenas os cadastros que estão com status "Ativo"
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?status=eq.Ativo&select=*`, {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/cadastro?select=*`, {
             headers: { "apikey": SUPABASE_KEY }
         });
         dados = await res.json();
@@ -221,7 +219,6 @@ async function init() {
 }
 
 function processarListaCompleta() {
-    // 1. Preencher seletor de cidades
     const select = document.getElementById("filtroCidade");
     select.innerHTML = '<option value="todos">🌍 Todas as Cidades</option>';
     const cidades = [...new Set(dados.map(p => p.cidade).filter(Boolean))].sort();
@@ -229,13 +226,11 @@ function processarListaCompleta() {
         select.innerHTML += `<option value="${c}">${c}</option>`;
     });
 
-    // 2. Atualizar STATUS (Disponível/Em breve) de TODOS os itens da página
     document.querySelectorAll('.category-item').forEach(item => {
         const spanNome = item.querySelector('span');
         const badge = item.querySelector('.badge');
         const nomeProfissao = spanNome.innerText.trim();
         
-        // Verifica se há pelo menos um profissional ATIVO para esta profissão
         const temProfissional = dados.some(p => p.profissao && p.profissao.trim().toLowerCase() === nomeProfissao.toLowerCase());
         
         if (temProfissional) {
@@ -246,7 +241,6 @@ function processarListaCompleta() {
             badge.className = "badge";
         }
         
-        // Garante o clique no modal
         item.onclick = () => abrirModal(nomeProfissao);
     });
 }
@@ -269,23 +263,20 @@ function abrirModal(profissao) {
                 <button onclick="window.open('https://wa.me/${p.whatsapp.replace(/\D/g, "")}')" style="background:green; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; margin-top:5px;">Chamar no WhatsApp</button>
             </div>`).join('');
     } else {
-        listaDiv.innerHTML = "<p>Nenhum profissional ativo nesta cidade.</p>";
+        listaDiv.innerHTML = "<p>Nenhum profissional cadastrado nesta cidade.</p>";
     }
     document.getElementById("modalProfissionais").style.display = "block";
 }
 
-// Fechar modal
 document.querySelector(".close").onclick = () => document.getElementById("modalProfissionais").style.display = "none";
 window.onclick = (event) => {
     const modal = document.getElementById("modalProfissionais");
     if (event.target === modal) modal.style.display = "none";
 };
 
-// BUSCA UNIVERSAL
 document.getElementById("inputBusca").addEventListener("input", (e) => {
     const termo = e.target.value.trim().toLowerCase();
 
-    // Filtra os itens
     document.querySelectorAll("ul.category-list li").forEach(li => {
         const texto = li.querySelector(".category-item span")
             .innerText
@@ -297,7 +288,6 @@ document.getElementById("inputBusca").addEventListener("input", (e) => {
             : "none";
     });
 
-    // Mostra ou esconde categorias inteiras
     document.querySelectorAll(".category-list").forEach(lista => {
         const itensVisiveis = [...lista.querySelectorAll("li")]
             .some(li => li.style.display !== "none");
